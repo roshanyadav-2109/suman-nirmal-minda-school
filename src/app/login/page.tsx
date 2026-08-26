@@ -85,8 +85,8 @@ export default function LoginPage() {
             // No photograph supplied for this school — a plain branded panel
             // reads as intentional, where a missing <img> would not.
             <div className="flex h-full w-full flex-col items-center justify-center gap-5 px-10 text-center">
-              <span className="flex h-20 w-20 items-center justify-center rounded-md bg-white/95 p-2">
-                <SchoolEmblem size={60} />
+              <span className="flex h-36 w-36 items-center justify-center rounded-full bg-white p-3">
+                <SchoolEmblem size={120} />
               </span>
               <div className="font-display text-[30px] font-medium leading-[1.15] tracking-[-0.01em] text-white">
                 {SCHOOL.name}
