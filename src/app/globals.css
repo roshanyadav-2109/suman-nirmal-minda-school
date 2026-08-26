@@ -1,0 +1,120 @@
+@import "tailwindcss";
+
+/* =============================================================================
+   School portal design tokens (brief §5) mapped into Tailwind v4 @theme.
+   Warm institutional palette: gold = aspiration/excellence, ink = trust.
+   Tricolour green/saffron are DATA-STATUS ONLY — never decoration.
+   ========================================================================== */
+@theme {
+  /* Brand — gold (the sun) */
+  --color-gold-100: #fbf3e2;
+  --color-gold-300: #f3dfb4;
+  --color-gold-500: #e09e3e; /* primary accent, fills, chart primary */
+  --color-gold-700: #b5761b; /* AA gold for text/links on light bg */
+
+  /* Brand — warm ink */
+  --color-ink-900: #2b1b1c;
+  --color-ink-700: #4a3634;
+  --color-ink-500: #6b5b57;
+  --color-muted: #857971;
+
+  /* Warm neutrals */
+  --color-paper: #fbf8f3;
+  --color-surface: #ffffff;
+  --color-panel: #f4f4f5; /* subtle panels / table headers (neutral grey) */
+  --color-hair: #e4e4e7; /* hairline borders (neutral grey) */
+
+  /* Semantic — DATA STATUS ONLY */
+  --color-up: #157d1c;
+  --color-up-soft: #e4f1e1;
+  --color-watch: #db7a1c;
+  --color-watch-soft: #fbebd8;
+  --color-down: #c0442e;
+  --color-down-soft: #f7e2dc;
+
+  /* Shape — nothing fully square, no pills */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  /* Type — Inter only (Indic fallbacks so HI/BN don't render tofu) */
+  --font-sans: var(--font-inter), "Noto Sans Devanagari", "Noto Sans Bengali",
+    ui-sans-serif, system-ui, sans-serif;
+
+  /* Soft, low, warm-tinted shadows (no neumorphism/glassmorphism) */
+  --shadow-card: 0 1px 2px rgba(43, 27, 28, 0.04), 0 2px 8px rgba(43, 27, 28, 0.05);
+  --shadow-pop: 0 6px 24px rgba(43, 27, 28, 0.12);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-hair);
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink-900);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  /* All figures/tables/charts use tabular figures (brief §5.3) */
+  table,
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  /* Visible keyboard focus (brief §5.6) */
+  :focus-visible {
+    outline: 2px solid var(--color-gold-700);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+  ::selection {
+    background: var(--color-gold-300);
+    color: var(--color-ink-900);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Print — monthly reports print cleanly without app chrome */
+@media print {
+  aside, header, .no-print { display: none !important; }
+  main { max-width: none !important; padding: 0 !important; }
+  .print-area { border: none !important; box-shadow: none !important; }
+  body { background: #fff; }
+}
+
+/* Type scale helpers (weight/size/tracking hierarchy, single typeface) */
+.t-display { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+.t-h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; }
+.t-h2 { font-size: 20px; font-weight: 600; line-height: 1.25; }
+.t-h3 { font-size: 16px; font-weight: 600; }
+.t-body { font-size: 15px; font-weight: 400; line-height: 1.55; }
+.t-label {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.01em;
+  color: var(--color-ink-900);
+}
+
+/* Distinctive display serif (sign-in hero/headings), Indic serif fallbacks */
+.font-display {
+  font-family: var(--font-display), Georgia, "Noto Serif Devanagari",
+    "Noto Serif Bengali", serif;
+  font-optical-sizing: auto;
+}
+
+/* Staggered load reveal (neutralised under prefers-reduced-motion above) */
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+.reveal { animation: reveal 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
