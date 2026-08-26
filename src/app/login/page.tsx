@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRightIcon, AwardIcon, MarksIcon, StudentsIcon, ProgressIcon, AllotmentIcon, CloseIcon, type IconComponent } from "@/components/icons";
 import { createClient } from "@/lib/supabase/client";
@@ -62,6 +62,14 @@ export default function LoginPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState(false);
   const [showDemo, setShowDemo] = useState(false);
+  // The player shows its title strip and a control cluster for the first moment
+  // of playback. Hold the film hidden until that has passed, so the panel only
+  // ever reveals the film itself.
+  const [filmReady, setFilmReady] = useState(false);
+  useEffect(() => {
+    const id = setTimeout(() => setFilmReady(true), 4000);
+    return () => clearTimeout(id);
+  }, []);
 
   async function signIn(em: string, pw: string, key: string) {
     setBusy(key); setError(false);
@@ -74,34 +82,35 @@ export default function LoginPage() {
   const rowBase = "flex w-full items-center gap-3 rounded-sm border border-hair bg-surface px-4 py-2.5 text-[14px] font-normal text-ink-900 transition-colors hover:bg-panel disabled:opacity-50";
 
   return (
-    <div className="grid min-h-dvh lg:h-dvh lg:grid-cols-[1.05fr_1fr]">
-      {/* ── Left: image frame ────────────────────────────────────────────────── */}
-      <aside className="hidden p-3 lg:block">
-        <div className="h-full w-full overflow-hidden rounded-md border border-hair bg-ink-900">
-          {SCHOOL.loginImage ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={SCHOOL.loginImage} alt={SCHOOL.fullName} className="h-full w-full object-cover" />
-          ) : (
-            // No photograph supplied for this school — a plain branded panel
-            // reads as intentional, where a missing <img> would not.
-            <div className="flex h-full w-full flex-col items-center justify-center gap-5 px-10 text-center">
-              <span className="flex h-36 w-36 items-center justify-center rounded-full bg-white p-3">
-                <SchoolEmblem size={120} />
-              </span>
-              <div className="font-display text-[30px] font-medium leading-[1.15] tracking-[-0.01em] text-white">
-                {SCHOOL.name}
-              </div>
-              {SCHOOL.place && (
-                <div className="text-[14px] tracking-[0.14em] text-white/70 uppercase">{SCHOOL.place}</div>
-              )}
-            </div>
-          )}
-        </div>
-      </aside>
+    <div className="relative min-h-dvh overflow-hidden bg-ink-900">
+      {/* ── Full-bleed silent film of the school ─────────────────────────────
+          Muted, autoplaying, endlessly looping and completely inert: the frame
+          is cropped past the player chrome, pointer events are off and a
+          transparent shield covers it, so no YouTube furniture is visible and
+          nothing happens on click. The sign-in block floats over it. ─────── */}
+      <div className="fixed inset-0 overflow-hidden bg-ink-900">
+        {/* Plain ground until the film has settled past its own chrome. */}
+        <iframe
+          src={`https://www.youtube-nocookie.com/embed/${SCHOOL.loginVideoId}?autoplay=1&mute=1&loop=1&playlist=${SCHOOL.loginVideoId}&controls=0&modestbranding=1&rel=0&showinfo=0&disablekb=1&fs=0&playsinline=1&iv_load_policy=3`}
+          title={SCHOOL.fullName}
+          allow="autoplay; encrypted-media"
+          tabIndex={-1}
+          aria-hidden
+          // max(…) of the two cover dimensions is always exactly 16:9, so the
+          // film fills any viewport without distorting; ×1.2 crops the frame
+          // past the player's own chrome.
+          className={`pointer-events-none absolute left-1/2 top-1/2 h-[calc(max(100dvh,100vw*0.5625)*1.2)] w-[calc(max(100vw,100dvh*1.7778)*1.2)] -translate-x-1/2 -translate-y-1/2 border-0 transition-opacity duration-700 ${filmReady ? "opacity-100" : "opacity-0"}`}
+        />
+        {/* Swallows every click/drag so the film can never be interacted with,
+            and lifts the white block off the moving picture. */}
+        <div className="absolute inset-0 bg-ink-900/25" aria-hidden />
+      </div>
 
       {/* ── Right: welcome + sign-in options ─────────────────────────────────── */}
-      <main className="flex flex-col justify-center overflow-y-auto px-6 py-8 sm:px-14">
-        <div className="mx-auto w-full max-w-sm">
+      <main className="relative z-10 flex min-h-dvh flex-col justify-center overflow-y-auto px-5 py-10 sm:px-8 lg:px-14">
+        {/* Everything on the sign-in side sits in one white block, held to the
+            right over the film (centred on narrow screens). */}
+        <div className="mx-auto w-full max-w-sm rounded-md border border-hair bg-white p-7 shadow-[var(--shadow-pop)] sm:p-8 lg:mr-0 lg:ml-auto">
           <div className="mb-6">
             <div className="flex items-center gap-3">
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-hair bg-surface p-1">

@@ -12,6 +12,7 @@
 //   NEXT_PUBLIC_SCHOOL_MONOGRAM     "SM"                  (emblem fallback, 2 letters)
 //   NEXT_PUBLIC_SCHOOL_LOGO         "/brand/school-logo.png"     (file in public/)
 //   NEXT_PUBLIC_SCHOOL_LOGIN_IMAGE  ""  (sign-in hero photo; empty = branded panel)
+//   NEXT_PUBLIC_SCHOOL_LOGIN_VIDEO_ID  "dX2RNaONA8A"  (silent looping sign-in film)
 
 const pick = (v: string | undefined, fallback: string) => (v && v.trim()) || fallback;
 
@@ -31,6 +32,8 @@ export const SCHOOL = {
   monogram: pick(process.env.NEXT_PUBLIC_SCHOOL_MONOGRAM, "SM").slice(0, 2).toUpperCase(),
   /** Emblem/logo served from public/. */
   logo: pick(process.env.NEXT_PUBLIC_SCHOOL_LOGO, "/brand/school-logo.png"),
-  /** Sign-in page hero photograph, served from public/. */
+  /** Sign-in page hero photograph, served from public/. Unused while a film plays. */
   loginImage: pick(process.env.NEXT_PUBLIC_SCHOOL_LOGIN_IMAGE, ""),
+  /** YouTube id of the silent looping film on the sign-in page's left panel. */
+  loginVideoId: pick(process.env.NEXT_PUBLIC_SCHOOL_LOGIN_VIDEO_ID, "dX2RNaONA8A"),
 } as const;
