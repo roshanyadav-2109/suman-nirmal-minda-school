@@ -107,18 +107,22 @@ export default function LoginPage() {
       </div>
 
       {/* ── Right: welcome + sign-in options ─────────────────────────────────── */}
+      {/* Emblem and name sit in the page's top-left corner, straight on the
+          film — no plate, no panel behind them. */}
+      <div className="absolute left-5 top-5 z-20 flex items-center gap-3 sm:left-8 sm:top-7">
+        <SchoolEmblem size={52} />
+        <div className="leading-tight [text-shadow:0_1px_10px_rgba(0,0,0,0.55)]">
+          <div className="text-[16px] font-semibold text-white">{SCHOOL.name}</div>
+          {SCHOOL.place && <div className="text-[12px] tracking-[0.1em] text-white/80 uppercase">{SCHOOL.place}</div>}
+        </div>
+      </div>
+
       <main className="relative z-10 flex min-h-dvh flex-col justify-center overflow-y-auto px-5 py-10 sm:px-8 lg:px-14">
         {/* Everything on the sign-in side sits in one white block, held to the
             right over the film (centred on narrow screens). */}
         <div className="mx-auto w-full max-w-sm rounded-md border border-hair bg-white p-7 shadow-[var(--shadow-pop)] sm:p-8 lg:mr-0 lg:ml-auto">
           <div className="mb-6">
-            <div className="flex items-center gap-3">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-hair bg-surface p-1">
-                <SchoolEmblem size={34} />
-              </span>
-              <div className="text-[15px] font-semibold leading-snug text-ink-900">{SCHOOL.fullName}</div>
-            </div>
-            <h1 className="font-display mt-3 text-center text-[42px] font-medium leading-[1.02] tracking-[-0.02em] text-ink-900">Welcomes</h1>
+            <h1 className="font-display text-center text-[42px] font-medium leading-[1.02] tracking-[-0.02em] text-ink-900">Welcomes</h1>
           </div>
 
           {error && (
