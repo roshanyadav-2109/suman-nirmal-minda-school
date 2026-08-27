@@ -62,11 +62,15 @@ export default function LoginPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState(false);
   const [showDemo, setShowDemo] = useState(false);
-  // The player shows its title strip and a control cluster for the first moment
-  // of playback. Hold the film hidden until that has passed, so the panel only
-  // ever reveals the film itself.
+  // The film is a large-screen affair: phones and tablets get the plain page and
+  // never fetch it. And because the player shows its title strip and a control
+  // cluster for the first moment of playback, it is held hidden until that has
+  // passed, so the page only ever reveals the film itself.
+  const [showFilm, setShowFilm] = useState(false);
   const [filmReady, setFilmReady] = useState(false);
   useEffect(() => {
+    if (!window.matchMedia("(min-width: 1024px)").matches) return;
+    setShowFilm(true);
     const id = setTimeout(() => setFilmReady(true), 4000);
     return () => clearTimeout(id);
   }, []);
@@ -82,14 +86,14 @@ export default function LoginPage() {
   const rowBase = "flex w-full items-center gap-3 rounded-sm border border-hair bg-surface px-4 py-2.5 text-[14px] font-normal text-ink-900 transition-colors hover:bg-panel disabled:opacity-50";
 
   return (
-    <div className="relative min-h-dvh overflow-hidden bg-ink-900">
-      {/* ── Full-bleed silent film of the school ─────────────────────────────
+    <div className="relative min-h-dvh overflow-hidden bg-paper lg:bg-ink-900">
+      {/* ── Full-bleed silent film of the school (large screens only) ────────
           Muted, autoplaying, endlessly looping and completely inert: the frame
           is cropped past the player chrome, pointer events are off and a
           transparent shield covers it, so no YouTube furniture is visible and
           nothing happens on click. The sign-in block floats over it. ─────── */}
-      <div className="fixed inset-0 overflow-hidden bg-ink-900">
-        {/* Plain ground until the film has settled past its own chrome. */}
+      {showFilm && (
+      <div className="fixed inset-0 hidden overflow-hidden bg-ink-900 lg:block">
         <iframe
           src={`https://www.youtube-nocookie.com/embed/${SCHOOL.loginVideoId}?autoplay=1&mute=1&loop=1&playlist=${SCHOOL.loginVideoId}&controls=0&modestbranding=1&rel=0&showinfo=0&disablekb=1&fs=0&playsinline=1&iv_load_policy=3`}
           title={SCHOOL.fullName}
@@ -105,22 +109,24 @@ export default function LoginPage() {
             and lifts the white block off the moving picture. */}
         <div className="absolute inset-0 bg-ink-900/25" aria-hidden />
       </div>
+      )}
 
-      {/* ── Right: welcome + sign-in options ─────────────────────────────────── */}
-      {/* Emblem and name sit in the page's top-left corner, straight on the
-          film — no plate, no panel behind them. */}
-      <div className="absolute left-5 top-5 z-20 flex items-center gap-3 sm:left-8 sm:top-7">
+      {/* Emblem and name sit in the page's top-left corner with nothing behind
+          them — light over the film, dark on the plain mobile ground. */}
+      <div className="absolute left-5 right-5 top-5 z-20 flex items-center gap-3 sm:left-8 sm:right-auto sm:top-7">
         <SchoolEmblem size={52} />
-        <div className="leading-tight [text-shadow:0_1px_10px_rgba(0,0,0,0.55)]">
-          <div className="text-[16px] font-semibold text-white">{SCHOOL.name}</div>
-          {SCHOOL.place && <div className="text-[12px] tracking-[0.1em] text-white/80 uppercase">{SCHOOL.place}</div>}
+        <div className="leading-tight lg:[text-shadow:0_1px_10px_rgba(0,0,0,0.55)]">
+          <div className="text-[16px] font-semibold text-ink-900 lg:text-white">{SCHOOL.name}</div>
+          {SCHOOL.place && (
+            <div className="text-[12px] tracking-[0.1em] text-ink-500 uppercase lg:text-white/80">{SCHOOL.place}</div>
+          )}
         </div>
       </div>
 
       <main className="relative z-10 flex min-h-dvh flex-col justify-center overflow-y-auto px-5 py-10 sm:px-8 lg:px-14">
         {/* Everything on the sign-in side sits in one white block, held to the
             right over the film (centred on narrow screens). */}
-        <div className="mx-auto w-full max-w-sm rounded-md border border-hair bg-white p-7 shadow-[var(--shadow-pop)] sm:p-8 lg:mr-0 lg:ml-auto">
+        <div className="mx-auto w-full max-w-sm rounded-md border border-hair bg-white p-7 shadow-[var(--shadow-card)] sm:p-8 lg:mr-0 lg:ml-auto lg:shadow-[var(--shadow-pop)]">
           <div className="mb-6">
             <h1 className="font-display text-center text-[42px] font-medium leading-[1.02] tracking-[-0.02em] text-ink-900">Welcomes</h1>
           </div>
@@ -166,7 +172,7 @@ export default function LoginPage() {
             ))}
           </div>
 
-          <a href="https://hebrewtechnologies.com" target="_blank" rel="noreferrer" className="mt-6 block text-center text-[15px] font-normal text-ink-900 hover:underline">
+          <a href="https://hebrewtechnologies.com" target="_blank" rel="noreferrer" className="mt-6 hidden text-center text-[15px] font-normal text-ink-900 hover:underline sm:block">
             hebrew technologies
           </a>
         </div>
