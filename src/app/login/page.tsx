@@ -71,7 +71,7 @@ export default function LoginPage() {
   useEffect(() => {
     if (!window.matchMedia("(min-width: 1024px)").matches) return;
     setShowFilm(true);
-    const id = setTimeout(() => setFilmReady(true), 4000);
+    const id = setTimeout(() => setFilmReady(true), 8000);
     return () => clearTimeout(id);
   }, []);
 
@@ -94,6 +94,15 @@ export default function LoginPage() {
           nothing happens on click. The sign-in block floats over it. ─────── */}
       {showFilm && (
       <div className="fixed inset-0 hidden overflow-hidden bg-ink-900 lg:block">
+        {/* The film's own opening frame, held under it: the wait for the player
+            to settle reads as a still of the school, not as a blank screen. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={`https://i.ytimg.com/vi/${SCHOOL.loginVideoId}/maxresdefault.jpg`}
+          alt=""
+          aria-hidden
+          className="absolute inset-0 h-full w-full object-cover"
+        />
         <iframe
           src={`https://www.youtube-nocookie.com/embed/${SCHOOL.loginVideoId}?autoplay=1&mute=1&loop=1&playlist=${SCHOOL.loginVideoId}&controls=0&modestbranding=1&rel=0&showinfo=0&disablekb=1&fs=0&playsinline=1&iv_load_policy=3`}
           title={SCHOOL.fullName}
@@ -124,9 +133,10 @@ export default function LoginPage() {
       </div>
 
       <main className="relative z-10 flex min-h-dvh flex-col justify-center overflow-y-auto px-5 py-10 sm:px-8 lg:px-14">
-        {/* Everything on the sign-in side sits in one white block, held to the
-            right over the film (centred on narrow screens). */}
-        <div className="mx-auto w-full max-w-sm rounded-md border border-hair bg-white p-7 shadow-[var(--shadow-card)] sm:p-8 lg:mr-0 lg:ml-auto lg:shadow-[var(--shadow-pop)]">
+        {/* The white block exists to lift the sign-in options off the film, so it
+            only appears where the film does: from lg up, held to the right. Below
+            that the options sit straight on the page. */}
+        <div className="mx-auto w-full max-w-sm lg:mr-0 lg:ml-auto lg:rounded-md lg:border lg:border-hair lg:bg-white lg:p-8 lg:shadow-[var(--shadow-pop)]">
           <div className="mb-6">
             <h1 className="font-display text-center text-[42px] font-medium leading-[1.02] tracking-[-0.02em] text-ink-900">Welcomes</h1>
           </div>
