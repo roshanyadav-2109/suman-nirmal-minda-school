@@ -34,11 +34,17 @@ export const getSession = cache(async (): Promise<Session | null> => {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data } = await supabase
-    .from("profile")
-    .select("id, role, full_name, locale, staff_id, guardian_id, student_id, staff:staff_id(role)")
-    .eq("id", user.id)
-    .single();
+  // The profile and the current year do not depend on each other, and the year
+  // is wanted by nearly every page anyway (getCurrentYear caches it per request),
+  // so fetch them together rather than one after the other.
+  const [{ data }, year] = await Promise.all([
+    supabase
+      .from("profile")
+      .select("id, role, full_name, locale, staff_id, guardian_id, student_id, staff:staff_id(role)")
+      .eq("id", user.id)
+      .single(),
+    getCurrentYear(),
+  ]);
   if (!data) return null;
 
   const staffRole = (data.staff as { role: StaffRole } | null)?.role ?? null;
@@ -47,17 +53,14 @@ export const getSession = cache(async (): Promise<Session | null> => {
 
   // Is this staff member a class teacher of any section in the current year?
   let isClassTeacher = false;
-  if (data.staff_id) {
-    const { data: cy } = await supabase.from("academic_year").select("id").eq("is_current", true).single();
-    if (cy) {
-      const { count } = await supabase
-        .from("teacher_allotment")
-        .select("id", { count: "exact", head: true })
-        .eq("staff_id", data.staff_id)
-        .eq("is_class_teacher", true)
-        .eq("academic_year_id", cy.id);
-      isClassTeacher = (count ?? 0) > 0;
-    }
+  if (data.staff_id && year) {
+    const { count } = await supabase
+      .from("teacher_allotment")
+      .select("id", { count: "exact", head: true })
+      .eq("staff_id", data.staff_id)
+      .eq("is_class_teacher", true)
+      .eq("academic_year_id", year.id);
+    isClassTeacher = (count ?? 0) > 0;
   }
 
   const navRole: NavRole = isClassTeacher ? "class_teacher" : (effectiveRole as NavRole);
