@@ -2,10 +2,11 @@ import {
   DashboardIcon, ProgressIcon, AttendanceIcon, MarksIcon, StudentsIcon,
   AnnounceIcon, CalendarIcon, ReportIcon, LeaveIcon, AllotmentIcon,
   PromotionIcon,
+  BusIcon,
   type IconComponent,
 } from "@/components/icons";
 
-export type NavRole = "student" | "guardian" | "subject_teacher" | "class_teacher" | "principal" | "office";
+export type NavRole = "student" | "guardian" | "subject_teacher" | "class_teacher" | "principal" | "office" | "transport";
 
 export type NavItem = {
   href: string;
@@ -18,6 +19,8 @@ const ALL: NavRole[] = ["student", "guardian", "subject_teacher", "class_teacher
 
 export const NAV: NavItem[] = [
   { href: "/", icon: DashboardIcon, labelKey: "nav.dashboard", roles: ALL },
+  { href: "/transport", icon: BusIcon, labelKey: "nav.transport", roles: [...ALL, "transport"] },
+  { href: "/transport/riders", icon: BusIcon, labelKey: "nav.transportRiders", roles: ["principal", "office"] },
   { href: "/progress", icon: ProgressIcon, labelKey: "nav.myProgress", roles: ["student"] },
   { href: "/progress", icon: ProgressIcon, labelKey: "nav.childProgress", roles: ["guardian"] },
   { href: "/progress", icon: ProgressIcon, labelKey: "nav.progress", roles: ["subject_teacher", "class_teacher", "principal"] },

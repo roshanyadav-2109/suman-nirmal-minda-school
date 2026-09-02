@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getCurrentYear, type Session } from "@/lib/session";
 import { getT } from "@/i18n/server";
 import { getOfficeStats } from "@/lib/data/dashboard";
-import { StatCard, DashHeader, AnnouncementsPanel, EventsPanel, QuickLinks } from "@/components/dashboards/parts";
+import { StatCard, DashHeader, AnnouncementsPanel, EventsPanel, QuickLinks, FleetStrip } from "@/components/dashboards/parts";
 import { MarksIcon } from "@/components/icons";
 
 // Administration overview for the office.
@@ -27,6 +27,8 @@ export async function OfficeDashboard({ session }: { session: Session }) {
           <div className="text-[14px] text-ink-900"><span className="font-semibold">{s.draft}</span> {t("marks.draft").toLowerCase()} — <span className="font-semibold text-[rgb(37,99,235)] underline">{t("marks.release").toLowerCase()}</span></div>
         </Link>
       )}
+
+      <FleetStrip />
 
       <div className="mb-6"><QuickLinks role="office" /></div>
       <div className="grid gap-5 lg:grid-cols-2">

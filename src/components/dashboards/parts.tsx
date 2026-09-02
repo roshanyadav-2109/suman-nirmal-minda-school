@@ -7,6 +7,9 @@ import { EmptyState } from "@/components/ui/empty";
 import { CalendarIcon } from "@/components/icons";
 import { AnnouncementsList } from "@/components/dashboards/announcements-list";
 import { navFor, type NavRole } from "@/lib/nav";
+import { getFleetSummary } from "@/lib/data/transport";
+import type { TransportCardLabels } from "@/components/transport/transport-card";
+import type { TFunction } from "@/i18n/translate";
 import { cn } from "@/lib/utils";
 
 // A distinct, premium colour per destination — icons only, no block behind.
@@ -126,4 +129,39 @@ export async function QuickLinks({ role }: { role: NavRole }) {
       </div>
     </div>
   );
+}
+
+// Buses on the road right now. Hidden entirely until the office sets transport
+// up, so a school without buses never sees three zeroes.
+export async function FleetStrip() {
+  const { t } = await getT();
+  const fleet = await getFleetSummary();
+  if (!fleet.buses) return null;
+  return (
+    <div className="mb-6">
+      <div className="mb-2.5 text-[13px] font-semibold text-ink-900">{t("transport.title")}</div>
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+        <StatCard label={t("transport.busesRunning")} value={fleet.running} sub={`${t("transport.of")} ${fleet.buses}`} tone={fleet.running ? "up" : "ink"} href="/transport" />
+        <StatCard label={t("transport.totalRiders")} value={fleet.riders} href="/transport" />
+        <StatCard label={t("transport.staleBuses")} value={fleet.stale} sub={t("transport.staleBusesHint")} tone={fleet.stale ? "watch" : "ink"} href="/transport" />
+      </div>
+    </div>
+  );
+}
+
+// The pupil's dashboard and the parent's dashboard hand TransportCard the same
+// thirteen strings. They are resolved server-side so the card ships no
+// dictionary, and built here so the list exists once rather than twice.
+export function transportCardLabels(t: TFunction): TransportCardLabels {
+  return {
+    trackBus: t("transport.trackBus"), notStarted: t("transport.notStarted"),
+    signalLost: t("transport.signalLost"), arrivingIn: t("transport.arrivingIn"),
+    atStop: t("transport.atStop"), onTheWay: t("transport.onTheWay"),
+    stopsRemaining: t("transport.stopsRemaining"), min: t("transport.min"),
+    minAgo: t("transport.minAgo"), liveNow: t("transport.liveNow"),
+    lastSeen: t("transport.lastSeen"), yourStop: t("transport.yourStop"),
+    scheduled: t("transport.scheduled"),
+      nextStop: t("transport.nextStop"),
+    passedYourStop: t("transport.passedYourStop"),
+};
 }

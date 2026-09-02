@@ -4,7 +4,7 @@ import type { Database } from "@/lib/database.types";
 
 export type StaffRole = Database["public"]["Enums"]["staff_role"];
 export type ProfileRole = Database["public"]["Enums"]["profile_role"];
-export type NavRole = "student" | "guardian" | "subject_teacher" | "class_teacher" | "principal" | "office";
+export type NavRole = "student" | "guardian" | "subject_teacher" | "class_teacher" | "principal" | "office" | "transport";
 
 export type Session = {
   userId: string;

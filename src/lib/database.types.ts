@@ -360,6 +360,193 @@ export type Database = {
           },
         ]
       }
+      bus: {
+        Row: {
+          capacity: number | null
+          code: string
+          created_at: string
+          id: number
+          is_active: boolean
+          registration_no: string | null
+          school_id: number
+          updated_at: string
+        }
+        Insert: {
+          capacity?: number | null
+          code: string
+          created_at?: string
+          id?: never
+          is_active?: boolean
+          registration_no?: string | null
+          school_id?: number
+          updated_at?: string
+        }
+        Update: {
+          capacity?: number | null
+          code?: string
+          created_at?: string
+          id?: never
+          is_active?: boolean
+          registration_no?: string | null
+          school_id?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bus_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "school"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bus_assignment: {
+        Row: {
+          academic_year_id: number
+          bus_id: number
+          conductor_staff_id: number | null
+          created_at: string
+          driver_staff_id: number | null
+          id: number
+          is_active: boolean
+          route_id: number
+          updated_at: string
+        }
+        Insert: {
+          academic_year_id: number
+          bus_id: number
+          conductor_staff_id?: number | null
+          created_at?: string
+          driver_staff_id?: number | null
+          id?: never
+          is_active?: boolean
+          route_id: number
+          updated_at?: string
+        }
+        Update: {
+          academic_year_id?: number
+          bus_id?: number
+          conductor_staff_id?: number | null
+          created_at?: string
+          driver_staff_id?: number | null
+          id?: never
+          is_active?: boolean
+          route_id?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bus_assignment_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_year"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bus_assignment_bus_id_fkey"
+            columns: ["bus_id"]
+            isOneToOne: false
+            referencedRelation: "bus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bus_assignment_conductor_staff_id_fkey"
+            columns: ["conductor_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bus_assignment_driver_staff_id_fkey"
+            columns: ["driver_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bus_assignment_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "route"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bus_live: {
+        Row: {
+          bus_id: number
+          eta_seconds: number | null
+          heading: number | null
+          is_running: boolean
+          lat: number | null
+          lng: number | null
+          next_stop_id: number | null
+          route_id: number | null
+          speed_kmh: number | null
+          stops_remaining: number | null
+          trip_id: number | null
+          updated_at: string
+        }
+        Insert: {
+          bus_id: number
+          eta_seconds?: number | null
+          heading?: number | null
+          is_running?: boolean
+          lat?: number | null
+          lng?: number | null
+          next_stop_id?: number | null
+          route_id?: number | null
+          speed_kmh?: number | null
+          stops_remaining?: number | null
+          trip_id?: number | null
+          updated_at?: string
+        }
+        Update: {
+          bus_id?: number
+          eta_seconds?: number | null
+          heading?: number | null
+          is_running?: boolean
+          lat?: number | null
+          lng?: number | null
+          next_stop_id?: number | null
+          route_id?: number | null
+          speed_kmh?: number | null
+          stops_remaining?: number | null
+          trip_id?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bus_live_bus_id_fkey"
+            columns: ["bus_id"]
+            isOneToOne: true
+            referencedRelation: "bus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bus_live_next_stop_id_fkey"
+            columns: ["next_stop_id"]
+            isOneToOne: false
+            referencedRelation: "route_stop"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bus_live_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "route"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bus_live_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trip"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       class: {
         Row: {
           created_at: string
@@ -1109,6 +1296,103 @@ export type Database = {
           },
         ]
       }
+      route: {
+        Row: {
+          code: string
+          created_at: string
+          id: number
+          is_active: boolean
+          name: string
+          notes: string | null
+          school_id: number
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: never
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          school_id?: number
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: never
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          school_id?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "school"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      route_stop: {
+        Row: {
+          created_at: string
+          cum_distance_m: number
+          geofence_m: number
+          id: number
+          landmark: string | null
+          lat: number
+          lng: number
+          name: string
+          route_id: number
+          sched_am: string | null
+          sched_pm: string | null
+          seq: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          cum_distance_m?: number
+          geofence_m?: number
+          id?: never
+          landmark?: string | null
+          lat: number
+          lng: number
+          name: string
+          route_id: number
+          sched_am?: string | null
+          sched_pm?: string | null
+          seq: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          cum_distance_m?: number
+          geofence_m?: number
+          id?: never
+          landmark?: string | null
+          lat?: number
+          lng?: number
+          name?: string
+          route_id?: number
+          sched_am?: string | null
+          sched_pm?: string | null
+          seq?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_stop_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "route"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       school: {
         Row: {
           address: string | null
@@ -1360,6 +1644,78 @@ export type Database = {
           },
         ]
       }
+      student_transport: {
+        Row: {
+          academic_year_id: number
+          created_at: string
+          drop_stop_id: number
+          id: number
+          is_active: boolean
+          pickup_stop_id: number
+          route_id: number
+          student_id: number
+          updated_at: string
+        }
+        Insert: {
+          academic_year_id: number
+          created_at?: string
+          drop_stop_id: number
+          id?: never
+          is_active?: boolean
+          pickup_stop_id: number
+          route_id: number
+          student_id: number
+          updated_at?: string
+        }
+        Update: {
+          academic_year_id?: number
+          created_at?: string
+          drop_stop_id?: number
+          id?: never
+          is_active?: boolean
+          pickup_stop_id?: number
+          route_id?: number
+          student_id?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_transport_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_year"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_transport_drop_stop_id_fkey"
+            columns: ["drop_stop_id"]
+            isOneToOne: false
+            referencedRelation: "route_stop"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_transport_pickup_stop_id_fkey"
+            columns: ["pickup_stop_id"]
+            isOneToOne: false
+            referencedRelation: "route_stop"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_transport_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "route"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_transport_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subject: {
         Row: {
           code: string
@@ -1436,6 +1792,207 @@ export type Database = {
             columns: ["subject_id"]
             isOneToOne: false
             referencedRelation: "subject"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transport_alert: {
+        Row: {
+          channel: string | null
+          created_at: string
+          id: number
+          kind: Database["public"]["Enums"]["transport_alert_kind"]
+          payload: Json
+          route_stop_id: number | null
+          sent_at: string | null
+          student_id: number
+          trip_id: number
+        }
+        Insert: {
+          channel?: string | null
+          created_at?: string
+          id?: never
+          kind: Database["public"]["Enums"]["transport_alert_kind"]
+          payload?: Json
+          route_stop_id?: number | null
+          sent_at?: string | null
+          student_id: number
+          trip_id: number
+        }
+        Update: {
+          channel?: string | null
+          created_at?: string
+          id?: never
+          kind?: Database["public"]["Enums"]["transport_alert_kind"]
+          payload?: Json
+          route_stop_id?: number | null
+          sent_at?: string | null
+          student_id?: number
+          trip_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_alert_route_stop_id_fkey"
+            columns: ["route_stop_id"]
+            isOneToOne: false
+            referencedRelation: "route_stop"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_alert_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_alert_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trip"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip: {
+        Row: {
+          bus_assignment_id: number
+          created_at: string
+          ended_at: string | null
+          id: number
+          service_date: string
+          shift: Database["public"]["Enums"]["trip_shift"]
+          started_at: string
+          started_by: string | null
+          status: Database["public"]["Enums"]["trip_status"]
+          updated_at: string
+        }
+        Insert: {
+          bus_assignment_id: number
+          created_at?: string
+          ended_at?: string | null
+          id?: never
+          service_date?: string
+          shift: Database["public"]["Enums"]["trip_shift"]
+          started_at?: string
+          started_by?: string | null
+          status?: Database["public"]["Enums"]["trip_status"]
+          updated_at?: string
+        }
+        Update: {
+          bus_assignment_id?: number
+          created_at?: string
+          ended_at?: string | null
+          id?: never
+          service_date?: string
+          shift?: Database["public"]["Enums"]["trip_shift"]
+          started_at?: string
+          started_by?: string | null
+          status?: Database["public"]["Enums"]["trip_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_bus_assignment_id_fkey"
+            columns: ["bus_assignment_id"]
+            isOneToOne: false
+            referencedRelation: "bus_assignment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_started_by_fkey"
+            columns: ["started_by"]
+            isOneToOne: false
+            referencedRelation: "profile"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_ping: {
+        Row: {
+          accuracy_m: number | null
+          battery_pct: number | null
+          captured_at: string
+          device_at: string | null
+          heading: number | null
+          id: number
+          lat: number
+          lng: number
+          speed_kmh: number | null
+          trip_id: number
+        }
+        Insert: {
+          accuracy_m?: number | null
+          battery_pct?: number | null
+          captured_at?: string
+          device_at?: string | null
+          heading?: number | null
+          id?: never
+          lat: number
+          lng: number
+          speed_kmh?: number | null
+          trip_id: number
+        }
+        Update: {
+          accuracy_m?: number | null
+          battery_pct?: number | null
+          captured_at?: string
+          device_at?: string | null
+          heading?: number | null
+          id?: never
+          lat?: number
+          lng?: number
+          speed_kmh?: number | null
+          trip_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_ping_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trip"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_stop_event: {
+        Row: {
+          at: string
+          event: Database["public"]["Enums"]["stop_event_kind"]
+          id: number
+          is_manual: boolean
+          route_stop_id: number
+          trip_id: number
+        }
+        Insert: {
+          at?: string
+          event: Database["public"]["Enums"]["stop_event_kind"]
+          id?: never
+          is_manual?: boolean
+          route_stop_id: number
+          trip_id: number
+        }
+        Update: {
+          at?: string
+          event?: Database["public"]["Enums"]["stop_event_kind"]
+          id?: never
+          is_manual?: boolean
+          route_stop_id?: number
+          trip_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_stop_event_route_stop_id_fkey"
+            columns: ["route_stop_id"]
+            isOneToOne: false
+            referencedRelation: "route_stop"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_stop_event_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trip"
             referencedColumns: ["id"]
           },
         ]
@@ -1727,6 +2284,7 @@ export type Database = {
         }
         Returns: number
       }
+      end_stale_trips: { Args: never; Returns: number }
       grade_band: { Args: { pct: number }; Returns: string }
       needs_support: {
         Args: { p_section: number; p_threshold?: number; p_year: number }
@@ -1786,6 +2344,11 @@ export type Database = {
           total: number
           transferred: number
         }[]
+      }
+      purge_old_pings: { Args: never; Returns: number }
+      recompute_route_distances: {
+        Args: { p_route: number }
+        Returns: undefined
       }
       refresh_slippage_flags: {
         Args: { p_threshold?: number; p_window?: number }
@@ -1884,7 +2447,21 @@ export type Database = {
         | "behaviour"
         | "general"
       profile_role: "student" | "guardian" | "staff"
-      staff_role: "subject_teacher" | "class_teacher" | "principal" | "office"
+      staff_role:
+        | "subject_teacher"
+        | "class_teacher"
+        | "principal"
+        | "office"
+        | "transport"
+      stop_event_kind: "approaching" | "arrived" | "departed" | "skipped"
+      transport_alert_kind:
+        | "trip_started"
+        | "approaching"
+        | "arrived"
+        | "delayed"
+        | "trip_ended"
+      trip_shift: "morning" | "afternoon"
+      trip_status: "running" | "completed" | "cancelled" | "auto_closed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2028,7 +2605,23 @@ export const Constants = {
         "general",
       ],
       profile_role: ["student", "guardian", "staff"],
-      staff_role: ["subject_teacher", "class_teacher", "principal", "office"],
+      staff_role: [
+        "subject_teacher",
+        "class_teacher",
+        "principal",
+        "office",
+        "transport",
+      ],
+      stop_event_kind: ["approaching", "arrived", "departed", "skipped"],
+      transport_alert_kind: [
+        "trip_started",
+        "approaching",
+        "arrived",
+        "delayed",
+        "trip_ended",
+      ],
+      trip_shift: ["morning", "afternoon"],
+      trip_status: ["running", "completed", "cancelled", "auto_closed"],
     },
   },
 } as const

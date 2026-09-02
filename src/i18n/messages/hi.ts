@@ -1,6 +1,6 @@
-import type { Messages } from "../index";
+import type { PartialMessages } from "../index";
 // Hindi
-const hi: Messages = {
+const hi: PartialMessages = {
   common: {
     appName: "सुमन निर्मल मिंडा स्कूल",
     appTagline: "छात्र प्रगति एवं विद्यालय पोर्टल",

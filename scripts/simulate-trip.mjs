@@ -95,6 +95,8 @@ const bearing = (a, b) => {
 const CRUISE_KMH = 26;            // city arterial with traffic
 const TICK_S = 10;                // one ping every 10 simulated seconds
 
+let closedByServer = false;
+outer:
 for (let i = 1; i < stops.length; i++) {
   const from = stops[i - 1], to = stops[i];
   const legM = metres(from, to);
@@ -105,16 +107,22 @@ for (let i = 1; i < stops.length; i++) {
     const t = k / ticks;
     // A little traffic: speed wobbles, and the bus slows into each stop.
     const kmh = Math.max(6, CRUISE_KMH * (0.75 + 0.35 * Math.sin(k / 2)) * (t > 0.85 ? 0.5 : 1));
-    await post("trip_ping", [{
-      trip_id: trip.id,
-      lat: lerp(from.lat, to.lat, t),
-      lng: lerp(from.lng, to.lng, t),
-      speed_kmh: Number(kmh.toFixed(1)),
-      heading: Number(bearing(from, to).toFixed(0)),
-      accuracy_m: 8 + Math.round(Math.random() * 12),
-      battery_pct: Math.max(20, 95 - i * 3),
-      device_at: new Date().toISOString(),
-    }], "return=minimal");
+    try {
+      await post("trip_ping", [{
+        trip_id: trip.id,
+        lat: lerp(from.lat, to.lat, t),
+        lng: lerp(from.lng, to.lng, t),
+        speed_kmh: Number(kmh.toFixed(1)),
+        heading: Number(bearing(from, to).toFixed(0)),
+        accuracy_m: 8 + Math.round(Math.random() * 12),
+        battery_pct: Math.max(20, 95 - i * 3),
+        device_at: new Date().toISOString(),
+      }], "return=minimal");
+    } catch (e) {
+      const [now] = await get(`trip?select=status&id=eq.${trip.id}`);
+      if (now && now.status !== "running") { closedByServer = true; break outer; }
+      throw e;
+    }
     await sleep((TICK_S / SPEEDUP) * 1000);
   }
 
@@ -125,6 +133,8 @@ for (let i = 1; i < stops.length; i++) {
   const eta = live?.eta_seconds == null ? "—" : `${Math.round(live.eta_seconds / 60)} min`;
   console.log(`  reached ${to.name.padEnd(26)} next: ${nextName.padEnd(26)} eta ${eta.padStart(6)}  arrived:${arrived.length}/${stops.length}`);
 }
+
+if (closedByServer) console.log("\n  route complete — the server closed the trip and stopped accepting positions");
 
 // --- what did the parents get? ----------------------------------------------
 // Read as the principal: a conductor has no policy on transport_alert (alerts
@@ -143,9 +153,11 @@ for (let i = 1; i < stops.length; i++) {
   }
 }
 
-if (END_AFTER) {
+if (END_AFTER && !closedByServer) {
   await patch("trip", `id=eq.${trip.id}`, { status: "completed", ended_at: new Date().toISOString() });
   console.log("trip completed.");
-} else {
+} else if (!closedByServer) {
   console.log("trip left running — open /transport to watch it, or re-run with --end to close it.");
+} else {
+  console.log("trip already completed by the server.");
 }

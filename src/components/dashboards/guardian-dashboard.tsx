@@ -3,10 +3,12 @@ import { getCurrentYear, type Session } from "@/lib/session";
 import { getT } from "@/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { getMyChildren } from "@/lib/data/analytics";
+import { getRideSummaries } from "@/lib/data/transport";
 import { Card, CardBody } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty";
 import { ProgressIcon, ArrowRightIcon } from "@/components/icons";
-import { DashHeader, AnnouncementsPanel, EventsPanel, QuickLinks } from "@/components/dashboards/parts";
+import { DashHeader, AnnouncementsPanel, EventsPanel, QuickLinks, transportCardLabels } from "@/components/dashboards/parts";
+import { TransportCard } from "@/components/transport/transport-card";
 
 // Parent view: an ID card per child (one login shows all siblings).
 export async function GuardianDashboard({ session }: { session: Session }) {
@@ -73,11 +75,34 @@ export async function GuardianDashboard({ session }: { session: Session }) {
         })}
       </div>
 
+      <BusStrip childIds={childIds} showNames={children.length > 1} />
+
       <div className="mb-6"><QuickLinks role="guardian" /></div>
       <div className="grid gap-5 lg:grid-cols-2">
         <AnnouncementsPanel />
         <EventsPanel />
       </div>
+    </div>
+  );
+}
+
+// One card per child who actually rides a bus. A family with no transport gets
+// nothing here — not an empty state, not a placeholder.
+async function BusStrip({ childIds, showNames }: { childIds: number[]; showNames: boolean }) {
+  const rides = await getRideSummaries(childIds);
+  if (!rides.length) return null;
+  const { t } = await getT();
+  const labels = transportCardLabels(t);
+  return (
+    <div className="mb-6 grid gap-4 sm:grid-cols-2">
+      {rides.map((ride) => (
+        <TransportCard
+          key={ride.studentId}
+          ride={ride}
+          labels={labels}
+          title={showNames ? t("transport.childBus", { name: ride.studentName.split(" ")[0] }) : undefined}
+        />
+      ))}
     </div>
   );
 }

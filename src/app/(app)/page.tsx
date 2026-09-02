@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { StudentDashboard } from "@/components/dashboards/student-dashboard";
 import { GuardianDashboard } from "@/components/dashboards/guardian-dashboard";
@@ -17,6 +18,9 @@ export default async function DashboardPage() {
       return <PrincipalDashboard session={session} />;
     case "office":
       return <OfficeDashboard session={session} />;
+    case "transport":
+      // Crew have one job on this portal; do not make them find it.
+      redirect("/transport/conductor");
     default: // subject_teacher | class_teacher
       return <TeacherDashboard session={session} />;
   }

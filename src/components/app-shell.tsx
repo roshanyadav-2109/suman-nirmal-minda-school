@@ -33,7 +33,16 @@ export function AppShell({
   const isStudent = role === "student";
   const isDashboard = pathname === "/";
 
-  const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
+  // Longest matching prefix wins, so /transport/riders lights up its own entry
+  // and not the /transport one above it. The "/" boundary keeps a href from
+  // matching a sibling that merely starts with the same letters.
+  const matches = (href: string) =>
+    href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
+  const activeHref = items
+    .map((i) => i.href)
+    .filter(matches)
+    .sort((a, b) => b.length - a.length)[0];
+  const isActive = (href: string) => href === activeHref;
 
   const navList = (
     <nav className="flex flex-col gap-0.5 p-3">

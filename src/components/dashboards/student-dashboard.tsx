@@ -4,12 +4,15 @@ import { getT } from "@/i18n/server";
 import { fmtPercent, fmtDate } from "@/i18n/format";
 import { getStudentStanding } from "@/lib/data/analytics";
 import { getStudentAttendance } from "@/lib/data/attendance";
+import { getRideSummaries } from "@/lib/data/transport";
 import { createClient } from "@/lib/supabase/server";
 import { CardBody, CardHeader } from "@/components/ui/card";
 import { navFor } from "@/lib/nav";
 import { CalendarIcon, ArrowRightIcon } from "@/components/icons";
 import { ProfileMenu } from "@/components/dashboards/profile-menu";
 import { AnnouncementsList } from "@/components/dashboards/announcements-list";
+import { transportCardLabels } from "@/components/dashboards/parts";
+import { TransportCard } from "@/components/transport/transport-card";
 import { cn } from "@/lib/utils";
 
 type Att = Awaited<ReturnType<typeof getStudentAttendance>>;
@@ -45,6 +48,7 @@ export async function StudentDashboard({ session }: { session: Session }) {
       <MainContent name={session.fullName} standing={standing} att={att} />
       <div className="flex flex-col gap-3">
         <ProfileCard name={session.fullName} studentId={studentId} />
+        <BusCard studentId={studentId} />
         <AnnouncementsCard />
         <EventCalendarCard />
       </div>
@@ -84,6 +88,26 @@ async function ProfileCard({ name, studentId }: { name: string; studentId: numbe
         </dl>
       </CardBody>
     </Panel>
+  );
+}
+
+// ── Right column: the pupil's bus, live ──────────────────────────────────────
+// A pupil who does not ride a bus sees nothing at all here — an empty state
+// would only advertise a service they have not bought.
+async function BusCard({ studentId }: { studentId: number }) {
+  const rides = await getRideSummaries([studentId]);
+  if (!rides.length) return null;
+  const { t } = await getT();
+  return (
+    <>
+      {rides.map((ride) => (
+        <TransportCard
+          key={ride.studentId}
+          ride={ride}
+          labels={transportCardLabels(t)}
+        />
+      ))}
+    </>
   );
 }
 

@@ -10,4 +10,5 @@ export const DEMO_ACCOUNTS = [
   { email: "parent@kv.demo", role: "guardian", name: "Demo Parent", note: "Two children" },
   { email: "student@kv.demo", role: "student", name: "Arjun Dey", note: "Class VIII-A" },
   { email: "office@kv.demo", role: "office", name: "Mr. Amit Kar", note: "Office / Admin" },
+  { email: "conductor@kv.demo", role: "transport", name: "Mr. Ramesh Vaghela", note: "Bus conductor · BUS-03, Route R3" },
 ] as const;

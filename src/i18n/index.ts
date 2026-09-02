@@ -13,17 +13,24 @@ export const localeNames: Record<Locale, string> = {
   bn: "বাংলা",
 };
 
-const dictionaries = { en, hi, bn } as const;
+const dictionaries: Record<Locale, PartialMessages> = { en, hi, bn };
 
 // Deep-widen the English literal types to `string` so translations type-check
 // while preserving the exact key structure.
 export type DeepString<T> = { [K in keyof T]: T[K] extends string ? string : DeepString<T[K]> };
 export type Messages = DeepString<typeof en>;
 
-export function getDictionary(locale: string | undefined): Messages {
+// A translation may lag English. Rather than force a translator to ship a
+// placeholder for every new key — or worse, invent one — a dictionary may omit
+// keys, and makeT falls back to English for anything missing.
+export type PartialMessages = { [K in keyof Messages]?: Messages[K] extends string ? string : Partial<Messages[K]> };
+
+export function getDictionary(locale: string | undefined): PartialMessages {
   if (locale && locales.includes(locale as Locale)) return dictionaries[locale as Locale];
   return en;
 }
+
+export const englishMessages: Messages = en;
 
 export function isLocale(v: string | undefined): v is Locale {
   return !!v && locales.includes(v as Locale);

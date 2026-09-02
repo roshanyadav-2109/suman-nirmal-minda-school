@@ -44,6 +44,7 @@ import {
   Analytics01Icon,
   Share08Icon,
   MoreHorizontalIcon,
+  SchoolBusIcon,
 } from "@hugeicons/core-free-icons";
 
 export type IconProps = { className?: string; size?: number; strokeWidth?: number };
@@ -92,6 +93,7 @@ export const TestTubeIcon = make(TestTube01Icon);
 export const CheckIcon = make(CheckmarkCircle01Icon);
 export const PlusIcon = make(Add01Icon);
 export const PromotionIcon = make(ArrowUpDoubleIcon);
+export const BusIcon = make(SchoolBusIcon);
 
 // X-style post action bar
 export const ReplyIcon = make(Comment01Icon);

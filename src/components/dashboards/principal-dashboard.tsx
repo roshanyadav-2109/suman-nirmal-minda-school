@@ -4,7 +4,7 @@ import { fmtPercent } from "@/i18n/format";
 import { getSchoolOverview } from "@/lib/data/dashboard";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { KVBarChart } from "@/components/charts";
-import { DashHeader, StatCard, AnnouncementsPanel, EventsPanel, QuickLinks } from "@/components/dashboards/parts";
+import { DashHeader, StatCard, AnnouncementsPanel, EventsPanel, QuickLinks, FleetStrip } from "@/components/dashboards/parts";
 
 // School-wide overview for the principal.
 export async function PrincipalDashboard({ session }: { session: Session }) {
@@ -29,6 +29,8 @@ export async function PrincipalDashboard({ session }: { session: Session }) {
           <CardBody className="pt-2"><KVBarChart data={classBars} xKey="name" valueKey="avg" height={240} /></CardBody>
         </Card>
       )}
+
+      <FleetStrip />
 
       <div className="mb-6"><QuickLinks role="principal" /></div>
       <div className="grid gap-5 lg:grid-cols-2">
