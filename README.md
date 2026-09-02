@@ -134,6 +134,7 @@ Private `app.*` helpers (SECURITY DEFINER) resolve the caller's scope once per q
 |---|---|
 | `absence-email` | Emails guardians of students marked absent (Resend) |
 | `monthly-report` | Generates a class's monthly reports in one step → Storage + email |
+| `transport-alert` | Drains the bus-alert outbox and emails guardians (see below) |
 
 Deploy (needs the Supabase CLI + `RESEND_API_KEY` secret):
 
@@ -143,6 +144,36 @@ supabase functions deploy absence-email
 supabase functions deploy monthly-report
 supabase secrets set RESEND_API_KEY=...
 ```
+
+### Bus alerts (`transport-alert`)
+
+Deploying needs no CLI — the Management API takes the bundle directly:
+
+```bash
+export SUPABASE_ACCESS_TOKEN=...   # personal access token
+export SUPABASE_REF=...            # project ref
+node scripts/deploy-function.mjs transport-alert
+```
+
+The database queues alerts into `transport_alert` the instant a geofence or ETA
+trigger observes something worth telling a family; `pg_cron` calls the function
+every minute to drain the queue. The dispatcher reads its own URL and key from
+**Vault**, not from a database parameter (a managed project will not let you set
+one):
+
+```sql
+select vault.create_secret('https://<ref>.functions.supabase.co', 'transport_functions_url');
+select vault.create_secret('<service-role key>', 'transport_service_key');
+```
+
+Mail itself is the last step. Until `RESEND_API_KEY` is set on the function, it
+**holds the queue rather than draining it** — so nothing is silently marked sent
+and nothing is thrown away before it could be delivered:
+
+```bash
+supabase secrets set RESEND_API_KEY=...   # or set it in the dashboard
+```
+
 
 ## Design system
 
