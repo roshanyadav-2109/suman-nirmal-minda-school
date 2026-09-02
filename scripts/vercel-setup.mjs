@@ -21,8 +21,7 @@ const H = { Authorization: `Bearer ${TOKEN}`, "Content-Type": "application/json"
 // tested, which is exactly what happened before this school got its own project.
 // Both values are browser-safe by design (RLS is the boundary).
 const local = Object.fromEntries(
-  readFileSync(".env.local", "utf8").split(/?
-/)
+  readFileSync(".env.local", "utf8").split(/\r?\n/)
     .filter((l) => l.includes("=") && !l.trim().startsWith("#"))
     .map((l) => { const i = l.indexOf("="); return [l.slice(0, i).trim(), l.slice(i + 1).trim()]; }),
 );
