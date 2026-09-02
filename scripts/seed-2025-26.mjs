@@ -82,7 +82,15 @@ const MONTHLY = [
 ];
 const examsFor = (level) => level >= 9 ? [...EXAMS, ...MONTHLY] : EXAMS;
 
-const FROM = 5, TO = 6;   // academic_year ids
+// academic_year ids, resolved by NAME rather than hardcoded: a fresh project
+// numbers the two sessions 1 and 2, the original demo project 5 and 6.
+const years = await sel("academic_year?select=id,name");
+const yearId = (n) => {
+  const y = years.find((x) => x.name === n);
+  if (!y) throw new Error(`academic_year "${n}" is missing — run scripts/seed-full.mjs first`);
+  return y.id;
+};
+const FROM = yearId("2024-25"), TO = yearId("2025-26");
 
 console.log("Loading current structure…");
 const classes = await sel("class?select=id,level,name");

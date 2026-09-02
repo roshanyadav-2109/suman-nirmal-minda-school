@@ -10,8 +10,8 @@
 
 export const SUPABASE_URL =
   process.env.NEXT_PUBLIC_SUPABASE_URL ||
-  "https://qyiqdwrjtgdzocoffzvk.supabase.co";
+  "https://gvfudrhdowlwvpbtctsl.supabase.co";
 
 export const SUPABASE_ANON_KEY =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5aXFkd3JqdGdkem9jb2ZmenZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4ODUwOTYsImV4cCI6MjA5ODQ2MTA5Nn0.UMeDptWDjGshwscCX4E7vCOzboMkBtl1V8uWsjaiS8E";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2ZnVkcmhkb3dsd3ZwYnRjdHNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzMjI4OTgsImV4cCI6MjEwMzg5ODg5OH0.jIrSZyzyFZqyjN1u3f73Fh558Et5sh-hB0K5MAKNXSk";
