@@ -9,16 +9,32 @@
 // keys, so the same repo builds as a different school:
 //   NEXT_PUBLIC_SCHOOL_NAME / _PLACE / _SHORT_NAME / _MONOGRAM / _LOGO / _LOGIN_IMAGE
 import "node:process";
+import { readFileSync } from "node:fs";
 
 const TOKEN = process.env.VERCEL_TOKEN;
 if (!TOKEN) { console.error("Set VERCEL_TOKEN"); process.exit(1); }
 const H = { Authorization: `Bearer ${TOKEN}`, "Content-Type": "application/json" };
 
+// The Supabase project comes from .env.local — the same backend this checkout
+// actually runs against. Hardcoding it here once meant production could be
+// pointed at a DIFFERENT school's database than the one being developed and
+// tested, which is exactly what happened before this school got its own project.
+// Both values are browser-safe by design (RLS is the boundary).
+const local = Object.fromEntries(
+  readFileSync(".env.local", "utf8").split(/?
+/)
+    .filter((l) => l.includes("=") && !l.trim().startsWith("#"))
+    .map((l) => { const i = l.indexOf("="); return [l.slice(0, i).trim(), l.slice(i + 1).trim()]; }),
+);
 const ENV = {
-  NEXT_PUBLIC_SUPABASE_URL: "https://qyiqdwrjtgdzocoffzvk.supabase.co",
-  NEXT_PUBLIC_SUPABASE_ANON_KEY:
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5aXFkd3JqdGdkem9jb2ZmenZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4ODUwOTYsImV4cCI6MjA5ODQ2MTA5Nn0.UMeDptWDjGshwscCX4E7vCOzboMkBtl1V8uWsjaiS8E",
+  NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || local.NEXT_PUBLIC_SUPABASE_URL,
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || local.NEXT_PUBLIC_SUPABASE_ANON_KEY,
 };
+if (!ENV.NEXT_PUBLIC_SUPABASE_URL || !ENV.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+  console.error("No Supabase URL/anon key — set them in .env.local or the environment");
+  process.exit(1);
+}
+console.log("backend:", ENV.NEXT_PUBLIC_SUPABASE_URL);
 
 // Branding vars are optional — only forwarded when present in the environment.
 for (const k of ["NEXT_PUBLIC_SCHOOL_NAME", "NEXT_PUBLIC_SCHOOL_PLACE", "NEXT_PUBLIC_SCHOOL_SHORT_NAME",
