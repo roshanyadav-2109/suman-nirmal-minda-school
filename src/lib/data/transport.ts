@@ -45,6 +45,8 @@ export type RiderView = {
   stops: Stop[];
   live: Live | null;
   arrivedStopIds: number[];
+  /** The running trip's direction; the afternoon run drives the route in reverse. */
+  shift: "morning" | "afternoon" | null;
   conductor: string | null;
   driver: string | null;
 };
@@ -84,6 +86,9 @@ export async function getMyRides(): Promise<RiderView[]> {
     : { data: [] as Live[] };
 
   const tripIds = (lives ?? []).map((l) => l.trip_id).filter((x): x is number => x != null);
+  const { data: trips } = tripIds.length
+    ? await supabase.from("trip").select("id, shift").in("id", tripIds)
+    : { data: [] as { id: number; shift: "morning" | "afternoon" }[] };
   const { data: events } = tripIds.length
     ? await supabase.from("trip_stop_event").select("trip_id, route_stop_id, event").in("trip_id", tripIds).eq("event", "arrived")
     : { data: [] as { trip_id: number; route_stop_id: number; event: string }[] };
@@ -118,6 +123,7 @@ export async function getMyRides(): Promise<RiderView[]> {
       stops: stopsByRoute.get(route.id) ?? [],
       live: (live as Live) ?? null,
       arrivedStopIds: (events ?? []).filter((e) => e.trip_id === live?.trip_id).map((e) => e.route_stop_id),
+      shift: (trips ?? []).find((t) => t.id === live?.trip_id)?.shift ?? null,
       conductor: (assign.conductor as unknown as { full_name: string } | null)?.full_name ?? null,
       driver: (assign.driver as unknown as { full_name: string } | null)?.full_name ?? null,
     });
@@ -201,6 +207,8 @@ export type CrewContext = {
   routeName: string;
   stops: Stop[];
   riderCountByStop: Record<number, number>;
+  /** The same counts for the afternoon run, where the drop stop is what matters. */
+  riderDropCountByStop: Record<number, number>;
   openTrip: { id: number; shift: "morning" | "afternoon"; started_at: string } | null;
   arrivedStopIds: number[];
 };
@@ -223,7 +231,8 @@ export async function getCrewContext(): Promise<CrewContext | null> {
 
   const [{ data: stops }, { data: riders }, { data: trip }] = await Promise.all([
     supabase.from("route_stop").select(STOP_COLS).eq("route_id", assign.route_id).order("seq"),
-    supabase.from("student_transport").select("pickup_stop_id").eq("route_id", assign.route_id).eq("academic_year_id", year.id).eq("is_active", true),
+    // Counts only, never names: crew are not in a pupil's scope (see 0030).
+    supabase.rpc("crew_stop_rider_counts", { p_route: assign.route_id }),
     // A bus can legitimately have two running trips (a morning run the crew
     // forgot to end, and today's afternoon one), so take the most recent rather
     // than asking for exactly one and erroring when there are two.
@@ -236,7 +245,11 @@ export async function getCrewContext(): Promise<CrewContext | null> {
     : { data: [] as { route_stop_id: number }[] };
 
   const riderCountByStop: Record<number, number> = {};
-  for (const r of riders ?? []) riderCountByStop[r.pickup_stop_id] = (riderCountByStop[r.pickup_stop_id] ?? 0) + 1;
+  const riderDropCountByStop: Record<number, number> = {};
+  for (const r of (riders ?? []) as { route_stop_id: number; morning_count: number; afternoon_count: number }[]) {
+    riderCountByStop[r.route_stop_id] = r.morning_count;
+    riderDropCountByStop[r.route_stop_id] = r.afternoon_count;
+  }
 
   const bus = assign.bus as unknown as { code: string; registration_no: string | null } | null;
   const route = assign.route as unknown as { code: string; name: string } | null;
@@ -249,6 +262,7 @@ export async function getCrewContext(): Promise<CrewContext | null> {
     routeName: route?.name ?? "",
     stops: (stops ?? []) as Stop[],
     riderCountByStop,
+    riderDropCountByStop,
     openTrip: (trip as CrewContext["openTrip"]) ?? null,
     arrivedStopIds: (events ?? []).map((e) => e.route_stop_id),
   };
@@ -324,6 +338,9 @@ export async function getRideSummaries(studentIds?: number[]): Promise<RideSumma
   for (const a of allots) {
     const route = a.route as unknown as { code: string; name: string } | null;
     const assign = (assigns ?? []).find((x) => x.route_id === a.route_id);
+    // No bus on this route yet: there is nothing truthful to show, and a card
+    // with a blank code would neither poll nor subscribe.
+    if (!assign) continue;
     const live = assign ? (((lives ?? []) as Live[]).find((l) => l.bus_id === assign.bus_id) ?? null) : null;
     const mine = stops.find((s) => s.id === a.pickup_stop_id);
     const student = a.student as unknown as { full_name: string } | null;
@@ -499,21 +516,47 @@ export async function getRiderAdmin(
     if (!matchIds.length) return { ...empty, routes };
   }
 
+  // PostgREST cannot sort a parent row by an embedded column, so the alphabet
+  // is resolved on the student table first and the page is cut from THAT order.
+  // Sorting only within a fetched page made every page restart at "A", which
+  // made paging toward a pupil impossible.
+  let idQ = supabase
+    .from("student_transport")
+    .select("student_id")
+    .eq("academic_year_id", year.id)
+    .eq("is_active", true);
+  if (opts.routeId) idQ = idQ.eq("route_id", opts.routeId);
+  if (matchIds) idQ = idQ.in("student_id", matchIds);
+  const scopedIds: number[] = [];
+  for (let from = 0; ; from += SCAN_CHUNK) {
+    const { data } = await idQ.range(from, from + SCAN_CHUNK - 1);
+    for (const r of data ?? []) scopedIds.push(r.student_id);
+    if (!data || data.length < SCAN_CHUNK) break;
+  }
+  const total = scopedIds.length;
+
+  const ordered: number[] = [];
+  for (let from = 0; from < scopedIds.length; from += SCAN_CHUNK) {
+    const { data } = await supabase
+      .from("student")
+      .select("id")
+      .in("id", scopedIds.slice(from, from + SCAN_CHUNK))
+      .order("full_name");
+    for (const r of data ?? []) ordered.push(r.id);
+  }
+  const pageIdsOrdered = ordered.slice(page * RIDER_PAGE_SIZE, page * RIDER_PAGE_SIZE + RIDER_PAGE_SIZE);
+
   let ridersQ = supabase
     .from("student_transport")
     .select(
       "id, student_id, route_id, pickup_stop_id, drop_stop_id, student:student_id(full_name, admission_no), route:route_id(code, name)",
-      { count: "exact" },
     )
     .eq("academic_year_id", year.id)
     .eq("is_active", true);
-  if (opts.routeId) ridersQ = ridersQ.eq("route_id", opts.routeId);
-  if (matchIds) ridersQ = ridersQ.in("student_id", matchIds);
-  // Paged by student_id because PostgREST cannot sort a parent row by an
-  // embedded name; each page is alphabetised below so the list still reads well.
-  const { data: riderRows, count: total } = await ridersQ
-    .order("student_id")
-    .range(page * RIDER_PAGE_SIZE, page * RIDER_PAGE_SIZE + RIDER_PAGE_SIZE - 1);
+  // -1 matches nothing, which keeps one query shape (and one row type) rather
+  // than branching on an empty page.
+  ridersQ = ridersQ.in("student_id", pageIdsOrdered.length ? pageIdsOrdered : [-1]);
+  const { data: riderRows } = await ridersQ;
 
   const stopName = (id: number) => {
     for (const list of stopsByRoute.values()) {

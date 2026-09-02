@@ -74,6 +74,12 @@ const en = {
     transport: "Bus Conductor",
   },
   transport: {
+    routeFilterScope: "(riders only)",
+    runFinished: "Today's run is finished",
+    staffNoLive: "Live bus tracking is kept to the office and the principal",
+    staffNoLiveHint: "Routes and stops are published for everyone. For a pupil's bus on a given day, ask the office.",
+    tripClosed: "The school has closed this trip, so positions are no longer accepted. Start the trip again if the bus is still running.",
+    confirmEnd: "End this trip? Tracking stops and families stop seeing the bus.",
     geoDenied: "Location is blocked for this site. Allow location in your browser settings, then reload — until then the school cannot see this bus.",
     endBlocked: "Some positions have not reached the school yet. Stay on this screen until the queue clears, then end the trip.",
     title: "School Transport",

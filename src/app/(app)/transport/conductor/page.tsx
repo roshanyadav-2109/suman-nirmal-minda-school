@@ -38,7 +38,8 @@ export default async function ConductorPage() {
         arrived: t("transport.arrived"), riders: t("transport.riders"),
         noGps: t("transport.noGps"), ok: t("transport.ok"),
         next: t("transport.next"), endBlocked: t("transport.endBlocked"),
-        geoDenied: t("transport.geoDenied"),
+        geoDenied: t("transport.geoDenied"), tripClosed: t("transport.tripClosed"),
+        confirmEnd: t("transport.confirmEnd"), cancel: t("transport.cancel"),
         nextStop: t("transport.nextStop"),
         stopsDone: t("transport.stopsDone"), notSending: t("transport.notSending"),
         // Left as the raw "{n}s ago" template: the console fills n in every second.

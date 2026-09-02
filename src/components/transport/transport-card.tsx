@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Card, CardBody } from "@/components/ui/card";
 import { BusIcon, ArrowRightIcon } from "@/components/icons";
 import type { RideSummary } from "@/lib/data/transport";
-import { LOST_MS, POLL_MS } from "@/components/transport/thresholds";
+import { LOST_MS, POLL_MS, serverSkewMs } from "@/components/transport/thresholds";
 
 // The dashboard version of the ride tracker: one line of truth per child, no
 // map. It obeys the same two rules as the full tracker — never show a stale
@@ -19,6 +19,7 @@ export type TransportCardLabels = {
   atStop: string;
   onTheWay: string;
   stopsRemaining: string;
+  runFinished: string;
   nextStop: string;
   passedYourStop: string;
   min: string;
@@ -42,9 +43,12 @@ export function TransportCard({
   ride,
   labels,
   title,
+  serverNow,
 }: {
   ride: RideSummary;
   labels: TransportCardLabels;
+  /** The server clock at render, so freshness ignores a wrong device clock. */
+  serverNow?: string;
   /** Whose bus this is — only worth printing when a guardian has siblings. */
   title?: string;
 }) {
@@ -61,6 +65,7 @@ export function TransportCard({
     updatedAt: ride.updatedAt,
   });
   const [now, setNow] = useState(() => Date.now());
+  const [skew] = useState(() => serverSkewMs(serverNow));
 
   const pull = useCallback(async () => {
     if (busId == null) return;
@@ -110,7 +115,10 @@ export function TransportCard({
     };
   }, [supabase, busId, ride.studentId, pull]);
 
-  const ageMs = live.updatedAt ? now - new Date(live.updatedAt).getTime() : null;
+  // updatedAt is the server clock; now is the device clock. Align them before
+  // judging freshness, or a phone that is a few minutes fast calls a healthy
+  // bus lost.
+  const ageMs = live.updatedAt ? Math.max(0, now + skew - new Date(live.updatedAt).getTime()) : null;
   const lost = live.isRunning && ageMs != null && ageMs > LOST_MS;
 
   // Is the bus heading for THIS pupil's stop? Only then is bus_live's ETA an
@@ -122,7 +130,13 @@ export function TransportCard({
   let text = labels.onTheWay;
   let tone = "text-ink-500";
   if (!live.isRunning) {
-    text = labels.notStarted;
+    // A bus that reported today and has since stopped has FINISHED. Saying "not
+    // started" tells a parent the opposite of what actually happened, for most
+    // of the day.
+    const reportedToday =
+      live.updatedAt != null &&
+      new Date(live.updatedAt).toDateString() === new Date(now + skew).toDateString();
+    text = reportedToday ? labels.runFinished : labels.notStarted;
   } else if (lost) {
     text = labels.signalLost;
     tone = "text-down";

@@ -97,6 +97,7 @@ async function BusStrip({ childIds, showNames }: { childIds: number[]; showNames
     <div className="mb-6 grid gap-4 sm:grid-cols-2">
       {rides.map((ride) => (
         <TransportCard
+          serverNow={new Date().toISOString()}
           key={ride.studentId}
           ride={ride}
           labels={labels}

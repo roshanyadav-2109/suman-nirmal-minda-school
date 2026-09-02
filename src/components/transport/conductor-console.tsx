@@ -39,6 +39,10 @@ export function ConductorConsole({ ctx, labels }: { ctx: CrewContext; labels: Re
   // the conductor can fix it — so it must not hide behind a generic alarm.
   const [geoDenied, setGeoDenied] = useState(false);
   const [busy, setBusy] = useState(false);
+  // The server ended this trip out from under us (route complete, or the
+  // stale-trip job). Stop pretending it is running.
+  const [closedByServer, setClosedByServer] = useState(false);
+  const [confirmEnd, setConfirmEnd] = useState(false);
   // "Seconds since the last send" is only honest if it counts up on its own.
   const [now, setNow] = useState(() => Date.now());
   // When this trip started sending. Silence only means something measured from
@@ -54,7 +58,7 @@ export function ConductorConsole({ ctx, labels }: { ctx: CrewContext; labels: Re
   const watchId = useRef<number | null>(null);
   const wakeLock = useRef<WakeLockSentinel | null>(null);
 
-  const running = tripId != null;
+  const running = tripId != null && !closedByServer;
   const stops = shift === "morning" ? ctx.stops : [...ctx.stops].reverse();
   const nextStop = stops.find((s) => !arrived.includes(s.id)) ?? null;
   const doneCount = stops.filter((s) => arrived.includes(s.id)).length;
@@ -71,8 +75,15 @@ export function ConductorConsole({ ctx, labels }: { ctx: CrewContext; labels: Re
         const { error } = await supabase
           .from("trip_ping")
           .insert(batch.map((p) => ({ ...p, trip_id: tripId })));
-        // Keep the batch on failure — a dead zone must cost time, never data.
-        if (error) { setErr(error.message); return false; }
+        if (error) {
+          // 42501 = the policy refused it. can_log_trip only refuses a trip that
+          // is no longer running (or no longer today), so retrying is pointless.
+          if (error.code === "42501") { setClosedByServer(true); setErr(labels.tripClosed); return false; }
+          // Anything else is transient: keep the batch, a dead zone must cost
+          // time, never data.
+          setErr(error.message);
+          return false;
+        }
         queue.current = queue.current.slice(batch.length);
         setQueued(queue.current.length);
         setLastSent(new Date());
@@ -96,6 +107,24 @@ export function ConductorConsole({ ctx, labels }: { ctx: CrewContext; labels: Re
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, [running]);
+
+  // Stops are usually marked by the geofence trigger, not by a tap. Without
+  // this the conductor's list stayed stuck at whatever it was on page load
+  // while every parent watched the stops tick off.
+  useEffect(() => {
+    if (!tripId) return;
+    let alive = true;
+    const pull = async () => {
+      if (document.hidden) return;
+      const { data } = await supabase
+        .from("trip_stop_event").select("route_stop_id")
+        .eq("trip_id", tripId).eq("event", "arrived");
+      if (alive && data) setArrived(data.map((e) => e.route_stop_id));
+    };
+    void pull();
+    const id = setInterval(() => void pull(), 10_000);
+    return () => { alive = false; clearInterval(id); };
+  }, [supabase, tripId]);
 
   // --- location + wake lock ---------------------------------------------------
   useEffect(() => {
@@ -176,6 +205,7 @@ export function ConductorConsole({ ctx, labels }: { ctx: CrewContext; labels: Re
     }
     setTripId(data.id);
     setStartedAt(Date.now());
+    setClosedByServer(false);
   }
 
   async function endTrip() {
@@ -194,6 +224,7 @@ export function ConductorConsole({ ctx, labels }: { ctx: CrewContext; labels: Re
     setBusy(false);
     if (error) { setErr(error.message); return; }
     setTripId(null); setArrived([]); setQueued(0); setLastSent(null); setStartedAt(null);
+    setConfirmEnd(false);
   }
 
   async function markArrived(stopId: number) {
@@ -237,14 +268,17 @@ export function ConductorConsole({ ctx, labels }: { ctx: CrewContext; labels: Re
               <div className="t-label">{ctx.routeCode} · {ctx.routeName}</div>
               <div className="text-[20px] font-bold text-ink-900">{ctx.busCode}</div>
             </div>
-            <div className="text-right text-[12px] text-ink-500">{ctx.registration}</div>
+            <div className="text-right text-[12px] text-ink-500">
+              <div>{ctx.registration}</div>
+              {running && <div className="mt-0.5 font-medium text-ink-900">{labels[shift]}</div>}
+            </div>
           </div>
 
           {!running && (
             <div className="flex gap-2">
               {(["morning", "afternoon"] as Shift[]).map((s) => (
-                <button key={s} onClick={() => setShift(s)}
-                  className={`flex-1 rounded-sm border px-3 py-2 text-[13px] font-medium ${s === shift ? "border-gold-500 bg-gold-100 text-ink-900" : "border-hair bg-surface text-ink-500"}`}>
+                <button key={s} onClick={() => setShift(s)} aria-pressed={s === shift}
+                  className={`h-12 flex-1 rounded-sm border text-[15px] font-medium ${s === shift ? "border-2 border-gold-500 bg-gold-100 font-bold text-ink-900" : "border-hair bg-surface text-ink-500"}`}>
                   {labels[s]}
                 </button>
               ))}
@@ -252,9 +286,23 @@ export function ConductorConsole({ ctx, labels }: { ctx: CrewContext; labels: Re
           )}
 
           {running ? (
-            <Button variant="danger" className="h-14 w-full text-[16px]" disabled={busy} onClick={endTrip}>
-              {labels.endTrip}
-            </Button>
+            confirmEnd ? (
+              <div className="rounded-sm border border-hair bg-panel p-3">
+                <p className="text-[14px] font-medium text-ink-900">{labels.confirmEnd}</p>
+                <div className="mt-2 flex gap-2">
+                  <Button variant="danger" className="h-12 flex-1 text-[15px]" disabled={busy} onClick={endTrip}>
+                    {labels.endTrip}
+                  </Button>
+                  <Button variant="ghost" className="h-12 text-[15px]" onClick={() => setConfirmEnd(false)}>
+                    {labels.cancel}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button variant="danger" className="h-14 w-full text-[16px]" disabled={busy} onClick={() => setConfirmEnd(true)}>
+                {labels.endTrip}
+              </Button>
+            )
           ) : (
             <Button variant="gold" className="h-14 w-full text-[16px]" disabled={busy} onClick={startTrip}>
               {labels.startTrip}
@@ -276,26 +324,27 @@ export function ConductorConsole({ ctx, labels }: { ctx: CrewContext; labels: Re
                 style={{ width: `${stops.length ? (doneCount / stops.length) * 100 : 0}%` }} />
             </div>
             {nextStop && (
-              <div className="mt-1.5 truncate text-[12px] text-ink-500">
-                {labels.nextStop}: <span className="text-ink-900">{nextStop.name}</span>
+              <div className="mt-2">
+                <div className="t-label">{labels.nextStop}</div>
+                <div className="text-[18px] font-bold leading-tight text-ink-900">{nextStop.name}</div>
               </div>
             )}
           </div>
 
-          <div className="grid grid-cols-3 gap-2 text-center text-[11px]">
-            <div className="rounded-sm border border-hair px-2 py-1.5">
-              <div className="t-label">{labels.gps}</div>
-              <div className={`tabular font-semibold ${gpsTone}`}>
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="rounded-sm border border-hair px-2 py-2">
+              <div className="text-[10px] uppercase tracking-wide text-ink-500">{labels.gps}</div>
+              <div className={`tabular text-[15px] font-bold ${gpsTone}`}>
                 {fix ? (fix.acc != null ? `±${Math.round(fix.acc)} m` : labels.ok) : "—"}
               </div>
             </div>
-            <div className="rounded-sm border border-hair px-2 py-1.5">
-              <div className="t-label">{labels.queued}</div>
-              <div className={`tabular font-semibold ${queueTone}`}>{queued}</div>
+            <div className="rounded-sm border border-hair px-2 py-2">
+              <div className="text-[10px] uppercase tracking-wide text-ink-500">{labels.queued}</div>
+              <div className={`tabular text-[15px] font-bold ${queueTone}`}>{queued}</div>
             </div>
-            <div className="rounded-sm border border-hair px-2 py-1.5">
-              <div className="t-label">{labels.lastSent}</div>
-              <div className={`tabular font-semibold ${sentTone}`}>{sentAgo == null ? "—" : secondsAgo(sentAgo)}</div>
+            <div className="rounded-sm border border-hair px-2 py-2">
+              <div className="text-[10px] uppercase tracking-wide text-ink-500">{labels.lastSent}</div>
+              <div className={`tabular text-[15px] font-bold ${sentTone}`}>{sentAgo == null ? "—" : secondsAgo(sentAgo)}</div>
             </div>
           </div>
 
@@ -316,7 +365,7 @@ export function ConductorConsole({ ctx, labels }: { ctx: CrewContext; labels: Re
             {stops.map((s) => {
               const done = arrived.includes(s.id);
               const isNext = nextStop?.id === s.id;
-              const riders = ctx.riderCountByStop[s.id] ?? 0;
+              const riders = (shift === "morning" ? ctx.riderCountByStop : ctx.riderDropCountByStop)[s.id] ?? 0;
               return (
                 <li key={s.id} className={`flex items-center gap-3 py-3 pr-4 ${isNext ? "border-l-4 border-gold-500 bg-gold-100 pl-3" : "pl-4"}`}>
                   <div className={`h-2.5 w-2.5 shrink-0 rounded-full ${done ? "bg-up" : isNext ? "bg-gold-500" : "bg-hair"}`} />

@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardBody } from "@/components/ui/card";
 import type { Live, RiderView } from "@/lib/data/transport";
-import { LOST_S, POLL_MS } from "@/components/transport/thresholds";
+import { LOST_S, POLL_MS , serverSkewMs } from "@/components/transport/thresholds";
 
 const LiveMap = dynamic(() => import("@/components/transport/live-map").then((m) => m.LiveMap), {
   ssr: false,
@@ -19,13 +19,24 @@ const LiveMap = dynamic(() => import("@/components/transport/live-map").then((m)
 
 const STALE_S = 60;      // no fix for a minute: say when it was last seen
 
-export function RideTracker({ ride, labels }: { ride: RiderView; labels: Record<string, string> }) {
+export function RideTracker({
+  ride,
+  labels,
+  serverNow,
+}: {
+  ride: RiderView;
+  labels: Record<string, string>;
+  /** The server's clock at render, so freshness does not depend on the phone's. */
+  serverNow: string;
+}) {
   // One client for the life of the component: the poll and the channel are both
   // torn down by bus id, so a new client per render would leak sockets.
   const supabase = useMemo(() => createClient(), []);
   const [live, setLive] = useState<Live | null>(ride.live);
   const [arrived, setArrived] = useState<number[]>(ride.arrivedStopIds);
   const [now, setNow] = useState(() => Date.now());
+  // Sampled once from the server-rendered timestamp; see serverSkewMs.
+  const [skew] = useState(() => serverSkewMs(serverNow));
 
   // One-second tick so the freshness read-out counts up on its own.
   useEffect(() => {
@@ -76,7 +87,10 @@ export function RideTracker({ ride, labels }: { ride: RiderView; labels: Record<
   }, [supabase, ride.busId, refresh]);
 
   const myStop = ride.stops.find((s) => s.id === ride.pickupStopId) ?? null;
-  const ageS = live?.updated_at ? Math.round((now - new Date(live.updated_at).getTime()) / 1000) : null;
+  // now is the DEVICE clock; updated_at is the SERVER's. Align them.
+  const ageS = live?.updated_at
+    ? Math.max(0, Math.round((now + skew - new Date(live.updated_at).getTime()) / 1000))
+    : null;
   const lost = !live?.is_running || (ageS != null && ageS > LOST_S);
   const stale = !lost && ageS != null && ageS > STALE_S;
 
@@ -88,9 +102,13 @@ export function RideTracker({ ride, labels }: { ride: RiderView; labels: Record<
       const mins = Math.max(1, Math.round(live.eta_seconds / 60));
       return { tone: "up", text: `${labels.arrivingIn} ~${mins} ${labels.min}` };
     }
+    // The afternoon run drives the route in reverse, so "how many stops away"
+    // must be counted in the direction the bus is actually travelling.
+    const order = ride.shift === "afternoon" ? [...ride.stops].reverse() : ride.stops;
+    const myStop = ride.shift === "afternoon" ? ride.dropStopId : ride.pickupStopId;
     const stopsAway =
-      ride.stops.findIndex((s) => s.id === ride.pickupStopId) -
-      ride.stops.findIndex((s) => s.id === live.next_stop_id);
+      order.findIndex((s) => s.id === myStop) -
+      order.findIndex((s) => s.id === live.next_stop_id);
     if (stopsAway > 0) return { tone: "watch", text: `${stopsAway} ${stopsAway === 1 ? labels.stopAway : labels.stopsAway}` };
     return { tone: "flat", text: labels.onRoute };
   }, [live, lost, arrived, ride, labels]);

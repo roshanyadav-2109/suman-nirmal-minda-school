@@ -1,5 +1,5 @@
 "use client";
-import { useState, useTransition } from "react";
+import { useId, useState, useTransition } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -92,8 +92,11 @@ export function RiderAdmin({ data }: { data: RiderAdminData }) {
           </div>
         </form>
         <div className="min-w-[200px]">
-          <label className="t-label mb-1 block" htmlFor="rider-route">{t("transport.route")}</label>
-          <Select id="rider-route" value={routeId || ""} onChange={(e) => push({ route: e.target.value })}>
+          <label className="t-label mb-1 block" htmlFor="rider-route">
+            {t("transport.route")} <span className="font-normal normal-case text-ink-500">{t("transport.routeFilterScope")}</span>
+          </label>
+          <Select id="rider-route" value={routeId || ""}
+            onChange={(e) => push({ route: e.target.value, q })}>
             <option value="">{t("common.all")}</option>
             {data.routes.map((r) => (
               <option key={r.id} value={r.id}>{r.code} · {r.name}</option>
@@ -271,6 +274,7 @@ function StopForm({
   onSave: (draft: Draft) => void;
   onCancel: () => void;
 }) {
+  const formId = useId();
   const t = useT();
   const [routeId, setRouteId] = useState(initial?.routeId ?? 0);
   const [pickup, setPickup] = useState(initial?.pickupStopId ?? 0);
@@ -296,10 +300,10 @@ function StopForm({
 
   return (
     <div className="rounded-sm border border-hair bg-panel p-3">
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 lg:grid-cols-3">
         <div>
-          <label className="t-label mb-1 block">{t("transport.route")}</label>
-          <Select value={routeId || ""} onChange={(e) => chooseRoute(Number(e.target.value))}>
+          <label className="t-label mb-1 block" htmlFor={`${formId}-route`}>{t("transport.route")}</label>
+          <Select id={`${formId}-route`} value={routeId || ""} onChange={(e) => chooseRoute(Number(e.target.value))}>
             <option value="">{t("transport.selectRoute")}</option>
             {routes.map((r) => (
               <option key={r.id} value={r.id}>{r.code} · {r.name}</option>
@@ -307,8 +311,8 @@ function StopForm({
           </Select>
         </div>
         <div>
-          <label className="t-label mb-1 block">{t("transport.pickupStop")}</label>
-          <Select value={pickup || ""} disabled={!routeId} onChange={(e) => choosePickup(Number(e.target.value))}>
+          <label className="t-label mb-1 block" htmlFor={`${formId}-pickup`}>{t("transport.pickupStop")}</label>
+          <Select id={`${formId}-pickup`} value={pickup || ""} disabled={!routeId} onChange={(e) => choosePickup(Number(e.target.value))}>
             <option value="">{t("transport.selectStop")}</option>
             {stops.map((s) => (
               <option key={s.id} value={s.id}>{s.seq}. {s.name}</option>
@@ -316,8 +320,8 @@ function StopForm({
           </Select>
         </div>
         <div>
-          <label className="t-label mb-1 block">{t("transport.dropStop")}</label>
-          <Select value={drop || ""} disabled={!routeId} onChange={(e) => setDrop(Number(e.target.value))}>
+          <label className="t-label mb-1 block" htmlFor={`${formId}-drop`}>{t("transport.dropStop")}</label>
+          <Select id={`${formId}-drop`} value={drop || ""} disabled={!routeId} onChange={(e) => setDrop(Number(e.target.value))}>
             <option value="">{t("transport.selectStop")}</option>
             {stops.map((s) => (
               <option key={s.id} value={s.id}>{s.seq}. {s.name}</option>

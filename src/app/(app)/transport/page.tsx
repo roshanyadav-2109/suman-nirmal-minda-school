@@ -16,6 +16,9 @@ export default async function TransportPage({ searchParams }: { searchParams: SP
   const sp = await searchParams;
   const session = (await getSession())!;
   const { t } = await getT();
+  // The server clock, handed to the client so "last seen" cannot be thrown off
+  // by a device whose own clock is wrong.
+  const serverNow = new Date().toISOString();
 
   const rideLabels = {
     notRunning: t("transport.notRunning"), signalLost: t("transport.signalLost"),
@@ -89,7 +92,7 @@ export default async function TransportPage({ searchParams }: { searchParams: SP
                 ))}
               </div>
             )}
-            <RideTracker key={ride.studentId} ride={ride} labels={rideLabels} />
+            <RideTracker key={ride.studentId} ride={ride} labels={rideLabels} serverNow={serverNow} />
           </>
         )}
       </div>
@@ -99,6 +102,20 @@ export default async function TransportPage({ searchParams }: { searchParams: SP
   // ---- Office, principal and teaching staff: the fleet ----
   // The board's own tiles can only count the rows it was handed; the summary is
   // the year's real fleet, so the server number wins where there is one.
+  //
+  // Teaching staff are NOT office: RLS gives them no bus_live rows at all, so a
+  // fleet board would confidently report every bus as "Not running" and the
+  // tiles as "0 / 4" while buses were on the road. Saying nothing is honest;
+  // saying zero is not.
+  if (!session.isAdminScope) {
+    return (
+      <div>
+        <PageHeader title={t("transport.title")} />
+        <EmptyState icon={BusIcon} title={t("transport.staffNoLive")} hint={t("transport.staffNoLiveHint")} />
+      </div>
+    );
+  }
+
   const [rows, summary] = await Promise.all([getFleet(), getFleetSummary()]);
   return (
     <div>

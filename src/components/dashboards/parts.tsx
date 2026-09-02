@@ -161,7 +161,8 @@ export function transportCardLabels(t: TFunction): TransportCardLabels {
     minAgo: t("transport.minAgo"), liveNow: t("transport.liveNow"),
     lastSeen: t("transport.lastSeen"), yourStop: t("transport.yourStop"),
     scheduled: t("transport.scheduled"),
-      nextStop: t("transport.nextStop"),
+      runFinished: t("transport.runFinished"),
+    nextStop: t("transport.nextStop"),
     passedYourStop: t("transport.passedYourStop"),
 };
 }

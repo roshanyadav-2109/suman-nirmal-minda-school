@@ -102,6 +102,7 @@ async function BusCard({ studentId }: { studentId: number }) {
     <>
       {rides.map((ride) => (
         <TransportCard
+          serverNow={new Date().toISOString()}
           key={ride.studentId}
           ride={ride}
           labels={transportCardLabels(t)}
