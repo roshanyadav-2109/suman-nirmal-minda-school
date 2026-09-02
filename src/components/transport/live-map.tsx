@@ -33,6 +33,12 @@ const busIcon = (code: string, heading: number | null, stale: boolean) => `
                 transform:rotate(${heading ?? 0}deg)"></div>
   </div>`;
 
+const stopDot = (state: "done" | "next" | "todo") => {
+  const fill = state === "done" ? "rgb(46,125,80)" : state === "next" ? "rgb(198,157,58)" : "#fff";
+  const ring = state === "todo" ? "rgb(180,180,180)" : fill;
+  return `<div style="width:9px;height:9px;border-radius:50%;background:${fill};border:2px solid ${ring};box-shadow:0 0 0 2px #fff"></div>`;
+};
+
 const stopIcon = (label: string, state: "done" | "next" | "todo") => {
   const fill = state === "done" ? "rgb(46,125,80)" : state === "next" ? "rgb(198,157,58)" : "#fff";
   const ring = state === "todo" ? "rgb(180,180,180)" : fill;
@@ -111,11 +117,20 @@ export function LiveMap({
       const pts = stops.map((s) => [s.lat, s.lng] as [number, number]);
       line.current = L.polyline(pts, { color: "rgb(198,157,58)", weight: 3, opacity: 0.65 }).addTo(map.current);
 
+      // Every route at once is 25 labels stacked over the city centre. On the
+      // fleet map the stops are context, not the subject, so they shrink to
+      // dots with the name on hover; a single focused route keeps its labels.
+      const dense = stops.length > 12;
       stops.forEach((s) => {
         const state = arrivedStopIds.includes(s.id) ? "done" : s.id === nextStopId ? "next" : "todo";
-        L.marker([s.lat, s.lng], {
-          icon: L.divIcon({ html: stopIcon(s.name, state), className: "", iconSize: [0, 0] }),
+        const marker = L.marker([s.lat, s.lng], {
+          icon: L.divIcon({
+            html: dense ? stopDot(state) : stopIcon(s.name, state),
+            className: "",
+            iconSize: [0, 0],
+          }),
         }).addTo(stopLayer.current!);
+        if (dense) marker.bindTooltip(s.name, { direction: "top", offset: [0, -6] });
       });
 
       // The focus effect owns the camera whenever it has a vehicle to point at;

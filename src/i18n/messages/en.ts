@@ -74,6 +74,7 @@ const en = {
     transport: "Bus Conductor",
   },
   transport: {
+    geoDenied: "Location is blocked for this site. Allow location in your browser settings, then reload — until then the school cannot see this bus.",
     endBlocked: "Some positions have not reached the school yet. Stay on this screen until the queue clears, then end the trip.",
     title: "School Transport",
     familyIntro: "Where your child's bus is right now, and when it reaches your stop.",

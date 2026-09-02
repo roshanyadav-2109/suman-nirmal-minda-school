@@ -35,6 +35,9 @@ export function ConductorConsole({ ctx, labels }: { ctx: CrewContext; labels: Re
   const [queued, setQueued] = useState(0);
   const [lastSent, setLastSent] = useState<Date | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  // A refused permission is a different problem from a silent network, and only
+  // the conductor can fix it — so it must not hide behind a generic alarm.
+  const [geoDenied, setGeoDenied] = useState(false);
   const [busy, setBusy] = useState(false);
   // "Seconds since the last send" is only honest if it counts up on its own.
   const [now, setNow] = useState(() => Date.now());
@@ -114,7 +117,12 @@ export function ConductorConsole({ ctx, labels }: { ctx: CrewContext; labels: Re
         });
         setQueued(queue.current.length);
       },
-      (e) => setErr(e.message),
+      (e) => {
+        // 1 = PERMISSION_DENIED. The browser's own wording ("User denied
+        // Geolocation") means nothing to a conductor.
+        if (e.code === 1) { setGeoDenied(true); setErr(labels.geoDenied); return; }
+        setErr(e.message);
+      },
       { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 },
     );
 
@@ -218,7 +226,7 @@ export function ConductorConsole({ ctx, labels }: { ctx: CrewContext; labels: Re
   const sentTone = !running ? "text-ink-500"
     : quietFor == null || quietFor > SILENT_S ? "text-down"
     : quietFor > 30 ? "text-watch" : "text-up";
-  const silent = running && quietFor != null && quietFor > SILENT_S;
+  const silent = running && !geoDenied && quietFor != null && quietFor > SILENT_S;
 
   return (
     <div className="space-y-4 md:grid md:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] md:items-start md:gap-4 md:space-y-0">
