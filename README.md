@@ -7,22 +7,27 @@ attendance, announcements/events, monthly reports, leave and parent feedback.
 Access is driven by **allotment**, enforced at the database with **Supabase Row Level
 Security** — the UI hiding data is never the security boundary.
 
-## ⚠ Backend status — read before a handover
+## Backend status
 
-This deployment points at the **same Supabase project as the KV IIT Kharagpur portal**
-(`NEXT_PUBLIC_SUPABASE_URL` in `.env.local`). The schema is **single-tenant**: a
-`school` table exists, but no table, RLS policy or RPC filters on `school_id`.
+This deployment now points at its **own dedicated Supabase project**
+(`NEXT_PUBLIC_SUPABASE_URL` in `.env.local`) — no longer the shared KV IIT
+Kharagpur project this codebase was forked from. All migrations in
+`supabase/migrations/` (through `0031`) are already applied to it, and the
+site is seeded with Suman Nirmal Minda School's own students, staff and
+allotments.
 
-**So this site shows the KV IIT Kharagpur data, under Suman Nirmal Minda branding.**
-That is fine for a product demo. Before this school uses it for real, one of:
+Production (`suman-nirmal-minda-school.vercel.app`) is deployed against this
+same project, with the environment variables set to match — verified live in
+a browser for the parent and office roles, including live bus tracking.
 
-1. **Own Supabase project** (recommended) — apply `supabase/migrations/0001…0021` to a
-   fresh project, seed this school's own students/staff/allotments, then point
-   `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` at it. Nothing else changes.
-2. **Make the shared project multi-tenant** — add `school_id` across the 25 tables,
-   backfill KV, and extend every RLS policy and analytics RPC to filter by it.
+**Still outstanding:**
 
-Until then, treat the demo logins as showing another school's records.
+- `RESEND_API_KEY` is not yet set on the `transport-alert` Edge Function, so
+  queued bus-alert emails to guardians are held rather than sent (see
+  [Bus alerts](#bus-alerts-transport-alert) below).
+- The Supabase personal access token, Vercel token, and Supabase service-role
+  key used to set this deployment up were shared in a chat session and
+  should be rotated.
 
 ## Branding
 
@@ -88,6 +93,8 @@ node scripts/apply-sql.mjs supabase/migrations/0001_core_schema.sql
 | `0006_slippage_job` | `refresh_slippage_flags()` — scheduled early-slippage computation |
 | `0007_cron` | Nightly `pg_cron` schedule for the slippage job |
 | `0008_storage` | `brand` (public) + `reports` (private) Storage buckets |
+| `0009…0021` | Student features, attendance/marks refinements, dashboard overview, exams & promotion |
+| `0022…0031` | Transport: schema, RLS, live tracking, trip/delay/crew handling, and the alert job |
 
 ### Seed & verify
 
