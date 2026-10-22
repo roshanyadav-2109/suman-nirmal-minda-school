@@ -110,22 +110,6 @@ export function AppShell({
     </>
   ) : null;
 
-  // Rail footer: vendor wordmark ("hebrew" over "technologies"). "hebrew" sets
-  // the width; "technologies" spreads its letters to fill that exact width.
-  const brandFooter = (
-    <div className="px-4 py-4 text-center">
-      <a href="https://hebrewtechnologies.com" target="_blank" rel="noreferrer" className="inline-block">
-        <div className="text-[24px] font-medium lowercase leading-none tracking-[0.08em] text-ink-900">hebrew</div>
-        <div className="mt-1.5 flex justify-between text-[12px] font-normal lowercase leading-none text-muted" aria-hidden>
-          {"technologies".split("").map((ch, i) => (
-            <span key={i}>{ch}</span>
-          ))}
-        </div>
-        <span className="sr-only">technologies</span>
-      </a>
-    </div>
-  );
-
   return (
     <div className="min-h-dvh bg-white lg:grid lg:grid-cols-[264px_1fr]">
       {/* Desktop sidebar — white floating rail for every role */}
@@ -134,7 +118,6 @@ export function AppShell({
         <div className="flex-1 overflow-y-auto">
           {navList}
         </div>
-        {brandFooter}
       </aside>
 
       {/* Mobile drawer */}
@@ -158,7 +141,6 @@ export function AppShell({
             <div className="flex-1 overflow-y-auto">
               {navList}
             </div>
-            {brandFooter}
           </aside>
         </div>
       )}
