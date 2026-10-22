@@ -1,4 +1,4 @@
-# The Suman Nirmal Minda School, Ahmedabad — Student Progress & School Portal
+# The Suman Nirmal Minda School, Ahmedabad — Student Progress and  School Portal
 
 A school-owned, mobile-responsive web portal (classes I–XII). Its spine is a
 **continuous, year-on-year student progress record** with real analytics, wrapped in
