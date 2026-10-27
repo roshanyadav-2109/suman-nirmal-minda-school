@@ -82,7 +82,7 @@ export function ClassAnalyticsView({ data, subjectName }: { data: Analytics; sub
             <ol className="space-y-1.5">
               {data.topPerformers.map((s, i) => (
                 <li key={i} className="odd:bg-panel/50">
-                  <Link href={drillHref(s.student_id)} className="flex items-center gap-3 rounded-sm px-2 py-1.5 transition-colors hover:bg-[rgb(37,99,235)]/[0.06]">
+                  <Link prefetch={false} href={drillHref(s.student_id)} className="flex items-center gap-3 rounded-sm px-2 py-1.5 transition-colors hover:bg-[rgb(37,99,235)]/[0.06]">
                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[rgb(37,99,235)]/[0.1] text-[12px] font-bold text-[rgb(37,99,235)] tabular">{i + 1}</span>
                     <span className="flex-1 truncate text-[14px] text-ink-900">{s.student_name}</span>
                     <span className="rounded-xs bg-panel px-1.5 py-0.5 text-[11px] font-semibold text-ink-900 tabular">{s.section_name}</span>
@@ -103,7 +103,7 @@ export function ClassAnalyticsView({ data, subjectName }: { data: Analytics; sub
           {data.needsSupport.length ? (
             <div className="grid gap-2 sm:grid-cols-2">
               {data.needsSupport.slice(0, 8).map((s, i) => (
-                <Link key={i} href={drillHref(s.student_id)} className="block rounded-sm border border-hair bg-surface p-2.5 transition-colors hover:border-black">
+                <Link prefetch={false} key={i} href={drillHref(s.student_id)} className="block rounded-sm border border-hair bg-surface p-2.5 transition-colors hover:border-black">
                   <div className="flex items-center justify-between">
                     <span className="text-[14px] font-semibold text-ink-900">{s.student_name}</span>
                     <span className="flex items-center gap-2">

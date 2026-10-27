@@ -54,7 +54,7 @@ export default async function ProgressPage({ searchParams }: { searchParams: SP 
             ? children.map((c) => {
                 const active = c.id === studentId;
                 return (
-                  <Link key={c.id} href={`/progress?child=${c.id}`}
+                  <Link prefetch={false} key={c.id} href={`/progress?child=${c.id}`}
                     className={cn("rounded-sm border px-3 py-1.5 text-[13px] font-medium transition-colors",
                       active ? "border-black bg-black text-white" : "border-hair bg-surface text-ink-900 hover:bg-panel")}>
                     {c.full_name}
@@ -101,16 +101,18 @@ export default async function ProgressPage({ searchParams }: { searchParams: SP 
   const subjectId = wantSubject != null && availableSubjects.some((s) => s.id === wantSubject) ? wantSubject : null;
   const subjectName = subjectId ? scope.subjects.find((s) => s.id === subjectId)?.name ?? null : null;
 
-  // Exam options for the scope (all subjects, or the chosen subject).
-  const exams = await getScopeExams(scopeSectionIds, subjectId, yearId);
+  // Exam options for the scope (all subjects, or the chosen subject), and the
+  // students in the scope (one section, or every section of the class) for the
+  // Student picker. Neither needs the other, so both are fetched at once.
+  const [exams, scopeRoster] = await Promise.all([
+    getScopeExams(scopeSectionIds, subjectId, yearId),
+    level === "class" && cls
+      ? Promise.all(scopeSectionIds.map((id) => getSectionStudents(id, yearId)))
+          .then((lists) => lists.flat().sort((a, b) => a.name.localeCompare(b.name)))
+      : getSectionStudents(section.id, yearId),
+  ]);
   const wantExam = str(sp.exam);
   const examName = wantExam && exams.some((e) => e.name === wantExam) ? wantExam : null;
-
-  // Students in the current scope (one section, or every section of the class) —
-  // this list drives the Student picker and refreshes when the scope changes.
-  const scopeRoster = level === "class" && cls
-    ? (await Promise.all(scopeSectionIds.map((id) => getSectionStudents(id, yearId)))).flat().sort((a, b) => a.name.localeCompare(b.name))
-    : await getSectionStudents(section.id, yearId);
   const wantStudent = num(sp.studentId);
   const studentId = wantStudent != null && scopeRoster.some((s) => s.id === wantStudent) ? wantStudent : null;
 
@@ -136,7 +138,7 @@ export default async function ProgressPage({ searchParams }: { searchParams: SP 
         <PageHeader title={t("progress.title")}
           description={data.student ? `${data.student.full_name} · ${data.student.admission_no}` : undefined} />
         {filters}
-        <Link href={`/progress?${backQs.toString()}`} className="mb-4 inline-flex items-center gap-1 text-[13px] font-medium text-[rgb(37,99,235)] hover:underline">
+        <Link prefetch={false} href={`/progress?${backQs.toString()}`} className="mb-4 inline-flex items-center gap-1 text-[13px] font-medium text-[rgb(37,99,235)] hover:underline">
           <ArrowRightIcon size={14} className="rotate-180" /> {backLabel}
         </Link>
         <StudentProgressView data={data} standing={standing} />

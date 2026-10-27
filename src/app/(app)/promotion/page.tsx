@@ -93,7 +93,7 @@ export default async function PromotionPage({ searchParams }: { searchParams: SP
               const active = c.id === selectedId;
               const allDone = c.promoted >= c.students && c.students > 0;
               return (
-                <Link key={c.id} href={`/promotion?class=${c.id}`}
+                <Link prefetch={false} key={c.id} href={`/promotion?class=${c.id}`}
                   className={`rounded-sm border px-3 py-2 text-[13px] transition-colors ${active ? "border-gold-500 bg-gold-100 text-ink-900" : "border-hair bg-surface text-ink-700 hover:border-gold-500 hover:bg-gold-100"}`}>
                   <span className="font-semibold">{t("common.class")} {c.name}</span>
                   <span className="ml-2 tabular text-muted">{c.students}</span>

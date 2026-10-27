@@ -18,7 +18,7 @@ export async function DetailedSectionAttendance({ students, period, sectionLabel
   return (
     <Card>
       <CardBody>
-        <Link href={backHref} className="inline-flex items-center gap-1.5 text-[22px] font-semibold leading-tight text-[rgb(37,99,235)] hover:underline">
+        <Link prefetch={false} href={backHref} className="inline-flex items-center gap-1.5 text-[22px] font-semibold leading-tight text-[rgb(37,99,235)] hover:underline">
           <ArrowRightIcon size={20} className="rotate-180" />
           {t("x.attendanceOverview")}
         </Link>

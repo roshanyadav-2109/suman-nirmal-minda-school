@@ -13,6 +13,7 @@ import { ProfileMenu } from "@/components/dashboards/profile-menu";
 import { AnnouncementsList } from "@/components/dashboards/announcements-list";
 import { transportCardLabels } from "@/components/dashboards/parts";
 import { TransportCard } from "@/components/transport/transport-card";
+import { TRANSPORT_ENABLED } from "@/lib/features";
 import { cn } from "@/lib/utils";
 
 type Att = Awaited<ReturnType<typeof getStudentAttendance>>;
@@ -95,6 +96,7 @@ async function ProfileCard({ name, studentId }: { name: string; studentId: numbe
 // A pupil who does not ride a bus sees nothing at all here — an empty state
 // would only advertise a service they have not bought.
 async function BusCard({ studentId }: { studentId: number }) {
+  if (!TRANSPORT_ENABLED) return null;
   const rides = await getRideSummaries([studentId]);
   if (!rides.length) return null;
   const { t } = await getT();
@@ -147,7 +149,7 @@ async function MainContent({ name, standing, att }: { name: string; standing: St
           {links.map((l) => {
             const Icon = l.icon;
             return (
-              <Link
+              <Link prefetch={false}
                 key={l.href + l.labelKey}
                 href={l.href}
                 className="group flex shrink-0 items-center gap-2.5 rounded-md border border-hair bg-surface px-4 py-3 transition-colors hover:bg-panel"
@@ -164,7 +166,7 @@ async function MainContent({ name, standing, att }: { name: string; standing: St
       <div className="rounded-sm border border-hair bg-surface p-5">
         <h3 className="t-h3 text-ink-900">{t("progress.title")}</h3>
         <p className="mt-1.5 text-[14px] leading-relaxed text-ink-900">{t("dashboard.progressCta")}</p>
-        <Link href="/progress" className="mt-3 inline-flex items-center gap-1.5 rounded-sm bg-black px-3.5 py-2 text-[13px] font-normal text-white transition-colors hover:bg-[rgb(38,38,38)]">
+        <Link prefetch={false} href="/progress" className="mt-3 inline-flex items-center gap-1.5 rounded-sm bg-black px-3.5 py-2 text-[13px] font-normal text-white transition-colors hover:bg-[rgb(38,38,38)]">
           {t("nav.myProgress")}
           <ArrowRightIcon size={14} />
         </Link>
@@ -188,7 +190,7 @@ async function AnnouncementsCard() {
       <CardHeader
         title={t("announce.title")}
         action={
-          <Link href="/announcements" className="inline-flex items-center gap-1 text-[12px] font-normal text-[rgb(37,99,235)] hover:text-ink-900">
+          <Link prefetch={false} href="/announcements" className="inline-flex items-center gap-1 text-[12px] font-normal text-[rgb(37,99,235)] hover:text-ink-900">
             {t("dashboard.viewAll")}
             <ArrowRightIcon size={13} />
           </Link>
@@ -219,7 +221,7 @@ async function EventCalendarCard() {
       <CardHeader
         title={t("announce.events")}
         action={
-          <Link href="/calendar" className="inline-flex items-center gap-1 text-[12px] font-normal text-[rgb(37,99,235)] hover:text-ink-900">
+          <Link prefetch={false} href="/calendar" className="inline-flex items-center gap-1 text-[12px] font-normal text-[rgb(37,99,235)] hover:text-ink-900">
             {t("dashboard.viewAll")}
             <ArrowRightIcon size={13} />
           </Link>
@@ -232,7 +234,7 @@ async function EventCalendarCard() {
               const d = new Date(e.start_date);
               return (
                 <li key={e.id}>
-                  <Link href="/calendar" className="group flex items-center gap-2.5 rounded-sm p-1 transition-colors hover:bg-panel">
+                  <Link prefetch={false} href="/calendar" className="group flex items-center gap-2.5 rounded-sm p-1 transition-colors hover:bg-panel">
                     <span className="flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-sm bg-ink-900 leading-none text-gold-100">
                       <span className="text-[15px] font-bold tabular">{fmtDate(locale, d, { day: "2-digit" })}</span>
                       <span className="text-[9px] font-semibold uppercase tracking-wide text-gold-300">{fmtDate(locale, d, { month: "short" })}</span>

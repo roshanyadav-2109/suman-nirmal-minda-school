@@ -32,7 +32,7 @@ export function SessionChooser({
       {opts.map((o) => {
         const isActive = active === o.key;
         return (
-          <Link
+          <Link prefetch={false}
             key={o.key}
             href={href(o.key)}
             aria-current={isActive ? "true" : undefined}

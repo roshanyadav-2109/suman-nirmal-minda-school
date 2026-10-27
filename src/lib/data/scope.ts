@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getSession } from "@/lib/session";
 
@@ -33,20 +34,39 @@ export type StaffScope = {
 
 // Filter options limited to the caller's allotment (brief §2.3). Principal/office
 // see everything; a teacher sees only sections/subjects they are allotted.
-export async function getStaffScope(): Promise<StaffScope> {
+// Cached per request, and every query that does not depend on another is sent
+// at once: the database is a long round trip away, so a page's wait is the
+// number of sequential trips, not the work done in each.
+export const getStaffScope = cache(async (): Promise<StaffScope> => {
   const supabase = await createClient();
-  const session = await getSession();
 
-  const { data: years } = await supabase
-    .from("academic_year")
-    .select("id, name, is_current")
-    .order("start_date", { ascending: false });
+  // A teacher's allotments wait only for the session (to know they are not
+  // admin), so they overlap with the rest instead of queueing behind them.
+  const sessionP = getSession();
+  const [session, { data: years }, { data: allSubs }, allots, { data: allSecs }, { data: allClassSubs }] = await Promise.all([
+    sessionP,
+    supabase.from("academic_year").select("id, name, is_current").order("start_date", { ascending: false }),
+    supabase.from("subject").select("id, name, code").order("name"),
+    sessionP.then(async (sess) => {
+      if (!sess || sess.isAdminScope) return [];
+      const { data } = await supabase
+        .from("teacher_allotment")
+        // Every year's rows (a teacher has a handful); the current year is
+        // picked below, once the year list has arrived alongside this.
+        .select("section_id, subject_id, is_class_teacher, academic_year_id, section:section_id(id, name, class:class_id(id, name, level))")
+        .eq("staff_id", sess.staffId ?? -1);
+      return data ?? [];
+    }),
+    // Both read-all tables; for a teacher RLS still applies and the rows are
+    // only used to resolve names, never to widen their scope.
+    supabase.from("section").select("id, name, class:class_id(id, name, level)").order("name"),
+    supabase.from("class_subject").select("class_id, subject_id"),
+  ]);
   const yearList = (years ?? []) as YearOpt[];
   const currentYearId = yearList.find((y) => y.is_current)?.id ?? yearList[0]?.id ?? null;
 
   const isAdmin = !!session?.isAdminScope;
 
-  const { data: allSubs } = await supabase.from("subject").select("id, name, code").order("name");
   const allSubjects = (allSubs ?? []) as SubjectOpt[];
   const subById = new Map<number, SubjectOpt>(allSubjects.map((s) => [s.id, s]));
 
@@ -56,11 +76,11 @@ export async function getStaffScope(): Promise<StaffScope> {
   });
 
   // class_id → its offered subjects (from class_subject), sorted by name.
-  const buildClassSubjects = async (classIds: number[]): Promise<Map<number, SubjectOpt[]>> => {
+  const buildClassSubjects = (classIds: number[]): Map<number, SubjectOpt[]> => {
     const map = new Map<number, SubjectOpt[]>();
-    if (!classIds.length) return map;
-    const { data } = await supabase.from("class_subject").select("class_id, subject_id").in("class_id", classIds);
-    for (const row of data ?? []) {
+    const want = new Set(classIds);
+    for (const row of allClassSubs ?? []) {
+      if (!want.has(row.class_id)) continue;
       const s = subById.get(row.subject_id);
       if (!s) continue;
       const arr = map.get(row.class_id) ?? [];
@@ -72,16 +92,12 @@ export async function getStaffScope(): Promise<StaffScope> {
   };
 
   if (isAdmin) {
-    const { data: secs } = await supabase
-      .from("section")
-      .select("id, name, class:class_id(id, name, level)")
-      .order("name");
-    const sections: SectionOpt[] = (secs ?? []).map((s) => {
+    const sections: SectionOpt[] = (allSecs ?? []).map((s) => {
       const c = s.class as unknown as ClassOpt;
       return { id: s.id, name: s.name, class_id: c.id, class_name: c.name, class_level: c.level };
     }).sort((a, b) => a.class_level - b.class_level || a.name.localeCompare(b.name));
     const classes = dedupeClasses(sections);
-    const clsSubs = await buildClassSubjects(classes.map((c) => c.id));
+    const clsSubs = buildClassSubjects(classes.map((c) => c.id));
     const forClass = (cid: number) => clsSubs.get(cid) ?? allSubjects;
     const sectionMeta = sections.map((s) => toMeta(s, false, forClass(s.class_id)));
     const subjectsByClass = Object.fromEntries(classes.map((c) => [c.id, forClass(c.id)]));
@@ -89,17 +105,14 @@ export async function getStaffScope(): Promise<StaffScope> {
   }
 
   // Teacher: derive scope from their own allotments (RLS: allot_read = own rows).
-  const { data: allots } = await supabase
-    .from("teacher_allotment")
-    .select("section_id, subject_id, is_class_teacher, section:section_id(id, name, class:class_id(id, name, level))")
-    .eq("academic_year_id", currentYearId ?? -1);
 
   type Info = { sec: SectionOpt; isCt: boolean; subj: Set<number> };
   const secInfo = new Map<number, Info>();
   const ctClassIds = new Set<number>();
   let classSectionId: number | null = null;
 
-  for (const a of allots ?? []) {
+  for (const a of allots) {
+    if (a.academic_year_id !== currentYearId) continue;
     const sec = a.section as unknown as { id: number; name: string; class: ClassOpt } | null;
     if (!sec) continue;
     let info = secInfo.get(sec.id);
@@ -114,8 +127,8 @@ export async function getStaffScope(): Promise<StaffScope> {
   // Class teacher teaches every subject of their class.
   const classSubjects = new Map<number, number[]>();
   if (ctClassIds.size) {
-    const { data: cs } = await supabase.from("class_subject").select("class_id, subject_id").in("class_id", [...ctClassIds]);
-    for (const row of cs ?? []) {
+    for (const row of allClassSubs ?? []) {
+      if (!ctClassIds.has(row.class_id)) continue;
       const arr = classSubjects.get(row.class_id) ?? [];
       arr.push(row.subject_id);
       classSubjects.set(row.class_id, arr);
@@ -146,7 +159,7 @@ export async function getStaffScope(): Promise<StaffScope> {
   );
 
   return { isAdmin, years: yearList, currentYearId, classes: dedupeClasses(sections), sections, subjects, classSectionId, sectionMeta, subjectsByClass };
-}
+});
 
 function dedupeClasses(sections: SectionOpt[]): ClassOpt[] {
   const m = new Map<number, ClassOpt>();

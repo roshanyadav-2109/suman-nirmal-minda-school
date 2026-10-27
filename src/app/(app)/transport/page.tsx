@@ -53,7 +53,7 @@ export default async function TransportPage({ searchParams }: { searchParams: SP
                   {ctx.registration && ` · ${ctx.registration}`}
                 </div>
               </div>
-              <Link href="/transport/conductor" className="inline-flex h-12 shrink-0 items-center justify-center rounded-sm bg-gold-500 px-5 text-[15px] font-medium text-ink-900 hover:bg-gold-700 hover:text-gold-100">
+              <Link prefetch={false} href="/transport/conductor" className="inline-flex h-12 shrink-0 items-center justify-center rounded-sm bg-gold-500 px-5 text-[15px] font-medium text-ink-900 hover:bg-gold-700 hover:text-gold-100">
                 {t("transport.openConsole")}
               </Link>
             </CardBody>
@@ -82,7 +82,7 @@ export default async function TransportPage({ searchParams }: { searchParams: SP
             {rides.length > 1 && (
               <div className="mb-5 flex flex-wrap gap-2">
                 {rides.map((r) => (
-                  <Link
+                  <Link prefetch={false}
                     key={r.studentId}
                     href={`/transport?child=${r.studentId}`}
                     className={`rounded-sm border px-3 py-1.5 text-[13px] font-medium ${r.studentId === ride.studentId ? "border-gold-500 bg-gold-100 text-ink-900" : "border-hair bg-surface text-ink-500 hover:bg-panel"}`}
@@ -124,7 +124,7 @@ export default async function TransportPage({ searchParams }: { searchParams: SP
         description={t("transport.fleetIntro")}
         // Allotting riders is office work, and the sidebar is the only other way in.
         actions={session.isAdminScope ? (
-          <Link
+          <Link prefetch={false}
             href="/transport/riders"
             className="inline-flex h-9 items-center rounded-sm border border-hair bg-surface px-3 text-[13px] font-medium text-ink-900 hover:bg-panel"
           >

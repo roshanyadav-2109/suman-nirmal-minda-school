@@ -31,7 +31,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: SP 
         <CardBody>
           <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
             {roster.map((s) => (
-              <Link key={s.id} href={`/progress?studentId=${s.id}&section=${section.id}&year=${yearId}`}
+              <Link prefetch={false} key={s.id} href={`/progress?studentId=${s.id}&section=${section.id}&year=${yearId}`}
                 className="group flex items-center gap-2.5 rounded-sm border border-hair bg-surface px-3 py-2 transition-colors hover:border-black">
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-panel text-[11px] font-semibold text-ink-700 tabular">{s.roll ?? "–"}</span>
                 <span className="min-w-0 flex-1">

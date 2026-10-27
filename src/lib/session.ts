@@ -25,14 +25,16 @@ export type Session = {
 };
 
 // Load the signed-in user's profile (RLS: self-read). Returns null if signed out.
-// Cached per request so the auth.getUser() network call + profile query run once
-// even though layout, page and data helpers all ask for the session.
+// Cached per request so the profile query runs once even though layout, page and
+// data helpers all ask for the session. The identity comes from getClaims(),
+// which verifies the JWT locally against the cached signing key — no auth-server
+// round trip (the proxy has already refreshed the cookie if it had expired).
 export const getSession = cache(async (): Promise<Session | null> => {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const userId = claimsData?.claims?.sub;
+  if (!userId) return null;
+  const user = { id: userId };
 
   // The profile and the current year do not depend on each other, and the year
   // is wanted by nearly every page anyway (getCurrentYear caches it per request),

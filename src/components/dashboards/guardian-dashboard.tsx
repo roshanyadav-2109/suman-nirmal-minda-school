@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/ui/empty";
 import { ProgressIcon, ArrowRightIcon } from "@/components/icons";
 import { DashHeader, AnnouncementsPanel, EventsPanel, QuickLinks, transportCardLabels } from "@/components/dashboards/parts";
 import { TransportCard } from "@/components/transport/transport-card";
+import { TRANSPORT_ENABLED } from "@/lib/features";
 
 // Parent view: an ID card per child (one login shows all siblings).
 export async function GuardianDashboard({ session }: { session: Session }) {
@@ -50,7 +51,7 @@ export async function GuardianDashboard({ session }: { session: Session }) {
                       <div className="text-[12px] tabular text-ink-900">{child.admission_no}</div>
                     </div>
                   </div>
-                  <Link href={`/progress?child=${child.id}`} aria-label={t("nav.childProgress")}
+                  <Link prefetch={false} href={`/progress?child=${child.id}`} aria-label={t("nav.childProgress")}
                     className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-[rgb(37,99,235)] text-white transition-colors hover:bg-[rgb(29,78,216)]">
                     <ArrowRightIcon size={16} />
                   </Link>
@@ -89,6 +90,7 @@ export async function GuardianDashboard({ session }: { session: Session }) {
 // One card per child who actually rides a bus. A family with no transport gets
 // nothing here — not an empty state, not a placeholder.
 async function BusStrip({ childIds, showNames }: { childIds: number[]; showNames: boolean }) {
+  if (!TRANSPORT_ENABLED) return null;
   const rides = await getRideSummaries(childIds);
   if (!rides.length) return null;
   const { t } = await getT();

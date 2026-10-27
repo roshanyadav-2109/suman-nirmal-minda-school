@@ -46,7 +46,7 @@ export default async function AttendancePage({ searchParams }: { searchParams: S
         {session.role === "guardian" && children.length > 1 && (
           <div className="mb-5 flex flex-wrap gap-2">
             {children.map((c) => (
-              <Link key={c.id} href={`/attendance?child=${c.id}`} className={`rounded-sm border px-3 py-1.5 text-[13px] font-medium ${c.id === studentId ? "border-gold-500 bg-gold-100 text-ink-900" : "border-hair bg-surface text-ink-500 hover:bg-panel"}`}>{c.full_name}</Link>
+              <Link prefetch={false} key={c.id} href={`/attendance?child=${c.id}`} className={`rounded-sm border px-3 py-1.5 text-[13px] font-medium ${c.id === studentId ? "border-gold-500 bg-gold-100 text-ink-900" : "border-hair bg-surface text-ink-500 hover:bg-panel"}`}>{c.full_name}</Link>
             ))}
           </div>
         )}

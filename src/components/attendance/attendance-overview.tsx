@@ -56,7 +56,7 @@ export async function AttendanceOverview({ overview, label, hrefForSection, sele
                     const active = selectedSection === sec.id;
                     if (hrefForSection) {
                       return (
-                        <Link key={sec.id} href={hrefForSection(sec.id)}
+                        <Link prefetch={false} key={sec.id} href={hrefForSection(sec.id)}
                           className={cn("rounded-sm border px-2 py-1 text-[12px] tabular transition-colors",
                             active ? "border-[rgb(37,99,235)]/40 bg-[rgb(37,99,235)]/[0.1] text-ink-900" : "border-hair bg-surface text-ink-900 hover:border-[rgb(37,99,235)]/40 hover:bg-[rgb(37,99,235)]/[0.05]")}>
                           {content}

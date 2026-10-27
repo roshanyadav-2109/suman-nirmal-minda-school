@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowRightIcon, AwardIcon, MarksIcon, StudentsIcon, ProgressIcon, AllotmentIcon, CloseIcon, type IconComponent } from "@/components/icons";
+import { ArrowRightIcon, RolePrincipalIcon, RoleTeacherIcon, RoleParentIcon, RoleStudentIcon, RoleOfficeIcon, RoleConductorIcon, CloseIcon, type IconComponent } from "@/components/icons";
 import { createClient } from "@/lib/supabase/client";
 import { useT } from "@/i18n/provider";
 import { SchoolEmblem } from "@/components/brand";
@@ -10,11 +10,12 @@ import { DEMO_ACCOUNTS, DEMO_PASSWORD } from "@/lib/demo";
 
 // A suitable icon per demo role.
 const ROLE_ICON: Record<string, IconComponent> = {
-  principal: AwardIcon,
-  teacher: MarksIcon,
-  guardian: StudentsIcon,
-  student: ProgressIcon,
-  office: AllotmentIcon,
+  principal: RolePrincipalIcon,
+  teacher: RoleTeacherIcon,
+  guardian: RoleParentIcon,
+  student: RoleStudentIcon,
+  office: RoleOfficeIcon,
+  transport: RoleConductorIcon,
 };
 
 // ── Provider brand marks (inline so they need no external assets) ──────────────
@@ -199,7 +200,7 @@ export default function LoginPage() {
 
             <div className="mt-6 grid w-full max-w-md grid-cols-2 gap-2.5 sm:mt-8 sm:flex sm:flex-wrap sm:justify-center">
               {DEMO_ACCOUNTS.map((a) => {
-                const Icon = ROLE_ICON[a.role] ?? ProgressIcon;
+                const Icon = ROLE_ICON[a.role] ?? RoleStudentIcon;
                 return (
                   <button key={a.email} onClick={() => signIn(a.email, DEMO_PASSWORD, a.email)} disabled={busy !== null}
                     className="flex w-full flex-col items-center gap-2 rounded-sm border border-hair bg-surface px-3 py-3.5 transition-colors hover:border-black hover:bg-panel disabled:opacity-50 sm:w-[128px]">

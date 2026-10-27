@@ -187,7 +187,7 @@ export function TransportCard({
             ) : null}
           </div>
         </div>
-        <Link
+        <Link prefetch={false}
           href="/transport"
           className="mt-3 inline-flex items-center gap-1.5 text-[12px] font-normal text-[rgb(37,99,235)] hover:text-ink-900"
         >

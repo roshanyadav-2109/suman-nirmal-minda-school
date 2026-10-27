@@ -30,10 +30,13 @@ export async function proxy(request: NextRequest) {
     },
   );
 
-  // IMPORTANT: do not run code between createServerClient and getUser().
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // IMPORTANT: do not run code between createServerClient and getClaims().
+  // getClaims verifies the JWT against the project's published signing key
+  // (cached in memory), so it costs no round trip to the auth server — unlike
+  // getUser(), which added one full trip to every page. It still refreshes an
+  // expired session through the cookie adapter above.
+  const { data } = await supabase.auth.getClaims();
+  const user = data?.claims ?? null;
 
   const path = request.nextUrl.pathname;
   const isPublic = PUBLIC_PATHS.some((p) => path === p || path.startsWith(p + "/"));

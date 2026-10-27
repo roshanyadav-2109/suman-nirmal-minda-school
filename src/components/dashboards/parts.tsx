@@ -11,6 +11,7 @@ import { getFleetSummary } from "@/lib/data/transport";
 import type { TransportCardLabels } from "@/components/transport/transport-card";
 import type { TFunction } from "@/i18n/translate";
 import { cn } from "@/lib/utils";
+import { TRANSPORT_ENABLED } from "@/lib/features";
 
 // A distinct, premium colour per destination — icons only, no block behind.
 export const NAV_COLOR: Record<string, string> = {
@@ -48,7 +49,7 @@ export function StatCard({ label, value, sub, tone = "ink", href }: { label: str
     </>
   );
   const base = "block rounded-md border border-hair bg-surface p-4";
-  if (href) return <Link href={href} className={cn(base, "transition-colors hover:border-black")}>{inner}</Link>;
+  if (href) return <Link prefetch={false} href={href} className={cn(base, "transition-colors hover:border-black")}>{inner}</Link>;
   return <div className={base}>{inner}</div>;
 }
 
@@ -116,12 +117,12 @@ export async function QuickLinks({ role }: { role: NavRole }) {
         {links.map((l) => {
           const Icon = l.icon;
           return (
-            <Link
+            <Link prefetch={false}
               key={l.href + l.labelKey}
               href={l.href}
               className="group flex items-center gap-3 rounded-md border border-hair bg-surface p-3.5 transition-colors hover:border-[rgb(37,99,235)]/40 hover:bg-[rgb(37,99,235)]/[0.05]"
             >
-              <Icon size={24} className="text-ink-900" />
+              <Icon size={26} className="text-[#2B2F6E]" />
               <span className="text-[15px] font-medium text-ink-900">{t(l.labelKey)}</span>
             </Link>
           );
@@ -134,6 +135,7 @@ export async function QuickLinks({ role }: { role: NavRole }) {
 // Buses on the road right now. Hidden entirely until the office sets transport
 // up, so a school without buses never sees three zeroes.
 export async function FleetStrip() {
+  if (!TRANSPORT_ENABLED) return null;
   const { t } = await getT();
   const fleet = await getFleetSummary();
   if (!fleet.buses) return null;
