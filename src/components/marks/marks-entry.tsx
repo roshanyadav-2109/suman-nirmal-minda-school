@@ -84,11 +84,11 @@ export function MarksEntry({
                   value={e.absent ? "" : e.marks ?? ""}
                   disabled={e.absent}
                   onChange={(ev) => setMark(r.id, ev.target.value)}
-                  className="h-9 w-20 rounded-sm border border-hair bg-surface px-2 text-right text-[14px] tabular focus-visible:border-[rgb(37,99,235)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(37,99,235)]/30 disabled:bg-panel"
+                  className="h-9 w-20 rounded-sm border border-hair bg-surface px-2 text-right text-[14px] tabular focus-visible:border-[#0F6CBD] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F6CBD]/30 disabled:bg-panel"
                   placeholder={String(maxMarks)}
                 />
                 <button onClick={() => toggleAbsent(r.id)} aria-pressed={e.absent}
-                  className={cn("h-8 rounded-sm px-2 text-[12px] font-semibold", e.absent ? "bg-down text-white" : "bg-panel text-ink-500 hover:bg-[rgb(37,99,235)]/[0.05]")}>
+                  className={cn("h-8 rounded-sm px-2 text-[12px] font-semibold", e.absent ? "bg-down text-white" : "bg-panel text-ink-500 hover:bg-[#0F6CBD]/[0.05]")}>
                   {t("marks.absent")}
                 </button>
               </li>

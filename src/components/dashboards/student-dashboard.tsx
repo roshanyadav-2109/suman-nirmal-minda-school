@@ -8,13 +8,14 @@ import { getRideSummaries } from "@/lib/data/transport";
 import { createClient } from "@/lib/supabase/server";
 import { CardBody, CardHeader } from "@/components/ui/card";
 import { navFor } from "@/lib/nav";
-import { CalendarIcon, ArrowRightIcon } from "@/components/icons";
+import { CalendarIcon, ArrowRightIcon, ProgressIcon, ReportIcon } from "@/components/icons";
 import { ProfileMenu } from "@/components/dashboards/profile-menu";
 import { AnnouncementsList } from "@/components/dashboards/announcements-list";
-import { transportCardLabels } from "@/components/dashboards/parts";
+import { transportCardLabels, ActionButtons } from "@/components/dashboards/parts";
 import { TransportCard } from "@/components/transport/transport-card";
 import { TRANSPORT_ENABLED } from "@/lib/features";
 import { cn } from "@/lib/utils";
+import { TrendArrow } from "@/components/ui/status";
 
 type Att = Awaited<ReturnType<typeof getStudentAttendance>>;
 type Standing = Awaited<ReturnType<typeof getStudentStanding>>;
@@ -24,11 +25,14 @@ function Panel({ className, children }: { className?: string; children: React.Re
   return <div className={cn("rounded-md border border-hair bg-surface", className)}>{children}</div>;
 }
 
-function Stat({ label, value, sub }: { label: string; value: React.ReactNode; sub?: string; tone?: "ink" | "up" | "down" | "gold" }) {
+function Stat({ label, value, sub, tone }: { label: string; value: React.ReactNode; sub?: string; tone?: "ink" | "up" | "down" | "gold" }) {
   return (
     <div className="rounded-sm border border-hair bg-surface p-4">
-      <div className="text-[12px] font-normal text-ink-900">{label}</div>
-      <div className="mt-1 text-[28px] font-normal leading-none tabular text-ink-900">{value}</div>
+      <div className="text-[13px] font-semibold text-ink-700">{label}</div>
+      <div className="mt-2 flex items-center gap-1.5 text-[28px] font-semibold leading-none tabular text-ink-900">
+        {value}
+        {(tone === "up" || tone === "down") && <TrendArrow tone={tone} size={18} />}
+      </div>
       {sub && <div className="mt-1.5 text-[12px] font-normal text-ink-900">{sub}</div>}
     </div>
   );
@@ -135,6 +139,11 @@ async function MainContent({ name, standing, att }: { name: string; standing: St
         <p className="mt-1 text-[14px] text-ink-900">{t("dashboard.overview")}</p>
       </div>
 
+      <ActionButtons actions={[
+        { href: "/progress", label: t("dashboard.ctaMyProgress"), icon: ProgressIcon },
+        { href: "/reports", label: t("dashboard.ctaReportCard"), icon: ReportIcon },
+      ]} />
+
       <div className="grid grid-cols-2 gap-3">
         <Stat label={`${t("progress.overall")} ${t("progress.average")}`} value={fmtPercent(locale, standing?.studentAvg ?? null, 1)} tone="gold" />
         <Stat label={t("attendance.percent")} value={att ? `${att.pct}%` : "—"} tone={att && att.pct < 75 ? "down" : "up"} sub={att ? `${att.present}/${att.total}` : undefined} />
@@ -143,8 +152,8 @@ async function MainContent({ name, standing, att }: { name: string; standing: St
       </div>
 
       {/* Quick links — one section, horizontal scroll, above My Progress */}
-      <div className="rounded-md border border-hair bg-surface p-4">
-        <div className="mb-2.5 text-[13px] font-semibold text-ink-900">{t("dashboard.quickLinks")}</div>
+      <div>
+        <div className="mb-3 text-[16px] font-semibold text-ink-900">{t("dashboard.quickLinks")}</div>
         <div className="flex gap-2.5 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {links.map((l) => {
             const Icon = l.icon;
@@ -166,7 +175,7 @@ async function MainContent({ name, standing, att }: { name: string; standing: St
       <div className="rounded-sm border border-hair bg-surface p-5">
         <h3 className="t-h3 text-ink-900">{t("progress.title")}</h3>
         <p className="mt-1.5 text-[14px] leading-relaxed text-ink-900">{t("dashboard.progressCta")}</p>
-        <Link prefetch={false} href="/progress" className="mt-3 inline-flex items-center gap-1.5 rounded-sm bg-black px-3.5 py-2 text-[13px] font-normal text-white transition-colors hover:bg-[rgb(38,38,38)]">
+        <Link prefetch={false} href="/progress" className="mt-3 inline-flex items-center gap-1.5 rounded-sm bg-[#0F6CBD] px-3.5 py-2 text-[13px] font-normal text-white transition-colors hover:bg-[#115EA3]">
           {t("nav.myProgress")}
           <ArrowRightIcon size={14} />
         </Link>
@@ -190,7 +199,7 @@ async function AnnouncementsCard() {
       <CardHeader
         title={t("announce.title")}
         action={
-          <Link prefetch={false} href="/announcements" className="inline-flex items-center gap-1 text-[12px] font-normal text-[rgb(37,99,235)] hover:text-ink-900">
+          <Link prefetch={false} href="/announcements" className="inline-flex items-center gap-1 text-[12px] font-normal text-[#0F6CBD] hover:text-ink-900">
             {t("dashboard.viewAll")}
             <ArrowRightIcon size={13} />
           </Link>
@@ -221,7 +230,7 @@ async function EventCalendarCard() {
       <CardHeader
         title={t("announce.events")}
         action={
-          <Link prefetch={false} href="/calendar" className="inline-flex items-center gap-1 text-[12px] font-normal text-[rgb(37,99,235)] hover:text-ink-900">
+          <Link prefetch={false} href="/calendar" className="inline-flex items-center gap-1 text-[12px] font-normal text-[#0F6CBD] hover:text-ink-900">
             {t("dashboard.viewAll")}
             <ArrowRightIcon size={13} />
           </Link>
@@ -240,7 +249,7 @@ async function EventCalendarCard() {
                       <span className="text-[9px] font-semibold uppercase tracking-wide text-gold-300">{fmtDate(locale, d, { month: "short" })}</span>
                     </span>
                     <span className="min-w-0">
-                      <span className="block truncate text-[13px] font-semibold text-ink-900 group-hover:text-[rgb(37,99,235)]">{e.title}</span>
+                      <span className="block truncate text-[13px] font-semibold text-ink-900 group-hover:text-[#0F6CBD]">{e.title}</span>
                       <span className="block text-[11px] capitalize text-ink-900">{e.event_type}</span>
                     </span>
                   </Link>

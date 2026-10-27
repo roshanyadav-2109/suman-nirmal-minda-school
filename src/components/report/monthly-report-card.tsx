@@ -1,7 +1,7 @@
 import { getT } from "@/i18n/server";
 import { fmtDate } from "@/i18n/format";
 import { Card, CardBody } from "@/components/ui/card";
-import { BandChip, DeltaBadge } from "@/components/ui/status";
+import { BandChip, DeltaBadge, TrendArrow } from "@/components/ui/status";
 import { SchoolEmblem } from "@/components/brand";
 import { SCHOOL } from "@/lib/school";
 import type { StudentReport } from "@/lib/data/report";
@@ -32,8 +32,9 @@ export async function ReportCard({ report, periodLabel }: { report: StudentRepor
           {att && (
             <div className="rounded-md bg-panel/50 p-4">
               <div className="t-label">{t("report.attendance")}</div>
-              <div className={`mt-1 text-[30px] font-normal tabular ${att.pct != null && att.pct < 75 ? "text-down" : "text-ink-900"}`}>
+              <div className="mt-1 flex items-center gap-1.5 text-[30px] font-normal tabular text-ink-900">
                 {att.pct != null ? `${att.pct}%` : "—"}
+                {att.pct != null && <TrendArrow tone={att.pct < 75 ? "down" : "up"} size={18} />}
               </div>
               <div className="text-[12px] text-ink-900">{att.present}/{att.total} {t("attendance.present").toLowerCase()}</div>
             </div>

@@ -1,16 +1,17 @@
+import { CalendarIcon, type IconComponent } from "@/components/icons";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getT } from "@/i18n/server";
 import { fmtDate } from "@/i18n/format";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty";
-import { CalendarIcon } from "@/components/icons";
 import { AnnouncementsList } from "@/components/dashboards/announcements-list";
 import { navFor, type NavRole } from "@/lib/nav";
 import { getFleetSummary } from "@/lib/data/transport";
 import type { TransportCardLabels } from "@/components/transport/transport-card";
 import type { TFunction } from "@/i18n/translate";
 import { cn } from "@/lib/utils";
+import { TrendArrow } from "@/components/ui/status";
 import { TRANSPORT_ENABLED } from "@/lib/features";
 
 // A distinct, premium colour per destination — icons only, no block behind.
@@ -18,7 +19,7 @@ export const NAV_COLOR: Record<string, string> = {
   "/progress": "text-[rgb(79,70,229)]",
   "/attendance": "text-[rgb(22,163,74)]",
   "/marks": "text-[rgb(219,39,119)]",
-  "/students": "text-[rgb(37,99,235)]",
+  "/students": "text-[#0F6CBD]",
   "/announcements": "text-[rgb(234,88,12)]",
   "/calendar": "text-[rgb(219,39,119)]",
   "/reports": "text-[rgb(124,58,237)]",
@@ -40,17 +41,49 @@ export async function DashHeader({ name, subtitleKey = "dashboard.overview", emo
 }
 
 export function StatCard({ label, value, sub, tone = "ink", href }: { label: string; value: React.ReactNode; sub?: string; tone?: "ink" | "up" | "down" | "watch" | "gold"; href?: string }) {
-  const toneCls = { ink: "text-ink-900", up: "text-up", down: "text-down", watch: "text-watch", gold: "text-[rgb(37,99,235)]" }[tone];
+  // The figure is always black; good / watch / bad shows only as a coloured arrow.
+  const arrow = tone === "up" || tone === "down" || tone === "watch" ? tone : null;
   const inner = (
     <>
-      <div className="text-[12px] font-normal text-ink-900">{label}</div>
-      <div className={cn("mt-1 text-[30px] font-normal leading-none tabular", toneCls)}>{value}</div>
-      {sub && <div className="mt-1.5 text-[12px] text-ink-900">{sub}</div>}
+      <div className="text-[13px] font-semibold text-ink-700">{label}</div>
+      <div className="mt-2 flex items-center gap-1.5 text-[30px] font-semibold leading-none tabular text-ink-900">
+        {value}
+        {arrow && <TrendArrow tone={arrow} size={20} />}
+      </div>
+      {sub && <div className="mt-1.5 text-[13px] text-ink-500">{sub}</div>}
     </>
   );
   const base = "block rounded-md border border-hair bg-surface p-4";
-  if (href) return <Link prefetch={false} href={href} className={cn(base, "transition-colors hover:border-black")}>{inner}</Link>;
+  if (href) return <Link prefetch={false} href={href} className={cn(base, "transition-colors hover:border-[#0F6CBD]")}>{inner}</Link>;
   return <div className={base}>{inner}</div>;
+}
+
+// The two or three things this person most often comes to do, as big buttons
+// right under the greeting. The first is the main one and is filled in.
+export type DashAction = { href: string; label: string; icon: IconComponent };
+export function ActionButtons({ actions }: { actions: DashAction[] }) {
+  if (!actions.length) return null;
+  return (
+    <div className="mb-6 flex flex-wrap gap-3">
+      {actions.map((a, i) => {
+        const Icon = a.icon;
+        return (
+          <Link prefetch={false} key={a.href + a.label} href={a.href}
+            className={cn(
+              "inline-flex h-12 items-center gap-2.5 rounded-md px-5 text-[15px] font-semibold transition-colors",
+              // Main action: soft school-blue tint with a blue edge; the others
+              // plain white. Light fills let the coloured icons sit naturally.
+              i === 0
+                ? "border border-[#9FD0F3] bg-[#EAF4FD] text-[#174C7A] hover:bg-[#DCEDFB]"
+                : "border border-hair bg-surface text-ink-900 hover:border-[#9FD0F3] hover:bg-[#F5FAFE]",
+            )}>
+            <Icon size={22} />
+            {a.label}
+          </Link>
+        );
+      })}
+    </div>
+  );
 }
 
 // Reusable async panels (RLS-scoped) used across every role dashboard.
@@ -90,7 +123,7 @@ export async function EventsPanel() {
           <ul className="divide-y divide-hair">
             {rows.map((e) => (
               <li key={e.id} className="flex items-center gap-3 py-3">
-                <CalendarIcon size={18} className="shrink-0 text-ink-900" />
+                <CalendarIcon size={26} className="shrink-0" />
                 <div className="min-w-0 flex-1">
                   <div className="text-[14px] font-semibold text-ink-900">{e.title}</div>
                   <div className="text-[12px] capitalize text-ink-900">{e.event_type}</div>
@@ -100,7 +133,7 @@ export async function EventsPanel() {
             ))}
           </ul>
         ) : (
-          <EmptyState icon={CalendarIcon} title={t("common.noData")} />
+          <EmptyState title={t("common.noData")} />
         )}
       </CardBody>
     </Card>
@@ -111,8 +144,8 @@ export async function QuickLinks({ role }: { role: NavRole }) {
   const { t } = await getT();
   const links = navFor(role).filter((l) => l.href !== "/");
   return (
-    <div className="rounded-md border border-hair bg-surface p-4">
-      <div className="mb-2.5 text-[13px] font-semibold text-ink-900">{t("dashboard.quickLinks")}</div>
+    <div>
+      <div className="mb-3 text-[16px] font-semibold text-ink-900">{t("dashboard.quickLinks")}</div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {links.map((l) => {
           const Icon = l.icon;
@@ -120,7 +153,7 @@ export async function QuickLinks({ role }: { role: NavRole }) {
             <Link prefetch={false}
               key={l.href + l.labelKey}
               href={l.href}
-              className="group flex items-center gap-3 rounded-md border border-hair bg-surface p-3.5 transition-colors hover:border-[rgb(37,99,235)]/40 hover:bg-[rgb(37,99,235)]/[0.05]"
+              className="group flex items-center gap-3 rounded-md border border-hair bg-surface p-3.5 transition-colors hover:border-[#0F6CBD]/40 hover:bg-[#0F6CBD]/[0.05]"
             >
               <Icon size={32} />
               <span className="text-[15px] font-medium text-ink-900">{t(l.labelKey)}</span>

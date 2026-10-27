@@ -20,10 +20,13 @@ export const C = {
   watch: "#DB7A1C",
   down: "#C0442E",
 };
-// Bright, jewel-toned multi-series palette — vivid and premium.
-export const SERIES = ["#2563eb", "#059669", "#7c3aed", "#db2777", "#d97706", "#0891b2", "#dc2626"];
+// Multi-series palette — Microsoft Power BI's default report colours: strong,
+// clearly distinct from one another, and readable on white.
+export const SERIES = ["#118DFF", "#12239E", "#E66C37", "#6B007B", "#E044A7", "#744EC2", "#D9B300", "#D64550"];
+// Single-series bars and the exam-history line.
+export const PRIMARY = "#118DFF";
 
-const axis = { stroke: "#111827", tick: { fill: "#111827", fontSize: 12, fontWeight: 500 }, tickLine: false };
+const axis = { stroke: "#BDBDBD", tick: { fill: "#242424", fontSize: 12, fontWeight: 600 }, tickLine: false };
 
 function TooltipBox({ active, payload, label }: { active?: boolean; payload?: Array<{ name?: string; value?: number; color?: string }>; label?: string }) {
   if (!active || !payload?.length) return null;
@@ -100,12 +103,12 @@ export function KVLineChart({
           <CartesianGrid stroke={C.hair} strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey={xKey} {...axis} interval={0} height={30} tickMargin={6} />
           <YAxis domain={yDomain} {...axis} width={40} />
-          <Tooltip content={<TooltipBox />} cursor={{ stroke: "#2563eb", strokeOpacity: 0.3 }} />
+          <Tooltip content={<TooltipBox />} cursor={{ stroke: PRIMARY, strokeOpacity: 0.3 }} />
           {lines.map((l, i) =>
             area ? (
               <Area key={l.key} type="monotone" dataKey={l.key} name={l.name}
                 stroke={l.color ?? SERIES[i % SERIES.length]} fill={l.color ?? SERIES[i % SERIES.length]}
-                fillOpacity={0.12} strokeWidth={2.25} dot={{ r: 2.5 }} activeDot={{ r: 4 }} />
+                fillOpacity={0.18} strokeWidth={2.75} dot={{ r: 2.5 }} activeDot={{ r: 4 }} />
             ) : (
               <Line key={l.key} type="monotone" dataKey={l.key} name={l.name}
                 stroke={l.color ?? SERIES[i % SERIES.length]} strokeWidth={2.25}
@@ -136,7 +139,7 @@ export function KVGroupedBarChart({
           <CartesianGrid stroke={C.hair} strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey={xKey} {...axis} interval={0} height={30} tickMargin={6} />
           <YAxis domain={yDomain} {...axis} width={40} />
-          <Tooltip content={<TooltipBox />} cursor={{ fill: "#2563eb", fillOpacity: 0.06 }} />
+          <Tooltip content={<TooltipBox />} cursor={{ fill: PRIMARY, fillOpacity: 0.08 }} />
           {bars.map((b, i) => (
             <Bar key={b.key} dataKey={b.key} name={b.name} fill={b.color ?? SERIES[i % SERIES.length]} radius={[3, 3, 0, 0]} maxBarSize={16} />
           ))}
@@ -158,8 +161,9 @@ export function KVBarChart({
   showValues?: boolean;
   maxDomain?: number;
 }) {
-  const BAR = "#2563eb"; // clear royal-blue bars (was gold/mud)
-  const bandColor: Record<string, string> = { A1: C.up, A2: C.up, B1: "#65a30d", B2: "#65a30d", C1: C.watch, C2: C.watch, D: C.down, E: C.down };
+  const BAR = PRIMARY;
+  // Grades: green good → yellow middling → red weak, in Power BI's status colours.
+  const bandColor: Record<string, string> = { A1: "#1AAB40", A2: "#1AAB40", B1: "#7BC043", B2: "#7BC043", C1: "#D9B300", C2: "#D9B300", D: "#D64550", E: "#D64550" };
   // Vertical bars with many categories scroll horizontally instead of squashing;
   // horizontal bars grow taller so each row stays readable.
   const minWidth = !horizontal && data.length > 8 ? data.length * 52 : undefined;

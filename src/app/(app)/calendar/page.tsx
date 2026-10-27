@@ -33,7 +33,7 @@ export default async function CalendarPage() {
 
   return (
     <div>
-      <PageHeader title={t("announce.events")} description={t("nav.calendar")} />
+      <PageHeader title={t("announce.events")} />
       <MonthCalendar items={items} defaultMonth={defaultMonth} />
     </div>
   );

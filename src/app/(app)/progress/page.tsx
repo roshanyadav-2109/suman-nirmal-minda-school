@@ -1,3 +1,4 @@
+import { ArrowRightIcon } from "@/components/icons";
 import Link from "next/link";
 import { getSession, getCurrentYear } from "@/lib/session";
 import { getT } from "@/i18n/server";
@@ -9,7 +10,6 @@ import { SessionChooser } from "@/components/progress/session-chooser";
 import { SectionAnalyticsView } from "@/components/progress/section-analytics-view";
 import { ClassAnalyticsView } from "@/components/progress/class-analytics-view";
 import { ExamAnalyticsView } from "@/components/progress/exam-analytics-view";
-import { ProgressIcon, ArrowRightIcon } from "@/components/icons";
 import { getStaffScope, getSectionStudents } from "@/lib/data/scope";
 import { getSectionAnalytics, getClassAnalytics, getExamAnalytics, getScopeExams, getStudentProgress, getStudentStanding, getMyChildren } from "@/lib/data/analytics";
 
@@ -32,7 +32,7 @@ export default async function ProgressPage({ searchParams }: { searchParams: SP 
       children = await getMyChildren();
       studentId = num(sp.child) ?? children[0]?.id ?? null;
     }
-    if (!studentId) return <EmptyState icon={ProgressIcon} title={t("progress.noMarks")} />;
+    if (!studentId) return <EmptyState art="no-marks" title={t("progress.noMarks")} />;
     const curYear = await getCurrentYear();
     // Session chooser: "lifetime" (full history), or a specific academic year.
     const sessionParam = typeof sp.session === "string" ? sp.session : undefined;
@@ -56,7 +56,7 @@ export default async function ProgressPage({ searchParams }: { searchParams: SP 
                 return (
                   <Link prefetch={false} key={c.id} href={`/progress?child=${c.id}`}
                     className={cn("rounded-sm border px-3 py-1.5 text-[13px] font-medium transition-colors",
-                      active ? "border-black bg-black text-white" : "border-hair bg-surface text-ink-900 hover:bg-panel")}>
+                      active ? "border-[#0F6CBD] bg-[#EBF3FC] text-[#0F6CBD] font-semibold" : "border-hair bg-surface text-ink-700 hover:border-[#B4D6FA] hover:bg-[#F5F9FE]")}>
                     {c.full_name}
                   </Link>
                 );
@@ -74,7 +74,7 @@ export default async function ProgressPage({ searchParams }: { searchParams: SP 
     return (
       <div>
         <PageHeader title={t("progress.title")} />
-        <EmptyState icon={ProgressIcon} title={t("progress.noMarks")} hint={t("x.progNoSections")} />
+        <EmptyState art="no-sections" title={t("progress.noMarks")} hint={t("x.progNoSections")} />
       </div>
     );
   }
@@ -138,7 +138,7 @@ export default async function ProgressPage({ searchParams }: { searchParams: SP 
         <PageHeader title={t("progress.title")}
           description={data.student ? `${data.student.full_name} · ${data.student.admission_no}` : undefined} />
         {filters}
-        <Link prefetch={false} href={`/progress?${backQs.toString()}`} className="mb-4 inline-flex items-center gap-1 text-[13px] font-medium text-[rgb(37,99,235)] hover:underline">
+        <Link prefetch={false} href={`/progress?${backQs.toString()}`} className="mb-4 inline-flex items-center gap-1 text-[13px] font-medium text-[#0F6CBD] hover:underline">
           <ArrowRightIcon size={14} className="rotate-180" /> {backLabel}
         </Link>
         <StudentProgressView data={data} standing={standing} />
@@ -151,8 +151,7 @@ export default async function ProgressPage({ searchParams }: { searchParams: SP 
     const data = await getExamAnalytics(scopeSectionIds, subjectId, yearId, examName);
     return (
       <div>
-        <PageHeader title={t("progress.title")}
-          description={`${scope.isAdmin ? t("x.progSchoolScope") : t("x.progAllottedScope")}`} />
+        <PageHeader title={t("progress.title")} />
         {filters}
         <ExamAnalyticsView data={data} examName={examName} subjectName={subjectName} />
       </div>
@@ -165,8 +164,7 @@ export default async function ProgressPage({ searchParams }: { searchParams: SP 
     const data = await getClassAnalytics(cls.id, sectionIds, yearId, subjectId);
     return (
       <div>
-        <PageHeader title={t("progress.title")}
-          description={`${sectionIds.length} ${t("common.section").toLowerCase()}(s)`} />
+        <PageHeader title={t("progress.title")} />
         {filters}
         <ClassAnalyticsView data={data} subjectName={subjectName} />
       </div>
@@ -177,8 +175,7 @@ export default async function ProgressPage({ searchParams }: { searchParams: SP 
 
   return (
     <div>
-      <PageHeader title={t("progress.title")}
-        description={`${scope.isAdmin ? t("x.progSchoolScope") : t("x.progAllottedScope")} · ${t("x.scopeSections", { n: scope.sections.length })}`} />
+      <PageHeader title={t("progress.title")} />
       {filters}
       <SectionAnalyticsView data={analytics} roster={scopeRoster} subjectName={subjectName} />
     </div>

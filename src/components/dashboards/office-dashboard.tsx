@@ -2,8 +2,8 @@ import Link from "next/link";
 import { getCurrentYear, type Session } from "@/lib/session";
 import { getT } from "@/i18n/server";
 import { getOfficeStats } from "@/lib/data/dashboard";
-import { StatCard, DashHeader, AnnouncementsPanel, EventsPanel, QuickLinks, FleetStrip } from "@/components/dashboards/parts";
-import { MarksIcon } from "@/components/icons";
+import { StatCard, DashHeader, AnnouncementsPanel, EventsPanel, QuickLinks, FleetStrip, ActionButtons } from "@/components/dashboards/parts";
+import { MarksIcon, AnnounceIcon, AllotmentIcon } from "@/components/icons";
 
 // Administration overview for the office.
 export async function OfficeDashboard({ session }: { session: Session }) {
@@ -14,6 +14,11 @@ export async function OfficeDashboard({ session }: { session: Session }) {
   return (
     <div>
       <DashHeader name={session.fullName} />
+      <ActionButtons actions={[
+        { href: "/marks", label: s && s.draft > 0 ? t("dashboard.ctaShareMarks") : t("dashboard.ctaEnterMarks"), icon: MarksIcon },
+        { href: "/announcements", label: t("dashboard.ctaPostNotice"), icon: AnnounceIcon },
+        { href: "/allotments", label: t("dashboard.ctaAssignedTeachers"), icon: AllotmentIcon },
+      ]} />
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard label={t("common.students")} value={s?.students ?? "—"} tone="gold" />
         <StatCard label={t("roles.staff")} value={s?.staff ?? "—"} />
@@ -22,9 +27,9 @@ export async function OfficeDashboard({ session }: { session: Session }) {
       </div>
 
       {s && s.draft > 0 && (
-        <Link prefetch={false} href="/marks" className="mb-6 flex items-center gap-3 rounded-md border border-black bg-panel px-4 py-3 transition-colors hover:bg-[rgb(37,99,235)]/[0.05]">
+        <Link prefetch={false} href="/marks" className="mb-6 flex items-center gap-3 rounded-md border border-[#0F6CBD] bg-panel px-4 py-3 transition-colors hover:bg-[#0F6CBD]/[0.05]">
           <MarksIcon size={20} className="text-ink-900" />
-          <div className="text-[14px] text-ink-900"><span className="font-semibold">{s.draft}</span> {t("marks.draft").toLowerCase()} — <span className="font-semibold text-[rgb(37,99,235)] underline">{t("marks.release").toLowerCase()}</span></div>
+          <div className="text-[14px] text-ink-900"><span className="font-semibold">{s.draft}</span> {t("marks.draft").toLowerCase()} — <span className="font-semibold text-[#0F6CBD] underline">{t("marks.release").toLowerCase()}</span></div>
         </Link>
       )}
 

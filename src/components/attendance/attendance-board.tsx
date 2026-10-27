@@ -1,4 +1,5 @@
 "use client";
+import { TrendArrow } from "@/components/ui/status";
 import { useState, useTransition } from "react";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -66,7 +67,7 @@ export function AttendanceBoard({
               <Button size="sm" variant="subtle" disabled={holiday} onClick={() => setAll("absent")}>{t("attendance.markAllAbsent")}</Button>
               <button type="button" onClick={() => setHoliday((v) => !v)} aria-pressed={holiday}
                 className={cn("h-8 rounded-sm border px-3 text-[13px] font-medium transition-colors",
-                  holiday ? "border-black bg-black text-white" : "border-hair bg-panel text-ink-900 hover:bg-[rgb(37,99,235)]/[0.05]")}>
+                  holiday ? "border-[#0F6CBD] bg-[#EBF3FC] text-[#0F6CBD] font-semibold" : "border-hair bg-surface text-ink-700 hover:border-[#B4D6FA] hover:bg-[#F5F9FE]")}>
                 {t("attendance.holiday")}
               </button>
             </div>
@@ -90,7 +91,7 @@ export function AttendanceBoard({
                         aria-pressed={!holiday && marks[r.id] === s.key}
                         className={cn("h-8 w-9 rounded-sm text-[12px] font-bold transition-colors",
                           holiday ? "cursor-not-allowed bg-panel text-ink-900 opacity-40"
-                            : marks[r.id] === s.key ? s.cls : "bg-panel text-ink-900 hover:bg-[rgb(37,99,235)]/[0.05]")}>
+                            : marks[r.id] === s.key ? s.cls : "bg-panel text-ink-900 hover:bg-[#0F6CBD]/[0.05]")}>
                         {s.short}
                       </button>
                     ))}
@@ -118,9 +119,9 @@ export function AttendanceBoard({
           {below.length ? (
             <ul className="space-y-1.5">
               {below.map(({ r, s }) => (
-                <li key={r.id} className="flex items-center justify-between rounded-sm bg-down-soft px-2.5 py-1.5">
+                <li key={r.id} className="flex items-center justify-between rounded-sm bg-panel px-2.5 py-1.5">
                   <span className="truncate text-[13px] text-ink-900">{r.name}</span>
-                  <span className="text-[13px] font-semibold tabular text-down">{s!.pct}%</span>
+                  <span className="inline-flex items-center gap-1 text-[13px] font-semibold tabular text-ink-900"><TrendArrow tone="down" size={12} />{s!.pct}%</span>
                 </li>
               ))}
             </ul>

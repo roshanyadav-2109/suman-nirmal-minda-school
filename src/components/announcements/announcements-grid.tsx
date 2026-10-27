@@ -14,11 +14,11 @@ export function AnnouncementsGrid({ items }: { items: AnnItem[] }) {
           <button
             key={a.id}
             onClick={() => setSel(a)}
-            className="flex flex-col rounded-sm border border-hair bg-surface p-5 text-left transition-colors hover:border-[rgb(37,99,235)]/40"
+            className="flex flex-col rounded-sm border border-hair bg-surface p-5 text-left transition-colors hover:border-[#0F6CBD]/40"
           >
             <div className="flex items-center gap-2.5">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-black text-white">
-                <AnnounceIcon size={17} />
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center">
+                <AnnounceIcon size={30} />
               </span>
               <div className="min-w-0">
                 <div className="text-[14px] font-bold text-ink-900">{a.poster}</div>
@@ -34,7 +34,7 @@ export function AnnouncementsGrid({ items }: { items: AnnItem[] }) {
                   <div className="pointer-events-none absolute inset-x-0 bottom-0 h-7 bg-gradient-to-t from-surface to-transparent" />
                 </div>
               </div>
-              <span aria-hidden className="w-[3px] shrink-0 self-stretch rounded-full bg-[rgb(37,99,235)]/25" />
+              <span aria-hidden className="w-[3px] shrink-0 self-stretch rounded-full bg-[#0F6CBD]/25" />
             </div>
 
             <div className="mt-4 border-t border-dashed border-hair" />
@@ -55,8 +55,8 @@ export function AnnouncementsGrid({ items }: { items: AnnItem[] }) {
               <CloseIcon size={20} />
             </button>
             <div className="flex items-center gap-2.5 pr-8">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-black text-white">
-                <AnnounceIcon size={18} />
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center">
+                <AnnounceIcon size={32} />
               </span>
               <div>
                 <div className="text-[14px] font-bold text-ink-900">{sel.poster}</div>

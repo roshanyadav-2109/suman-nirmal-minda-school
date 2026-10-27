@@ -4,7 +4,6 @@ import { getT } from "@/i18n/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty";
 import { Card, CardBody } from "@/components/ui/card";
-import { PromotionIcon } from "@/components/icons";
 import { PromotionConsole } from "@/components/promotion/promotion-console";
 import { PromotionSummary } from "@/components/promotion/promotion-summary";
 import { NewSessionForm } from "@/components/promotion/new-session-form";
@@ -24,17 +23,17 @@ export default async function PromotionPage({ searchParams }: { searchParams: SP
   const canSummary = staffRole === "principal" || session?.isClassTeacher;
 
   if (!isOffice && !canSummary) {
-    return (<div><PageHeader title={t("nav.promotion")} /><EmptyState icon={PromotionIcon} title={t("common.noAccess")} /></div>);
+    return (<div><PageHeader title={t("nav.promotion")} /><EmptyState art="no-access" title={t("common.noAccess")} /></div>);
   }
 
   const { from, to } = await getPromotionYears();
   if (!from) {
-    return (<div><PageHeader title={t("nav.promotion")} /><EmptyState icon={PromotionIcon} title={t("x.noNextYear")} hint={t("x.noNextYearHint")} /></div>);
+    return (<div><PageHeader title={t("nav.promotion")} /><EmptyState art="no-next-year" title={t("x.noNextYear")} hint={t("x.noNextYearHint")} /></div>);
   }
   // No next session yet → office creates one here before promoting.
   if (!to) {
     if (!isOffice) {
-      return (<div><PageHeader title={t("nav.promotion")} /><EmptyState icon={PromotionIcon} title={t("x.noNextYear")} hint={t("x.noNextYearHint")} /></div>);
+      return (<div><PageHeader title={t("nav.promotion")} /><EmptyState art="no-next-year" title={t("x.noNextYear")} hint={t("x.noNextYearHint")} /></div>);
     }
     const base = parseInt(from.name.slice(0, 4), 10);
     const y = (Number.isFinite(base) ? base : new Date().getUTCFullYear()) + 1;
@@ -105,7 +104,7 @@ export default async function PromotionPage({ searchParams }: { searchParams: SP
         </CardBody>
       </Card>
 
-      {console_ ?? <EmptyState icon={PromotionIcon} title={t("x.pickClassTitle")} hint={t("x.pickClassHint")} />}
+      {console_ ?? <EmptyState art="pick-student" title={t("x.pickClassTitle")} hint={t("x.pickClassHint")} />}
     </div>
   );
 }

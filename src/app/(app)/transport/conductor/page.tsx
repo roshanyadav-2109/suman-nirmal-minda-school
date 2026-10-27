@@ -3,7 +3,6 @@ import { getSession } from "@/lib/session";
 import { getT } from "@/i18n/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty";
-import { BusIcon } from "@/components/icons";
 import { ConductorConsole } from "@/components/transport/conductor-console";
 import { getCrewContext } from "@/lib/data/transport";
 
@@ -20,7 +19,7 @@ export default async function ConductorPage() {
     return (
       <div>
         <PageHeader title={t("transport.console")} />
-        <EmptyState icon={BusIcon} title={t("transport.noBusAssigned")} hint={t("transport.noBusAssignedHint")} />
+        <EmptyState art="no-bus-assigned" title={t("transport.noBusAssigned")} hint={t("transport.noBusAssignedHint")} />
       </div>
     );
   }

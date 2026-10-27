@@ -41,22 +41,22 @@ export function StaffReportBar({
 
   const TypeChip = ({ v, label }: { v: ReportType; label: string }) => (
     <button onClick={() => push({ type: v })} aria-pressed={type === v}
-      className={cn("h-10 rounded-sm px-3 text-[13px] font-medium transition-colors",
-        type === v ? "bg-black text-white" : "bg-panel text-ink-900 hover:bg-[rgb(37,99,235)]/[0.05]")}>
+      className={cn("h-10 rounded-sm border px-3.5 text-[13px] font-medium transition-colors",
+        type === v ? "border-[#0F6CBD] bg-[#EBF3FC] text-[#0F6CBD] font-semibold" : "border-hair bg-surface text-ink-700 hover:border-[#B4D6FA] hover:bg-[#F5F9FE]")}>
       {label}
     </button>
   );
   const ViewChip = ({ v, label }: { v: View; label: string }) => (
     <button onClick={() => push({ view: v }, v === "overview" ? ["student"] : [])} aria-pressed={view === v}
-      className={cn("h-10 rounded-sm px-3 text-[13px] font-medium transition-colors",
-        view === v ? "bg-black text-white" : "bg-panel text-ink-900 hover:bg-[rgb(37,99,235)]/[0.05]")}>
+      className={cn("h-10 rounded-sm border px-3.5 text-[13px] font-medium transition-colors",
+        view === v ? "border-[#0F6CBD] bg-[#EBF3FC] text-[#0F6CBD] font-semibold" : "border-hair bg-surface text-ink-700 hover:border-[#B4D6FA] hover:bg-[#F5F9FE]")}>
       {label}
     </button>
   );
   const SortChip = ({ v, label }: { v: "roll" | "marks"; label: string }) => (
     <button onClick={() => push({ sort: v })} aria-pressed={sort === v}
-      className={cn("h-10 rounded-sm px-3 text-[13px] font-medium transition-colors",
-        sort === v ? "bg-black text-white" : "bg-panel text-ink-900 hover:bg-[rgb(37,99,235)]/[0.05]")}>
+      className={cn("h-10 rounded-sm border px-3.5 text-[13px] font-medium transition-colors",
+        sort === v ? "border-[#0F6CBD] bg-[#EBF3FC] text-[#0F6CBD] font-semibold" : "border-hair bg-surface text-ink-700 hover:border-[#B4D6FA] hover:bg-[#F5F9FE]")}>
       {label}
     </button>
   );

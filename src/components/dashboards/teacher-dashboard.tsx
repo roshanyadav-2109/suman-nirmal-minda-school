@@ -2,8 +2,8 @@ import Link from "next/link";
 import { type Session } from "@/lib/session";
 import { getT } from "@/i18n/server";
 import { getStaffScope } from "@/lib/data/scope";
-import { StudentsIcon, ProgressIcon, AttendanceIcon, MarksIcon } from "@/components/icons";
-import { DashHeader, AnnouncementsPanel, EventsPanel, QuickLinks, NAV_COLOR } from "@/components/dashboards/parts";
+import { StudentsIcon, ProgressIcon, AttendanceIcon, MarksIcon, AnnounceIcon } from "@/components/icons";
+import { DashHeader, AnnouncementsPanel, EventsPanel, QuickLinks, NAV_COLOR, ActionButtons } from "@/components/dashboards/parts";
 import type { NavRole } from "@/lib/nav";
 
 // One unified teacher portal: own class (full access) + subject-only sections.
@@ -24,6 +24,15 @@ export async function TeacherDashboard({ session }: { session: Session }) {
   return (
     <div>
       <DashHeader name={session.fullName} />
+      <ActionButtons actions={myClass ? [
+        { href: `/attendance?section=${myClass.id}`, label: t("dashboard.ctaMarkAttendance"), icon: AttendanceIcon },
+        { href: `/marks?section=${myClass.id}`, label: t("dashboard.ctaEnterMarks"), icon: MarksIcon },
+        { href: `/progress?section=${myClass.id}&year=${yr}`, label: t("dashboard.ctaMyClass"), icon: ProgressIcon },
+      ] : [
+        { href: "/marks", label: t("dashboard.ctaEnterMarks"), icon: MarksIcon },
+        { href: "/progress", label: t("nav.progress"), icon: ProgressIcon },
+        { href: "/announcements", label: t("dashboard.ctaPostNotice"), icon: AnnounceIcon },
+      ]} />
 
       {myClass && (
         <section className="mb-4 rounded-md border border-hair bg-surface p-4">
@@ -38,8 +47,8 @@ export async function TeacherDashboard({ session }: { session: Session }) {
               {classActions.map((l) => {
                 const Icon = l.icon;
                 return (
-                  <Link prefetch={false} key={l.label} href={l.href} className="flex items-center gap-2 rounded-md border border-hair bg-surface px-3 py-3 text-[13px] font-medium text-ink-900 transition-colors hover:border-[rgb(37,99,235)]/40">
-                    <Icon size={18} className={NAV_COLOR[l.path] ?? "text-[rgb(37,99,235)]"} />{l.label}
+                  <Link prefetch={false} key={l.label} href={l.href} className="flex items-center gap-2 rounded-md border border-hair bg-surface px-3 py-3 text-[13px] font-medium text-ink-900 transition-colors hover:border-[#0F6CBD]/40">
+                    <Icon size={18} className={NAV_COLOR[l.path] ?? "text-[#0F6CBD]"} />{l.label}
                   </Link>
                 );
               })}
@@ -54,7 +63,7 @@ export async function TeacherDashboard({ session }: { session: Session }) {
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {subjectSections.map((m) => (
               <Link prefetch={false} key={m.id} href={`/progress?section=${m.id}&year=${yr}${m.subjects[0] ? `&subject=${m.subjects[0].id}` : ""}`}
-                className="group rounded-md border border-hair bg-surface p-3.5 transition-colors hover:border-[rgb(37,99,235)]/40 hover:bg-[rgb(37,99,235)]/[0.05]">
+                className="group rounded-md border border-hair bg-surface p-3.5 transition-colors hover:border-[#0F6CBD]/40 hover:bg-[#0F6CBD]/[0.05]">
                 <div className="flex items-center justify-between">
                   <span className="text-[15px] font-semibold text-ink-900">{m.label}</span>
                   <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-900">{t("dashboard.subjectOnly")}</span>

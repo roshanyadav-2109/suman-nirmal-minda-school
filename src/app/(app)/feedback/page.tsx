@@ -6,7 +6,6 @@ import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty";
 import { Card, CardBody } from "@/components/ui/card";
 import { StatusPill, type Status } from "@/components/ui/status";
-import { FeedbackIcon } from "@/components/icons";
 import { FeedbackForm, RespondForm } from "@/components/feedback/feedback-ui";
 import { getMyChildren } from "@/lib/data/analytics";
 
@@ -57,7 +56,7 @@ export default async function FeedbackPage() {
               );
             })
           ) : (
-            <EmptyState icon={FeedbackIcon} title={t("common.noData")} hint={isGuardian ? t("feedback.send") : undefined} />
+            <EmptyState title={t("common.noData")} hint={isGuardian ? t("feedback.send") : undefined} />
           )}
         </div>
         {isGuardian && children.length > 0 && <FeedbackForm children={children} />}

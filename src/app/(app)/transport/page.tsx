@@ -4,7 +4,6 @@ import { getT } from "@/i18n/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty";
 import { Card, CardBody } from "@/components/ui/card";
-import { BusIcon } from "@/components/icons";
 import { RideTracker } from "@/components/transport/ride-tracker";
 import { FleetBoard } from "@/components/transport/fleet-board";
 import { getMyRides, getFleet, getFleetSummary, getCrewContext } from "@/lib/data/transport";
@@ -59,7 +58,7 @@ export default async function TransportPage({ searchParams }: { searchParams: SP
             </CardBody>
           </Card>
         ) : (
-          <EmptyState icon={BusIcon} title={t("transport.noBusAssigned")} hint={t("transport.noBusAssignedHint")} />
+          <EmptyState art="no-bus-assigned" title={t("transport.noBusAssigned")} hint={t("transport.noBusAssignedHint")} />
         )}
       </div>
     );
@@ -76,7 +75,7 @@ export default async function TransportPage({ searchParams }: { searchParams: SP
       <div>
         <PageHeader title={t("transport.title")} description={t("transport.familyIntro")} />
         {!ride ? (
-          <EmptyState icon={BusIcon} title={t("transport.noTransport")} hint={t("transport.noTransportHint")} />
+          <EmptyState art="no-bus" title={t("transport.noTransport")} hint={t("transport.noTransportHint")} />
         ) : (
           <>
             {rides.length > 1 && (
@@ -85,7 +84,7 @@ export default async function TransportPage({ searchParams }: { searchParams: SP
                   <Link prefetch={false}
                     key={r.studentId}
                     href={`/transport?child=${r.studentId}`}
-                    className={`rounded-sm border px-3 py-1.5 text-[13px] font-medium ${r.studentId === ride.studentId ? "border-gold-500 bg-gold-100 text-ink-900" : "border-hair bg-surface text-ink-500 hover:bg-panel"}`}
+                    className={`rounded-sm border px-3 py-1.5 text-[13px] font-medium ${r.studentId === ride.studentId ? "border-[#0F6CBD] bg-[#EBF3FC] text-[#0F6CBD] font-semibold" : "border-hair bg-surface text-ink-700 hover:border-[#B4D6FA] hover:bg-[#F5F9FE]"}`}
                   >
                     {r.studentName}
                   </Link>
@@ -111,7 +110,7 @@ export default async function TransportPage({ searchParams }: { searchParams: SP
     return (
       <div>
         <PageHeader title={t("transport.title")} />
-        <EmptyState icon={BusIcon} title={t("transport.staffNoLive")} hint={t("transport.staffNoLiveHint")} />
+        <EmptyState art="no-access" title={t("transport.staffNoLive")} hint={t("transport.staffNoLiveHint")} />
       </div>
     );
   }
@@ -133,7 +132,7 @@ export default async function TransportPage({ searchParams }: { searchParams: SP
         ) : undefined}
       />
       {rows.length === 0 ? (
-        <EmptyState icon={BusIcon} title={t("transport.noBuses")} />
+        <EmptyState art="no-bus" title={t("transport.noBuses")} />
       ) : (
         <FleetBoard rows={rows} summary={summary} />
       )}

@@ -3,7 +3,6 @@ import { useMemo, useState } from "react";
 import { Select } from "@/components/ui/field";
 import { EmptyState } from "@/components/ui/empty";
 import { StatusPill } from "@/components/ui/status";
-import { AllotmentIcon } from "@/components/icons";
 import { useT } from "@/i18n/provider";
 
 export type AllotRow = {
@@ -91,7 +90,7 @@ export function AllotmentsTable({ rows }: { rows: AllotRow[] }) {
             </tbody>
           </table>
         ) : (
-          <EmptyState icon={AllotmentIcon} title={t("common.noData")} />
+          <EmptyState title={t("common.noData")} />
         )}
       </div>
     </div>

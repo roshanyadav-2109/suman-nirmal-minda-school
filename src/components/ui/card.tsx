@@ -25,10 +25,13 @@ export function CardHeader({
   className?: string;
 }) {
   return (
-    <div className={cn("flex items-start justify-between gap-3 px-4 pt-4", className)}>
-      <div className="min-w-0">
-        {eyebrow && <div className="t-label mb-1">{eyebrow}</div>}
-        {title && <h3 className="t-h3 text-ink-900 truncate">{title}</h3>}
+    // A title strip across the top of the panel, like a register's header row.
+    <div className={cn("flex items-center justify-between gap-3 rounded-t-md border-b border-hair bg-[#fafafa] px-4 py-2.5", className)}>
+      <div className="flex min-w-0 items-baseline gap-2">
+        {/* The eyebrow names the panel ("Class comparison"); the title, when
+            there is one too, says what it shows ("Average") and sits after it. */}
+        <h3 className="truncate text-[14px] font-semibold text-ink-900">{eyebrow || title}</h3>
+        {title && eyebrow && <span className="truncate text-[13px] text-ink-500">{title}</span>}
       </div>
       {action}
     </div>

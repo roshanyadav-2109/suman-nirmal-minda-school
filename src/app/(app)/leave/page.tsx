@@ -6,7 +6,6 @@ import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { StatusPill, type Status } from "@/components/ui/status";
-import { LeaveIcon } from "@/components/icons";
 import { LeaveForm, LeaveDecision } from "@/components/leave/leave-ui";
 import { AbsenceList } from "@/components/leave/absence-ui";
 import { getMyChildren } from "@/lib/data/analytics";
@@ -66,7 +65,7 @@ export default async function LeavePage() {
                     );
                   })
                 ) : (
-                  <EmptyState icon={LeaveIcon} title={t("common.noData")} hint={isGuardian ? t("leave.apply") : undefined} />
+                  <EmptyState title={t("common.noData")} hint={isGuardian ? t("leave.apply") : undefined} />
                 )}
               </CardBody>
             </Card>

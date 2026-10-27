@@ -1,4 +1,5 @@
 "use client";
+import { TrendArrow } from "@/components/ui/status";
 import { useState } from "react";
 import { useT } from "@/i18n/provider";
 
@@ -18,7 +19,7 @@ export function SessionDetail({ sessions }: { sessions: Sessions }) {
           const active = s.yearId === sess.yearId;
           return (
             <button key={s.yearId} onClick={() => setYearId(s.yearId)}
-              className={`rounded-sm border px-3 py-1.5 text-[13px] font-medium transition-colors ${active ? "border-black bg-black text-white" : "border-hair bg-surface text-ink-900 hover:bg-panel"}`}>
+              className={`rounded-sm border px-3 py-1.5 text-[13px] font-medium transition-colors ${active ? "border-[#0F6CBD] bg-[#EBF3FC] text-[#0F6CBD] font-semibold" : "border-hair bg-surface text-ink-700 hover:border-[#B4D6FA] hover:bg-[#F5F9FE]"}`}>
               {s.yearName}
             </button>
           );
@@ -42,7 +43,7 @@ export function SessionDetail({ sessions }: { sessions: Sessions }) {
                   return (
                     <td key={a} className="px-1 py-1.5 text-center">
                       {c ? (
-                        <span className={`tabular ${c.percent < 33 ? "text-down" : "text-ink-900"}`}>{c.percent}</span>
+                        <span className="inline-flex items-center gap-0.5 tabular text-ink-900">{c.percent < 33 && <TrendArrow tone="down" size={11} />}{c.percent}</span>
                       ) : (
                         <span className="text-ink-900">—</span>
                       )}

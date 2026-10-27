@@ -4,8 +4,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty";
 import { DeltaBadge } from "@/components/ui/status";
-import { KVBarChart, KVLineChart } from "@/components/charts";
-import { ProgressIcon } from "@/components/icons";
+import { KVBarChart, KVLineChart, PRIMARY } from "@/components/charts";
 import { useI18n } from "@/i18n/provider";
 import { fmtPercent } from "@/i18n/format";
 import { supportReason } from "@/components/progress/insight";
@@ -31,7 +30,7 @@ export function SectionAnalyticsView({
   };
 
   if (!data.subjectAverages.length) {
-    return <EmptyState icon={ProgressIcon} title={t("progress.noMarks")} hint={t("progress.pickStudent")} />;
+    return <EmptyState art="no-marks" title={t("progress.noMarks")} hint={t("progress.pickStudent")} />;
   }
 
   const subjBars = data.subjectAverages.map((s) => ({ subject: s.subject, avg: s.avg }));
@@ -56,7 +55,7 @@ export function SectionAnalyticsView({
             <ol className="space-y-1.5">
               {[...data.subjectAverages].sort((a, b) => b.avg - a.avg).map((s, i) => (
                 <li key={s.subject} className="flex items-center gap-3 rounded-sm px-2 py-1.5 odd:bg-panel/50">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[rgb(37,99,235)]/[0.1] text-[12px] font-bold text-[rgb(37,99,235)] tabular">{i + 1}</span>
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#0F6CBD]/[0.1] text-[12px] font-bold text-[#0F6CBD] tabular">{i + 1}</span>
                   <span className="flex-1 truncate text-[14px] text-ink-900">{s.subject}</span>
                   <span className="text-[14px] font-semibold tabular text-ink-900">{fmtPercent(locale, s.avg, 1)}</span>
                 </li>
@@ -71,7 +70,7 @@ export function SectionAnalyticsView({
           <CardHeader title={t("progress.timeline")} />
           <CardBody className="pt-2">
             {data.termTrend.length > 1 ? (
-              <KVLineChart data={data.termTrend} xKey="term" lines={[{ key: "avg", name: t("progress.average"), color: "#E09E3E" }]} height={280} area />
+              <KVLineChart data={data.termTrend} xKey="term" lines={[{ key: "avg", name: t("progress.average"), color: PRIMARY }]} height={280} area />
             ) : (
               <div className="flex h-[280px] items-center justify-center text-[14px] text-ink-900">{t("common.noData")}</div>
             )}
@@ -110,8 +109,8 @@ export function SectionAnalyticsView({
             <ol className="space-y-1.5">
               {data.topPerformers.map((s, i) => (
                 <li key={i} className="odd:bg-panel/50">
-                  <Link prefetch={false} href={drillHref(s.student_id)} className="flex items-center gap-3 rounded-sm px-2 py-1.5 transition-colors hover:bg-[rgb(37,99,235)]/[0.06]">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[rgb(37,99,235)]/[0.1] text-[12px] font-bold text-[rgb(37,99,235)] tabular">{i + 1}</span>
+                  <Link prefetch={false} href={drillHref(s.student_id)} className="flex items-center gap-3 rounded-sm px-2 py-1.5 transition-colors hover:bg-[#0F6CBD]/[0.06]">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#0F6CBD]/[0.1] text-[12px] font-bold text-[#0F6CBD] tabular">{i + 1}</span>
                     <span className="flex-1 truncate text-[14px] text-ink-900">{s.student_name}</span>
                     <span className="text-[14px] font-semibold tabular text-ink-900">{fmtPercent(locale, Number(s.avg_percent), 1)}</span>
                   </Link>
@@ -129,7 +128,7 @@ export function SectionAnalyticsView({
               <ul className="space-y-2">
                 {data.needsSupport.slice(0, 6).map((s, i) => (
                   <li key={i}>
-                    <Link prefetch={false} href={drillHref(s.student_id)} className="block rounded-sm border border-hair bg-surface p-2.5 transition-colors hover:border-black">
+                    <Link prefetch={false} href={drillHref(s.student_id)} className="block rounded-sm border border-hair bg-surface p-2.5 transition-colors hover:border-[#0F6CBD]">
                       <div className="flex items-center justify-between">
                         <span className="text-[14px] font-semibold text-ink-900">{s.student_name}</span>
                         <span className="flex items-center gap-2">
@@ -155,7 +154,7 @@ export function SectionAnalyticsView({
         <CardBody className="pt-2">
           <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
             {roster.map((s) => (
-              <Link prefetch={false} key={s.id} href={drillHref(s.id)} className="group flex items-center gap-2.5 rounded-sm border border-hair bg-surface px-3 py-2 transition-colors hover:border-[rgb(37,99,235)]/40 hover:bg-[rgb(37,99,235)]/[0.05]">
+              <Link prefetch={false} key={s.id} href={drillHref(s.id)} className="group flex items-center gap-2.5 rounded-sm border border-hair bg-surface px-3 py-2 transition-colors hover:border-[#0F6CBD]/40 hover:bg-[#0F6CBD]/[0.05]">
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-panel text-[11px] font-semibold text-ink-900 tabular">{s.roll ?? "–"}</span>
                 <span className="flex-1 truncate text-[13px] font-medium text-ink-900">{s.name}</span>
               </Link>

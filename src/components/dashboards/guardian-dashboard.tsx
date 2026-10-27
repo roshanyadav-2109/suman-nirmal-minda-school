@@ -1,3 +1,4 @@
+import { ArrowRightIcon, ProgressIcon, LeaveIcon, ReportIcon } from "@/components/icons";
 import Link from "next/link";
 import { getCurrentYear, type Session } from "@/lib/session";
 import { getT } from "@/i18n/server";
@@ -6,8 +7,7 @@ import { getMyChildren } from "@/lib/data/analytics";
 import { getRideSummaries } from "@/lib/data/transport";
 import { Card, CardBody } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty";
-import { ProgressIcon, ArrowRightIcon } from "@/components/icons";
-import { DashHeader, AnnouncementsPanel, EventsPanel, QuickLinks, transportCardLabels } from "@/components/dashboards/parts";
+import { DashHeader, AnnouncementsPanel, EventsPanel, QuickLinks, transportCardLabels, ActionButtons } from "@/components/dashboards/parts";
 import { TransportCard } from "@/components/transport/transport-card";
 import { TRANSPORT_ENABLED } from "@/lib/features";
 
@@ -17,7 +17,7 @@ export async function GuardianDashboard({ session }: { session: Session }) {
   const year = await getCurrentYear();
   const children = await getMyChildren();
   if (!children.length || !year) {
-    return (<div><DashHeader name={session.fullName} emoji="🙏" /><EmptyState icon={ProgressIcon} title={t("common.noData")} /></div>);
+    return (<div><DashHeader name={session.fullName} emoji="🙏" /><EmptyState title={t("common.noData")} /></div>);
   }
   const supabase = await createClient();
   const childIds = children.map((c) => c.id);
@@ -35,6 +35,11 @@ export async function GuardianDashboard({ session }: { session: Session }) {
   return (
     <div>
       <DashHeader name={session.fullName} emoji="🙏" />
+      <ActionButtons actions={[
+        { href: "/progress", label: t("dashboard.ctaChildProgress"), icon: ProgressIcon },
+        { href: "/leave", label: t("dashboard.ctaApplyLeave"), icon: LeaveIcon },
+        { href: "/reports", label: t("dashboard.ctaReportCard"), icon: ReportIcon },
+      ]} />
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2">
         {children.map((child) => {
@@ -52,7 +57,7 @@ export async function GuardianDashboard({ session }: { session: Session }) {
                     </div>
                   </div>
                   <Link prefetch={false} href={`/progress?child=${child.id}`} aria-label={t("nav.childProgress")}
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-[rgb(37,99,235)] text-white transition-colors hover:bg-[rgb(29,78,216)]">
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-hair bg-surface transition-colors hover:border-[#B4D6FA] hover:bg-[#F5F9FE]">
                     <ArrowRightIcon size={16} />
                   </Link>
                 </div>

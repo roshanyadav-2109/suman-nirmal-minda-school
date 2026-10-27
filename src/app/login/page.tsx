@@ -203,7 +203,7 @@ export default function LoginPage() {
                 const Icon = ROLE_ICON[a.role] ?? RoleStudentIcon;
                 return (
                   <button key={a.email} onClick={() => signIn(a.email, DEMO_PASSWORD, a.email)} disabled={busy !== null}
-                    className="flex w-full flex-col items-center gap-2 rounded-sm border border-hair bg-surface px-3 py-3.5 transition-colors hover:border-black hover:bg-panel disabled:opacity-50 sm:w-[128px]">
+                    className="flex w-full flex-col items-center gap-2 rounded-sm border border-hair bg-surface px-3 py-3.5 transition-colors hover:border-[#0F6CBD] hover:bg-panel disabled:opacity-50 sm:w-[128px]">
                     <span className="flex h-11 w-11 items-center justify-center rounded-full bg-panel text-ink-900">
                       {busy === a.email
                         ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-hair border-t-ink-900" />

@@ -1,3 +1,4 @@
+import { TrendArrow } from "@/components/ui/status";
 import Link from "next/link";
 import { getSession, getCurrentYear } from "@/lib/session";
 import { getT } from "@/i18n/server";
@@ -10,7 +11,6 @@ import { AttendanceBoard } from "@/components/attendance/attendance-board";
 import { AttendanceOverview } from "@/components/attendance/attendance-overview";
 import { AttendanceAdminControls } from "@/components/attendance/attendance-admin-controls";
 import { DetailedSectionAttendance } from "@/components/attendance/detailed-section-attendance";
-import { AttendanceIcon } from "@/components/icons";
 import { getStaffScope, getSectionStudents } from "@/lib/data/scope";
 import { getMyChildren } from "@/lib/data/analytics";
 import { getDateAttendance, getSectionAttendanceSummary, getStudentAttendance, getLatestAttendanceDate, getLatestAttendanceDateAll, getAttendanceOverview, getSectionAttendanceRange } from "@/lib/data/attendance";
@@ -38,7 +38,7 @@ export default async function AttendancePage({ searchParams }: { searchParams: S
       children = await getMyChildren();
       studentId = num(sp.child) ?? children[0]?.id ?? null;
     }
-    if (!studentId || !year) return <EmptyState icon={AttendanceIcon} title={t("common.noData")} />;
+    if (!studentId || !year) return <EmptyState title={t("common.noData")} />;
     const att = await getStudentAttendance(studentId, year.id);
     return (
       <div>
@@ -46,7 +46,7 @@ export default async function AttendancePage({ searchParams }: { searchParams: S
         {session.role === "guardian" && children.length > 1 && (
           <div className="mb-5 flex flex-wrap gap-2">
             {children.map((c) => (
-              <Link prefetch={false} key={c.id} href={`/attendance?child=${c.id}`} className={`rounded-sm border px-3 py-1.5 text-[13px] font-medium ${c.id === studentId ? "border-gold-500 bg-gold-100 text-ink-900" : "border-hair bg-surface text-ink-500 hover:bg-panel"}`}>{c.full_name}</Link>
+              <Link prefetch={false} key={c.id} href={`/attendance?child=${c.id}`} className={`rounded-sm border px-3 py-1.5 text-[13px] font-medium ${c.id === studentId ? "border-[#0F6CBD] bg-[#EBF3FC] text-[#0F6CBD] font-semibold" : "border-hair bg-surface text-ink-700 hover:border-[#B4D6FA] hover:bg-[#F5F9FE]"}`}>{c.full_name}</Link>
             ))}
           </div>
         )}
@@ -54,7 +54,7 @@ export default async function AttendancePage({ searchParams }: { searchParams: S
           <Card>
             <CardBody>
               <div className="t-label">{t("attendance.percent")}</div>
-              <div className={`mt-1 text-[38px] font-bold leading-none tabular ${att.pct < 75 ? "text-down" : "text-ink-900"}`}>{att.pct}%</div>
+              <div className="mt-1 flex items-center gap-2 text-[38px] font-bold leading-none tabular text-ink-900">{att.pct}%<TrendArrow tone={att.pct < 75 ? "down" : "up"} size={24} /></div>
               <div className="mt-1 text-[13px] text-ink-500">{att.present} / {att.total} {t("attendance.present").toLowerCase()}</div>
               {att.pct < 75 && <div className="mt-3 text-[12px] font-medium text-down">{t("attendance.belowThreshold")}</div>}
             </CardBody>
@@ -85,7 +85,7 @@ export default async function AttendancePage({ searchParams }: { searchParams: S
   // section for per-student detail.
   if (session.isAdminScope) {
     const year = await getCurrentYear();
-    if (!year) return (<div><PageHeader title={t("attendance.title")} /><EmptyState icon={AttendanceIcon} title={t("common.noData")} /></div>);
+    if (!year) return (<div><PageHeader title={t("attendance.title")} /><EmptyState title={t("common.noData")} /></div>);
 
     const period: "day" | "month" = str(sp.period) === "month" ? "month" : "day";
     const date = str(sp.date) ?? (await getLatestAttendanceDateAll(year.id)) ?? new Date().toISOString().slice(0, 10);
@@ -131,7 +131,7 @@ export default async function AttendancePage({ searchParams }: { searchParams: S
 
     return (
       <div>
-        <PageHeader title={t("attendance.title")} description={t("x.attendanceOverview")} />
+        <PageHeader title={t("attendance.title")} />
         <AttendanceAdminControls period={period} date={date} month={month} />
         <AttendanceOverview overview={overview} label={label} hrefForSection={hrefForSection} selectedSection={selectedSection} />
       </div>
@@ -141,7 +141,7 @@ export default async function AttendancePage({ searchParams }: { searchParams: S
   // ---- Teachers: mark (own class) or read-only (subject sections) ----
   const scope = await getStaffScope();
   if (!scope.sections.length || !scope.currentYearId) {
-    return (<div><PageHeader title={t("attendance.title")} /><EmptyState icon={AttendanceIcon} title={t("common.noData")} hint={t("x.attNoSections")} /></div>);
+    return (<div><PageHeader title={t("attendance.title")} /><EmptyState art="no-sections" title={t("common.noData")} hint={t("x.attNoSections")} /></div>);
   }
   const yearId = num(sp.year) ?? scope.currentYearId;
 
@@ -167,7 +167,7 @@ export default async function AttendancePage({ searchParams }: { searchParams: S
   return (
     <div>
       <PageHeader eyebrow={`${section.class_name}-${section.name}`} title={t("attendance.title")}
-        description={canMark ? t("attendance.markToday") : t("x.attViewOnly")} />
+        description={canMark ? undefined : t("x.attViewOnly")} />
       <ScopeBar years={scope.years} sections={sections} yearId={yearId} sectionId={section.id} date={date} />
       <AttendanceBoard key={`${section.id}-${date}`} sectionId={section.id} yearId={yearId} date={date} roster={roster} initial={initial} summary={summary} readOnly={!canMark} />
     </div>

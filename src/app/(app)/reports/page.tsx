@@ -1,3 +1,4 @@
+import { TrendArrow } from "@/components/ui/status";
 import Link from "next/link";
 import { getSession, getCurrentYear } from "@/lib/session";
 import { getT } from "@/i18n/server";
@@ -9,7 +10,6 @@ import { ReportControls } from "@/components/report/report-controls";
 import { StaffReportBar } from "@/components/report/staff-report-bar";
 import { ReportCard } from "@/components/report/monthly-report-card";
 import { ScopeBar } from "@/components/scope-bar";
-import { ReportIcon } from "@/components/icons";
 import { getMyChildren } from "@/lib/data/analytics";
 import { getStaffScope, getSectionStudents } from "@/lib/data/scope";
 import {
@@ -38,7 +38,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: SP }
       children = await getMyChildren();
       studentId = num(sp.child) ?? children[0]?.id ?? null;
     }
-    if (!studentId) return <EmptyState icon={ReportIcon} title={t("common.noData")} />;
+    if (!studentId) return <EmptyState title={t("common.noData")} />;
     const { start, end } = monthBounds(month);
     const r = await getStudentReport(studentId, start, end);
     return (
@@ -47,7 +47,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: SP }
         {session.role === "guardian" && children.length > 1 && (
           <div className="no-print mb-3 flex flex-wrap gap-2">
             {children.map((c) => (
-              <Link prefetch={false} key={c.id} href={`/reports?child=${c.id}&month=${month}`} className={`rounded-sm border px-3 py-1.5 text-[13px] font-medium ${c.id === studentId ? "border-gold-500 bg-gold-100 text-ink-900" : "border-hair bg-surface text-ink-500 hover:bg-panel"}`}>{c.full_name}</Link>
+              <Link prefetch={false} key={c.id} href={`/reports?child=${c.id}&month=${month}`} className={`rounded-sm border px-3 py-1.5 text-[13px] font-medium ${c.id === studentId ? "border-[#0F6CBD] bg-[#EBF3FC] text-[#0F6CBD] font-semibold" : "border-hair bg-surface text-ink-700 hover:border-[#B4D6FA] hover:bg-[#F5F9FE]"}`}>{c.full_name}</Link>
             ))}
           </div>
         )}
@@ -60,7 +60,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: SP }
   // ---- Staff: monthly / yearly / exam report, class or student detail ----
   const scope = await getStaffScope();
   if (!scope.sections.length || !scope.currentYearId) {
-    return (<div><PageHeader title={t("report.title")} /><EmptyState icon={ReportIcon} title={t("common.noData")} /></div>);
+    return (<div><PageHeader title={t("report.title")} /><EmptyState title={t("common.noData")} /></div>);
   }
   const yearId = num(sp.year) ?? scope.currentYearId;
   const yearName = scope.years.find((y) => y.id === yearId)?.name ?? (await getCurrentYear())?.name ?? "";
@@ -89,14 +89,14 @@ export default async function ReportsPage({ searchParams }: { searchParams: SP }
     }
     return (
       <div>
-        <PageHeader eyebrow={`${section.class_name}-${section.name}`} title={t("report.title")} description={t("report.studentDetail")} />
+        <PageHeader eyebrow={`${section.class_name}-${section.name}`} title={t("report.title")} />
         <ScopeBar years={scope.years} sections={scope.sections} yearId={yearId} sectionId={section.id} />
         <StaffReportBar type={type} view={view} month={month} examName={examName} exams={exams}
           students={roster.map((s) => ({ id: s.id, name: s.name }))} studentId={studentId} sort="roll" />
         {report ? (
           <ReportCard report={report} periodLabel={periodLabel} />
         ) : (
-          <EmptyState icon={ReportIcon} title={type === "exam" && !exams.length ? t("common.noData") : t("x.reportPickStudent")} />
+          <EmptyState art={type === "exam" && !exams.length ? "nothing-yet" : "pick-student"} title={type === "exam" && !exams.length ? t("common.noData") : t("x.reportPickStudent")} />
         )}
       </div>
     );
@@ -123,7 +123,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: SP }
 
   return (
     <div>
-      <PageHeader eyebrow={`${section.class_name}-${section.name}`} title={t("report.title")} description={t("report.classDetail")} />
+      <PageHeader eyebrow={`${section.class_name}-${section.name}`} title={t("report.title")} />
       <ScopeBar years={scope.years} sections={scope.sections} yearId={yearId} sectionId={section.id} />
       <StaffReportBar type={type} view={view} month={month} examName={examName} exams={exams}
         students={roster.map((s) => ({ id: s.id, name: s.name }))} studentId={studentId} sort={sort} xlsx={xlsx} />
@@ -146,7 +146,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: SP }
                     <td className="py-2 text-muted tabular">{r.roll ?? "–"}</td>
                     <td className="py-2 text-ink-900">{r.name}</td>
                     <td className="py-2 text-right font-normal tabular text-ink-900">{r.avg != null ? fmtPercent(locale, r.avg, 1) : "—"}</td>
-                    {showAtt && <td className={`py-2 text-right tabular ${r.attPct != null && r.attPct < 75 ? "font-semibold text-down" : "text-ink-700"}`}>{r.attPct != null ? `${r.attPct}%` : "—"}</td>}
+                    {showAtt && <td className="py-2 text-right tabular text-ink-900">{r.attPct != null && r.attPct < 75 && <TrendArrow tone="down" size={12} className="mr-1 align-[-1px]" />}{r.attPct != null ? `${r.attPct}%` : "—"}</td>}
                   </tr>
                 ))}
               </tbody>

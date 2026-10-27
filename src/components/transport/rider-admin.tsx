@@ -1,11 +1,11 @@
 "use client";
+import { SearchIcon } from "@/components/icons";
 import { useId, useState, useTransition } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty";
 import { Input, Select } from "@/components/ui/field";
-import { BusIcon, SearchIcon } from "@/components/icons";
 import { useT } from "@/i18n/provider";
 import {
   assignTransport, updateTransport, removeTransport,
@@ -115,7 +115,7 @@ export function RiderAdmin({ data }: { data: RiderAdminData }) {
           <CardBody className="pt-2">
             {data.riders.length === 0 ? (
               <EmptyState
-                icon={BusIcon}
+                art={filtered ? "no-results" : "no-bus"}
                 title={filtered ? t("transport.noResults") : t("transport.noRiders")}
                 hint={filtered ? t("transport.noResultsHint") : t("transport.noRidersHint")}
               />
@@ -210,7 +210,7 @@ export function RiderAdmin({ data }: { data: RiderAdminData }) {
           />
           <CardBody className="pt-2">
             {data.unassigned.length === 0 ? (
-              <EmptyState icon={BusIcon} title={t("transport.noResults")} hint={t("transport.noResultsHint")} />
+              <EmptyState art="no-results" title={t("transport.noResults")} hint={t("transport.noResultsHint")} />
             ) : (
               <ul className="divide-y divide-hair">
                 {data.unassigned.map((p) => {

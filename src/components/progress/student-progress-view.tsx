@@ -1,10 +1,10 @@
 "use client";
+import { ChartLineIcon, ViewsIcon, NotebookIcon } from "@/components/icons";
 import { useState } from "react";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { DeltaBadge, BandChip } from "@/components/ui/status";
 import { EmptyState } from "@/components/ui/empty";
 import { KVLineChart, KVBarChart, KVGroupedBarChart, SERIES } from "@/components/charts";
-import { ProgressIcon, NotebookIcon, ViewsIcon, ChartLineIcon } from "@/components/icons";
 import { SessionDetail } from "@/components/progress/session-detail";
 import { useI18n } from "@/i18n/provider";
 import { fmtDate, fmtPercent } from "@/i18n/format";
@@ -17,7 +17,7 @@ export function StudentProgressView({ data, standing }: { data: Progress; standi
   const { t, locale } = useI18n();
   const [chartType, setChartType] = useState<"line" | "bar">("line");
   if (!data.hasData || !data.student) {
-    return <EmptyState icon={ProgressIcon} title={t("progress.noMarks")} hint={t("progress.pickStudent")} />;
+    return <EmptyState art="no-marks" title={t("progress.noMarks")} hint={t("progress.pickStudent")} />;
   }
 
   const lines = data.seriesSubjects.map((s, i) => ({ key: s.code, name: s.name, color: SERIES[i % SERIES.length] }));
@@ -65,7 +65,7 @@ export function StudentProgressView({ data, standing }: { data: Progress; standi
                 aria-pressed={chartType === k}
                 onClick={() => setChartType(k)}
                 className={cn("flex h-7 w-8 items-center justify-center rounded-sm border transition-colors",
-                  chartType === k ? "border-black bg-black text-white" : "border-hair text-ink-900 hover:bg-panel")}
+                  chartType === k ? "border-[#0F6CBD] bg-[#EBF3FC] text-[#0F6CBD] font-semibold" : "border-hair bg-surface text-ink-700 hover:border-[#B4D6FA] hover:bg-[#F5F9FE]")}
               >
                 {k === "line" ? <ChartLineIcon size={18} /> : <ViewsIcon size={18} />}
               </button>

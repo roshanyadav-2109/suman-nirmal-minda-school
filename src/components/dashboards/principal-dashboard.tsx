@@ -1,10 +1,11 @@
+import { StudentsIcon, AttendanceIcon, AnnounceIcon } from "@/components/icons";
 import { getCurrentYear, type Session } from "@/lib/session";
 import { getT } from "@/i18n/server";
 import { fmtPercent } from "@/i18n/format";
 import { getSchoolOverview } from "@/lib/data/dashboard";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { KVBarChart } from "@/components/charts";
-import { DashHeader, StatCard, AnnouncementsPanel, EventsPanel, QuickLinks, FleetStrip } from "@/components/dashboards/parts";
+import { DashHeader, StatCard, AnnouncementsPanel, EventsPanel, QuickLinks, FleetStrip, ActionButtons } from "@/components/dashboards/parts";
 
 // School-wide overview for the principal.
 export async function PrincipalDashboard({ session }: { session: Session }) {
@@ -16,6 +17,11 @@ export async function PrincipalDashboard({ session }: { session: Session }) {
   return (
     <div>
       <DashHeader name={session.fullName} />
+      <ActionButtons actions={[
+        { href: "/progress", label: t("dashboard.ctaNeedHelp"), icon: StudentsIcon },
+        { href: "/attendance", label: t("dashboard.ctaAttendanceToday"), icon: AttendanceIcon },
+        { href: "/announcements", label: t("dashboard.ctaPostNotice"), icon: AnnounceIcon },
+      ]} />
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard label={t("common.students")} value={ov?.students ?? "—"} tone="gold" href="/students" />
         <StatCard label={`${t("progress.overall")} ${t("progress.average")}`} value={fmtPercent(locale, ov?.avg ?? null, 1)} href="/progress" />

@@ -1,3 +1,4 @@
+import { TrendArrow } from "@/components/ui/status";
 import Link from "next/link";
 import { getT } from "@/i18n/server";
 import { Card, CardBody } from "@/components/ui/card";
@@ -18,7 +19,7 @@ export async function DetailedSectionAttendance({ students, period, sectionLabel
   return (
     <Card>
       <CardBody>
-        <Link prefetch={false} href={backHref} className="inline-flex items-center gap-1.5 text-[22px] font-semibold leading-tight text-[rgb(37,99,235)] hover:underline">
+        <Link prefetch={false} href={backHref} className="inline-flex items-center gap-1.5 text-[22px] font-semibold leading-tight text-[#0F6CBD] hover:underline">
           <ArrowRightIcon size={20} className="rotate-180" />
           {t("x.attendanceOverview")}
         </Link>
@@ -49,7 +50,8 @@ export async function DetailedSectionAttendance({ students, period, sectionLabel
                         <span className="text-ink-900">—</span>
                       )
                     ) : (
-                      <span className={`tabular ${st.pct != null && st.pct < 75 ? "text-down" : "text-ink-900"}`}>
+                      <span className="inline-flex items-center gap-1 tabular text-ink-900">
+                        {st.pct != null && st.pct < 75 && <TrendArrow tone="down" size={12} />}
                         {st.present}/{st.total}{st.pct != null ? ` · ${st.pct}%` : ""}
                       </span>
                     )}

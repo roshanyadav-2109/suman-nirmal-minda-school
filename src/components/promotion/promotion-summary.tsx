@@ -1,13 +1,12 @@
 import { getT } from "@/i18n/server";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
-import { PromotionIcon } from "@/components/icons";
 import { EmptyState } from "@/components/ui/empty";
 import type { PromSummaryRow } from "@/lib/data/promotion";
 
 // Read-only promotion outcomes (principal = school-wide; class teacher = own class).
 export async function PromotionSummary({ rows, toYearName }: { rows: PromSummaryRow[]; toYearName: string }) {
   const { t } = await getT();
-  if (!rows.length) return <EmptyState icon={PromotionIcon} title={t("x.noPromotions")} hint={t("x.noPromotionsHint")} />;
+  if (!rows.length) return <EmptyState art="no-promotions" title={t("x.noPromotions")} hint={t("x.noPromotionsHint")} />;
 
   const tot = rows.reduce((a, r) => ({
     promoted: a.promoted + r.promoted, retained: a.retained + r.retained,
@@ -41,10 +40,10 @@ export async function PromotionSummary({ rows, toYearName }: { rows: PromSummary
                 {rows.map((r) => (
                   <tr key={r.classId} className="border-t border-hair">
                     <td className="py-2 pr-3 font-medium text-ink-900">{t("common.class")} {r.className}</td>
-                    <td className="py-2 pr-3 text-right text-up">{r.promoted || "–"}</td>
-                    <td className="py-2 pr-3 text-right text-watch">{r.retained || "–"}</td>
-                    <td className="py-2 pr-3 text-right text-down">{r.transferred || "–"}</td>
-                    <td className="py-2 pr-3 text-right text-gold-700">{r.graduated || "–"}</td>
+                    <td className="py-2 pr-3 text-right text-ink-900">{r.promoted || "–"}</td>
+                    <td className="py-2 pr-3 text-right text-ink-900">{r.retained || "–"}</td>
+                    <td className="py-2 pr-3 text-right text-ink-900">{r.transferred || "–"}</td>
+                    <td className="py-2 pr-3 text-right text-ink-900">{r.graduated || "–"}</td>
                     <td className="py-2 text-right font-semibold text-ink-900">{r.total}</td>
                   </tr>
                 ))}
@@ -61,7 +60,7 @@ function Kpi({ label, n, tone }: { label: string; n: number; tone: string }) {
   return (
     <div className="rounded-md border border-hair bg-surface p-4 shadow-[var(--shadow-card)]">
       <div className="t-label">{label}</div>
-      <div className={`mt-1 text-[30px] font-bold leading-none tabular ${tone}`}>{n}</div>
+      <div className="mt-1 text-[30px] font-bold leading-none tabular text-ink-900">{n}</div>
     </div>
   );
 }

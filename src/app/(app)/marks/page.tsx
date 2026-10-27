@@ -5,7 +5,6 @@ import { EmptyState } from "@/components/ui/empty";
 import { MarksScopeBar } from "@/components/marks/marks-scope-bar";
 import { MarksEntry } from "@/components/marks/marks-entry";
 import { NewExamButton } from "@/components/marks/new-exam-button";
-import { MarksIcon } from "@/components/icons";
 import { getStaffScope, getSectionStudents } from "@/lib/data/scope";
 import { getAssessments, getAssessmentMarks } from "@/lib/data/marks";
 
@@ -24,7 +23,7 @@ export default async function MarksPage({ searchParams }: { searchParams: SP }) 
     return (
       <div>
         <PageHeader title={t("marks.title")} />
-        <EmptyState icon={MarksIcon} title={t("x.marksPrincipalTitle")} hint={t("x.marksPrincipalHint")} />
+        <EmptyState art="marks-office-only" title={t("x.marksPrincipalTitle")} hint={t("x.marksPrincipalHint")} />
       </div>
     );
   }
@@ -32,7 +31,7 @@ export default async function MarksPage({ searchParams }: { searchParams: SP }) 
   const scope = await getStaffScope();
 
   if (!scope.sections.length || !scope.subjects.length || !scope.currentYearId) {
-    return (<div><PageHeader title={t("marks.title")} /><EmptyState icon={MarksIcon} title={t("common.noData")} hint={t("x.marksNoSubjects")} /></div>);
+    return (<div><PageHeader title={t("marks.title")} /><EmptyState art="no-sections" title={t("common.noData")} hint={t("x.marksNoSubjects")} /></div>);
   }
 
   const yearId = num(sp.year) ?? scope.currentYearId;
@@ -61,7 +60,7 @@ export default async function MarksPage({ searchParams }: { searchParams: SP }) 
       {assessment ? (
         <MarksEntry key={assessment.id} assessmentId={assessment.id} assessmentName={assessment.name} maxMarks={assessment.max_marks} roster={roster} initial={initial} published={assessment.is_published} />
       ) : (
-        <EmptyState icon={MarksIcon} title={t("marks.pickAssessment")} />
+        <EmptyState art="no-marks" title={t("marks.pickAssessment")} />
       )}
     </div>
   );

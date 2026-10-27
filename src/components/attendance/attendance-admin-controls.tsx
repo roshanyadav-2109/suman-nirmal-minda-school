@@ -21,8 +21,8 @@ export function AttendanceAdminControls({ period, date, month }: { period: "day"
     <button
       onClick={() => push({ period: p }, ["section", p === "day" ? "month" : "date"])}
       aria-pressed={period === p}
-      className={cn("h-10 rounded-sm px-3 text-[13px] font-medium transition-colors",
-        period === p ? "bg-ink-900 text-gold-100" : "bg-panel text-ink-900 hover:bg-[rgb(37,99,235)]/[0.05]")}
+      className={cn("h-10 rounded-sm border px-3.5 text-[13px] font-medium transition-colors",
+        period === p ? "border-[#0F6CBD] bg-[#EBF3FC] text-[#0F6CBD] font-semibold" : "border-hair bg-surface text-ink-700 hover:border-[#B4D6FA] hover:bg-[#F5F9FE]")}
     >
       {label}
     </button>

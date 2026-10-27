@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { MenuIcon, CloseIcon } from "@/components/icons";
+import { usePathname, useRouter } from "next/navigation";
+import { MenuIcon, CloseIcon, SearchIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { navFor, type NavRole } from "@/lib/nav";
 import { useT } from "@/i18n/provider";
@@ -26,11 +26,22 @@ export function AppShell({
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const router = useRouter();
   const items = navFor(role);
 
-  // Every role gets the white floating rail; only the student carries identity
-  // in their dashboard (so the top-bar identity menu is hidden for them).
-  const isStudent = role === "student";
+  // Desktop side menu can be hidden from the top bar for more room.
+  const [collapsed, setCollapsed] = useState(false);
+  const toggleCollapsed = () => setCollapsed((c) => !c);
+
+  // Student search is for the staff who have the Students page.
+  const canSearch = role === "principal" || role === "office" || role === "class_teacher";
+  const [query, setQuery] = useState("");
+  const search = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = query.trim();
+    if (q) router.push(`/students?q=${encodeURIComponent(q)}`);
+  };
+
   const isDashboard = pathname === "/";
 
   // Longest matching prefix wins, so /transport/riders lights up its own entry
@@ -61,7 +72,7 @@ export function AppShell({
             )}
           >
             {active ? (
-              <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-[rgb(37,99,235)]" />
+              <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-[#0F6CBD]" />
             ) : (
               <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-[rgb(156,163,175)] opacity-0 transition-opacity group-hover:opacity-100" />
             )}
@@ -74,8 +85,8 @@ export function AppShell({
   );
 
   const brandHeader = (
-    <div className="flex h-16 items-center gap-2.5 px-4">
-      <SchoolEmblem size={36} />
+    <div className="flex h-16 shrink-0 items-center gap-2.5 border-b border-hair px-4">
+      <SchoolEmblem size={32} />
       <div className="leading-tight">
         <div className="text-[13px] font-bold text-ink-900">{SCHOOL.name}</div>
         {SCHOOL.place && <div className="text-[11px] text-muted">{SCHOOL.place}</div>}
@@ -85,39 +96,36 @@ export function AppShell({
 
   const initials = name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
 
-  // Non-students carry their identity + sign-out in a card at the TOP-RIGHT
-  // (like the student's dashboard profile card).
-  // The identity/sign-out card lives only on the dashboard (like the student's).
-  const personMenu = !isStudent && isDashboard ? (
-    <>
-      <button onClick={() => setMenuOpen(true)} aria-haspopup="dialog" className="flex items-center gap-2.5 rounded-md border border-hair bg-surface px-2.5 py-1.5 hover:bg-panel">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-black text-[12px] font-semibold text-white">{initials}</span>
-        <span className="hidden text-left leading-tight sm:block">
-          <span className="block truncate text-[13px] font-semibold text-ink-900">{name}</span>
-          <span className="block truncate text-[12px] text-ink-900">{roleLabel}</span>
+  // Everyone's name, role and sign-out sit at the foot of the side menu, on
+  // every page — the same place in the desktop rail and the phone drawer.
+  const personCard = (
+    <div className="border-t border-hair p-3">
+      <button
+        onClick={() => { setOpen(false); setMenuOpen(true); }}
+        aria-haspopup="dialog"
+        className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-left hover:bg-panel"
+      >
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-hair bg-panel text-[13px] font-semibold text-ink-900">{initials}</span>
+        <span className="min-w-0 flex-1 leading-tight">
+          <span className="block break-words text-[14px] font-semibold text-ink-900">{name}</span>
+          <span className="block truncate text-[12px] text-ink-500">{roleLabel}</span>
         </span>
-        <span className="flex flex-col items-center gap-[3px] text-ink-900" aria-hidden>
+        <span className="flex flex-col items-center gap-[3px] text-ink-700" aria-hidden>
           <span className="h-1 w-1 rounded-full bg-current" /><span className="h-1 w-1 rounded-full bg-current" /><span className="h-1 w-1 rounded-full bg-current" />
         </span>
       </button>
-      <SignOutModal
-        open={menuOpen}
-        onClose={() => setMenuOpen(false)}
-        promptLabel={t("dashboard.logoutPrompt")}
-        confirmLabel={t("dashboard.confirmSignOut")}
-        cancelLabel={t("dashboard.cancel")}
-      />
-    </>
-  ) : null;
+    </div>
+  );
 
   return (
-    <div className="min-h-dvh bg-white lg:grid lg:grid-cols-[264px_1fr]">
-      {/* Desktop sidebar — white floating rail for every role */}
-      <aside className="sticky top-3 m-3 hidden h-[calc(100dvh-1.5rem)] flex-col overflow-hidden rounded-md border border-hair bg-surface lg:flex">
+    <div className={cn("min-h-dvh bg-white lg:grid", collapsed ? "lg:grid-cols-[1fr]" : "lg:grid-cols-[264px_1fr]")}>
+      {/* Desktop side menu — attached to the left edge, full height */}
+      <aside className={cn("sticky top-0 hidden h-dvh flex-col overflow-hidden border-r border-hair bg-surface", !collapsed && "lg:flex")}>
         {brandHeader}
         <div className="flex-1 overflow-y-auto">
           {navList}
         </div>
+        {personCard}
       </aside>
 
       {/* Mobile drawer */}
@@ -141,29 +149,53 @@ export function AppShell({
             <div className="flex-1 overflow-y-auto">
               {navList}
             </div>
+            {personCard}
           </aside>
         </div>
       )}
 
+      <SignOutModal
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        promptLabel={t("dashboard.logoutPrompt")}
+        confirmLabel={t("dashboard.confirmSignOut")}
+        cancelLabel={t("dashboard.cancel")}
+      />
+
       <div className="flex min-w-0 flex-col">
-        {/* No full navbar — just the mobile hamburger + a person card top-right. */}
-        <header className={cn("flex h-14 items-center gap-3 px-3 sm:px-5", !personMenu && "lg:hidden")}>
+        {/* Top bar: menu button, student search for staff, a parent's language picker. */}
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-hair bg-white px-3 sm:px-4">
           <button aria-label="Menu" onClick={() => setOpen(true)} className="rounded-sm p-1.5 text-ink-700 hover:bg-panel lg:hidden">
-            <MenuIcon size={20} />
+            <MenuIcon size={22} />
           </button>
-          <div className="lg:hidden">
+          <button aria-label={collapsed ? "Show menu" : "Hide menu"} title={collapsed ? "Show menu" : "Hide menu"} onClick={toggleCollapsed}
+            className="hidden rounded-sm p-1.5 text-ink-700 hover:bg-panel lg:block">
+            <MenuIcon size={22} />
+          </button>
+          <div className={cn(!collapsed && "lg:hidden")}>
             <SchoolEmblem size={28} />
           </div>
-          {(personMenu || (role === "guardian" && isDashboard)) && (
+          {canSearch && (
+            <form onSubmit={search} role="search" className="flex w-full max-w-[460px] items-center gap-2 rounded-md border border-hair bg-surface px-3 focus-within:border-[#0F6CBD]">
+              <SearchIcon size={18} />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={t("x.searchStudents")}
+                aria-label={t("x.searchStudents")}
+                className="h-9 w-full bg-transparent text-[14px] text-ink-900 outline-none placeholder:text-ink-500"
+              />
+            </form>
+          )}
+          {role === "guardian" && isDashboard && (
             <div className="ml-auto flex items-center gap-2">
-              {role === "guardian" && isDashboard && <LocaleSwitcher />}
-              {personMenu}
+              <LocaleSwitcher />
             </div>
           )}
         </header>
 
         {/* Each section is its own block on the page — no shared wrapper. */}
-        <main className="w-full flex-1 p-3 lg:py-3 lg:pl-1 lg:pr-3">
+        <main className="w-full flex-1 p-3 lg:px-5 lg:py-4">
           {children}
         </main>
       </div>

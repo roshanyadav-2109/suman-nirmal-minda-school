@@ -13,8 +13,8 @@ function LogoutHuman() {
       <path d="M56 54 l20 -16" className="text-ink-900" />
       <path d="M56 78 l-12 28" className="text-ink-900" />
       <path d="M56 78 l12 28" className="text-ink-900" />
-      <path d="M84 28 q7 5 0 12" className="text-[rgb(37,99,235)]" strokeWidth={3.5} />
-      <path d="M92 21 q12 9 0 22" className="text-[rgb(37,99,235)]" strokeWidth={3.5} />
+      <path d="M84 28 q7 5 0 12" className="text-[#0F6CBD]" strokeWidth={3.5} />
+      <path d="M92 21 q12 9 0 22" className="text-[#0F6CBD]" strokeWidth={3.5} />
     </svg>
   );
 }
@@ -43,7 +43,7 @@ export function SignOutModal({
         <p className="mt-6 t-h3 text-ink-900">{promptLabel}</p>
         <div className="mt-7 flex flex-wrap justify-center gap-3">
           <form action={signOut}>
-            <button className="rounded-sm bg-black px-5 py-2.5 text-[13px] font-normal text-white transition-colors hover:bg-[rgb(38,38,38)]">
+            <button className="rounded-sm bg-[#0F6CBD] px-5 py-2.5 text-[13px] font-normal text-white transition-colors hover:bg-[#115EA3]">
               {confirmLabel}
             </button>
           </form>

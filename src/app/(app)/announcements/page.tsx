@@ -3,7 +3,6 @@ import { createClient } from "@/lib/supabase/server";
 import { getT } from "@/i18n/server";
 import { fmtRelative } from "@/i18n/format";
 import { EmptyState } from "@/components/ui/empty";
-import { AnnounceIcon } from "@/components/icons";
 import { AnnouncementForm } from "@/components/announcements/announcement-form";
 import { AnnouncementsGrid } from "@/components/announcements/announcements-grid";
 import { getStaffScope } from "@/lib/data/scope";
@@ -38,7 +37,7 @@ export default async function AnnouncementsPage() {
   const feed = gridItems.length ? (
     <AnnouncementsGrid items={gridItems} />
   ) : (
-    <EmptyState icon={AnnounceIcon} title={t("common.noData")} hint={isStaff ? t("announce.new") : undefined} />
+    <EmptyState title={t("common.noData")} hint={isStaff ? t("announce.new") : undefined} />
   );
 
   if (!isStaff || !scope) return feed;

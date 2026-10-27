@@ -29,7 +29,7 @@ export default async function AllotmentsPage() {
 
   return (
     <div>
-      <PageHeader title={t("nav.allotments")} description={year?.name} />
+      <PageHeader title={t("nav.allotments")} />
       <AllotmentsTable rows={rows} />
     </div>
   );
