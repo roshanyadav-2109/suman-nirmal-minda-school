@@ -2,7 +2,7 @@
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Input, Select } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
-import { ReportIcon } from "@/components/icons";
+import { ExcelIcon, PrintIcon } from "@/components/icons";
 import { useT } from "@/i18n/provider";
 import { cn } from "@/lib/utils";
 import { downloadXlsx } from "@/lib/xlsx";
@@ -118,7 +118,7 @@ export function StaffReportBar({
 
       <Button variant="subtle" className="ml-auto"
         onClick={() => xlsx ? downloadXlsx(xlsx.filename, xlsx.headers, xlsx.rows, xlsx.sheetName) : window.print()}>
-        <ReportIcon size={16} /> {xlsx ? t("x.downloadExcel") : t("x.download")}
+        {xlsx ? <ExcelIcon size={18} /> : <PrintIcon size={18} />} {xlsx ? t("x.downloadExcel") : t("x.download")}
       </Button>
     </div>
   );

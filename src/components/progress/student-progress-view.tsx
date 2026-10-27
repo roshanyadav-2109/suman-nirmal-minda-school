@@ -4,7 +4,7 @@ import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { DeltaBadge, BandChip } from "@/components/ui/status";
 import { EmptyState } from "@/components/ui/empty";
 import { KVLineChart, KVBarChart, KVGroupedBarChart, SERIES } from "@/components/charts";
-import { ProgressIcon, NotebookIcon, ViewsIcon } from "@/components/icons";
+import { ProgressIcon, NotebookIcon, ViewsIcon, ChartLineIcon } from "@/components/icons";
 import { SessionDetail } from "@/components/progress/session-detail";
 import { useI18n } from "@/i18n/provider";
 import { fmtDate, fmtPercent } from "@/i18n/format";
@@ -67,7 +67,7 @@ export function StudentProgressView({ data, standing }: { data: Progress; standi
                 className={cn("flex h-7 w-8 items-center justify-center rounded-sm border transition-colors",
                   chartType === k ? "border-black bg-black text-white" : "border-hair text-ink-900 hover:bg-panel")}
               >
-                {k === "line" ? <ProgressIcon size={15} /> : <ViewsIcon size={15} />}
+                {k === "line" ? <ChartLineIcon size={18} /> : <ViewsIcon size={18} />}
               </button>
             ))}
           </div>

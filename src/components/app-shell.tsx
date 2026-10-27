@@ -65,7 +65,7 @@ export function AppShell({
             ) : (
               <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-[rgb(156,163,175)] opacity-0 transition-opacity group-hover:opacity-100" />
             )}
-            <Icon size={20} className={active ? "text-[rgb(37,99,235)]" : "text-[#2B2F6E]"} />
+            <Icon size={24} />
             {t(item.labelKey)}
           </Link>
         );

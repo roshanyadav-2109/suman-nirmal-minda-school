@@ -207,7 +207,7 @@ export default function LoginPage() {
                     <span className="flex h-11 w-11 items-center justify-center rounded-full bg-panel text-ink-900">
                       {busy === a.email
                         ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-hair border-t-ink-900" />
-                        : <Icon size={22} />}
+                        : <Icon size={32} />}
                     </span>
                     <span className="text-[13px] font-semibold text-ink-900">{t(`roles.${a.role}`)}</span>
                   </button>
