@@ -1,8 +1,10 @@
+/* eslint-disable @next/next/no-img-element -- Cloudinary already serves sized, compressed images */
 "use client";
 import { useState } from "react";
 import { AnnounceIcon, CloseIcon } from "@/components/icons";
+import { cldImage } from "@/lib/cloudinary-url";
 
-export type AnnItem = { id: number; poster: string; time: string; title: string; body: string; scope: string };
+export type AnnItem = { id: number; poster: string; time: string; title: string; body: string; scope: string; imageUrl?: string | null };
 
 // Clickable announcement cards; a card opens a ~70% modal with the full text.
 export function AnnouncementsGrid({ items }: { items: AnnItem[] }) {
@@ -25,6 +27,11 @@ export function AnnouncementsGrid({ items }: { items: AnnItem[] }) {
                 <div className="text-[12px] text-ink-900">{a.time}</div>
               </div>
             </div>
+
+            {a.imageUrl && (
+              <img src={cldImage(a.imageUrl, "c_fill,w_640,h_320,q_auto,f_auto")} alt="" loading="lazy"
+                className="mt-4 h-36 w-full rounded-sm border border-hair object-cover" />
+            )}
 
             <div className="mt-4 flex gap-3">
               <div className="min-w-0 flex-1">
@@ -64,7 +71,13 @@ export function AnnouncementsGrid({ items }: { items: AnnItem[] }) {
               </div>
             </div>
             <h2 className="mt-4 text-[20px] font-bold leading-snug text-ink-900">{sel.title}</h2>
-            <div className="mt-3 flex-1 overflow-y-auto whitespace-pre-wrap text-[14px] leading-relaxed text-ink-900">{sel.body}</div>
+            <div className="mt-3 flex-1 overflow-y-auto">
+              {sel.imageUrl && (
+                <img src={cldImage(sel.imageUrl, "c_limit,w_1400,q_auto,f_auto")} alt=""
+                  className="mb-4 max-h-[50vh] w-full rounded-sm border border-hair object-contain" />
+              )}
+              <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-ink-900">{sel.body}</p>
+            </div>
             <div className="mt-4 border-t border-dashed border-hair pt-3 text-[11px] font-semibold uppercase tracking-wide text-ink-900">{sel.scope}</div>
           </div>
         </div>

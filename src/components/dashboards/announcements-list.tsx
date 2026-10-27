@@ -1,9 +1,11 @@
+/* eslint-disable @next/next/no-img-element -- Cloudinary already serves sized, compressed images */
 "use client";
 import { AnnounceIcon, CloseIcon } from "@/components/icons";
 import { useState } from "react";
 import { EmptyState } from "@/components/ui/empty";
+import { cldImage } from "@/lib/cloudinary-url";
 
-export type AnnItem = { id: number; title: string; body: string; date: string };
+export type AnnItem = { id: number; title: string; body: string; date: string; imageUrl?: string | null };
 
 // Clickable announcement rows; a row opens a rectangular modal (~60% of the
 // screen) with the full announcement text.
@@ -48,8 +50,12 @@ export function AnnouncementsList({ items, emptyLabel }: { items: AnnItem[]; emp
               <div className="text-[12px] font-medium text-ink-900">{sel.date}</div>
               <h2 className="t-h2 mt-1 text-ink-900">{sel.title}</h2>
             </div>
-            <div className="mt-4 flex-1 overflow-y-auto whitespace-pre-wrap text-[14px] leading-relaxed text-ink-900">
-              {sel.body}
+            <div className="mt-4 flex-1 overflow-y-auto">
+              {sel.imageUrl && (
+                <img src={cldImage(sel.imageUrl, "c_limit,w_1400,q_auto,f_auto")} alt=""
+                  className="mb-4 max-h-[50vh] w-full rounded-sm border border-hair object-contain" />
+              )}
+              <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-ink-900">{sel.body}</p>
             </div>
           </div>
         </div>

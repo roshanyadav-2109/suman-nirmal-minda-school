@@ -117,9 +117,11 @@ export type Database = {
           created_at: string
           created_by: number | null
           id: number
+          image_url: string | null
           published_at: string
           scope: Database["public"]["Enums"]["announcement_scope"]
           section_id: number | null
+          section_ids: number[] | null
           title: string
         }
         Insert: {
@@ -129,9 +131,11 @@ export type Database = {
           created_at?: string
           created_by?: number | null
           id?: never
+          image_url?: string | null
           published_at?: string
           scope?: Database["public"]["Enums"]["announcement_scope"]
           section_id?: number | null
+          section_ids?: number[] | null
           title: string
         }
         Update: {
@@ -141,9 +145,11 @@ export type Database = {
           created_at?: string
           created_by?: number | null
           id?: never
+          image_url?: string | null
           published_at?: string
           scope?: Database["public"]["Enums"]["announcement_scope"]
           section_id?: number | null
+          section_ids?: number[] | null
           title?: string
         }
         Relationships: [

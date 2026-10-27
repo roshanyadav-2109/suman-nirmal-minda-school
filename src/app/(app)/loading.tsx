@@ -1,22 +1,21 @@
-// Instant navigation feedback while the server renders the next page.
+import { Illustration } from "@/components/ui/empty";
+
+// Shown the moment someone opens a page, while it loads: the school's "books"
+// illustration floating gently, with three dots pulsing in turn. Motion stops
+// for anyone who has asked their device for reduced motion (globals.css).
 export default function Loading() {
   return (
-    <div className="animate-pulse">
-      <div className="mb-6">
-        <div className="h-3 w-24 rounded bg-panel" />
-        <div className="mt-2 h-7 w-64 rounded bg-panel" />
-        <div className="mt-2 h-4 w-80 rounded bg-panel" />
+    <div role="status" aria-live="polite" className="flex min-h-[60vh] flex-col items-center justify-center text-center">
+      <div className="loader-float">
+        <Illustration name="loading" size={130} />
       </div>
-      <div className="mb-5 h-16 rounded-md border border-hair bg-panel/50" />
-      <div className="grid gap-4 sm:grid-cols-3">
-        {[0, 1, 2].map((i) => (
-          <div key={i} className="h-28 rounded-md border border-hair bg-panel/50" />
-        ))}
-      </div>
-      <div className="mt-5 grid gap-5 lg:grid-cols-2">
-        {[0, 1].map((i) => (
-          <div key={i} className="h-64 rounded-md border border-hair bg-panel/50" />
-        ))}
+      <div className="mt-4 flex items-center gap-2 text-[15px] font-medium text-ink-700">
+        Loading
+        <span className="flex gap-1" aria-hidden>
+          <span className="loader-dot" />
+          <span className="loader-dot [animation-delay:0.15s]" />
+          <span className="loader-dot [animation-delay:0.3s]" />
+        </span>
       </div>
     </div>
   );

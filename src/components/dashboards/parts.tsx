@@ -6,6 +6,7 @@ import { fmtDate } from "@/i18n/format";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty";
 import { AnnouncementsList } from "@/components/dashboards/announcements-list";
+import { getAnnouncements } from "@/lib/data/announcements";
 import { navFor, type NavRole } from "@/lib/nav";
 import { getFleetSummary } from "@/lib/data/transport";
 import type { TransportCardLabels } from "@/components/transport/transport-card";
@@ -90,12 +91,8 @@ export function ActionButtons({ actions }: { actions: DashAction[] }) {
 export async function AnnouncementsPanel() {
   const supabase = await createClient();
   const { t, locale } = await getT();
-  const { data } = await supabase
-    .from("announcement")
-    .select("id, title, body, published_at")
-    .order("published_at", { ascending: false })
-    .limit(4);
-  const items = (data ?? []).map((a) => ({ id: a.id, title: a.title, body: a.body, date: fmtDate(locale, a.published_at) }));
+  const rows = await getAnnouncements(4);
+  const items = rows.map((a) => ({ id: a.id, title: a.title, body: a.body, date: fmtDate(locale, a.published_at), imageUrl: a.image_url }));
   return (
     <Card>
       <CardHeader title={t("announce.title")} />
