@@ -164,13 +164,21 @@ export default async function ReportsPage({ searchParams }: { searchParams: SP }
     rows: rows.map((r) => [r.roll ?? "", r.name, r.avg ?? "", ...(showAtt ? [r.attPct ?? ""] : [])] as (string | number | null)[]),
   };
   const pdf = classListPdf(rows, { kind: type, period: periodEn, yearName, section: sectionLabel, showAtt });
+  const cards = { sectionId: section.id, yearId, type, month, examName, section: sectionLabel, period: periodEn, yearName };
+  // Each name opens that pupil's own report card, with the same report type and period.
+  const cardHref = (studentId: number) => {
+    const q = new URLSearchParams();
+    for (const [k, v] of Object.entries(sp)) if (typeof v === "string" && k !== "student" && k !== "view") q.set(k, v);
+    q.set("section", String(section.id)); q.set("view", "student"); q.set("student", String(studentId));
+    return `/dashboard/reports?${q.toString()}`;
+  };
 
   return (
     <div>
       <PageHeader title={t("report.title")} />
       {scopeBar}
       <StaffReportBar type={type} view={view} month={month} examName={examName} exams={exams}
-        students={roster.map((s) => ({ id: s.id, name: s.name }))} studentId={studentId} sort={sort} xlsx={xlsx} pdf={pdf} />
+        students={roster.map((s) => ({ id: s.id, name: s.name }))} studentId={studentId} sort={sort} xlsx={xlsx} pdf={pdf} cards={cards} />
       <Card className="print-area">
         <CardHeader eyebrow={`${sectionLabel} · ${periodLabel}`} title={yearName} />
         <CardBody className="pt-2">
@@ -188,7 +196,9 @@ export default async function ReportsPage({ searchParams }: { searchParams: SP }
                 {rows.map((r) => (
                   <tr key={r.id} className="border-t border-hair">
                     <td className="py-2 text-muted tabular">{r.roll ?? "–"}</td>
-                    <td className="py-2 text-ink-900">{r.name}</td>
+                    <td className="py-2">
+                      <Link prefetch={false} href={cardHref(r.id)} className="text-ink-900 hover:text-[#0F6CBD] hover:underline" title="Open this student's report card">{r.name}</Link>
+                    </td>
                     <td className="py-2 text-right font-normal tabular text-ink-900">{r.avg != null ? fmtPercent(locale, r.avg, 1) : "—"}</td>
                     {showAtt && <td className="py-2 text-right tabular text-ink-900"><AttPct v={r.attPct} /></td>}
                   </tr>

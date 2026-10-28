@@ -290,3 +290,61 @@ export async function getSchoolReport(yearId: number, sections: SchoolSectionRef
     })
     .filter((s) => s.rows.length > 0);
 }
+
+// ---------------------------------------------------------------------------
+// Every pupil's report card for one section (the "All report cards" PDF):
+// the same contents as getStudentReport / getStudentExamReport, fetched for
+// the whole class in a few set-based queries. In roll-number order.
+// ---------------------------------------------------------------------------
+export type ClassCard = StudentReport & { roll: number | null };
+
+export async function getClassReportCards(
+  sectionId: number, yearId: number,
+  period: { kind: "range"; start: string; end: string } | { kind: "exam"; examName: string },
+): Promise<ClassCard[]> {
+  const supabase = await createClient();
+  const { data: roster } = await supabase.from("student_enrollment")
+    .select("roll_no, status, student:student_id(id, full_name, admission_no)")
+    .eq("section_id", sectionId).eq("academic_year_id", yearId).neq("status", "transferred")
+    .order("roll_no");
+  const pupils = (roster ?? []).map((e) => ({ roll: e.roll_no, ...(e.student as unknown as { id: number; full_name: string; admission_no: string }) }));
+  if (!pupils.length) return [];
+  const ids = pupils.map((p) => p.id);
+
+  type Mark = ReportMark & { student_id: number };
+  const marksP = fetchAll<Mark>((from, to, withCount) => {
+    const q = supabase.from("v_student_subject_trend")
+      .select("student_id, subject_name, assessment_name, percent, delta, prev_percent, band", withCount ? { count: "exact" } : undefined)
+      .in("student_id", ids);
+    const f = period.kind === "exam"
+      ? q.eq("academic_year_id", yearId).eq("assessment_name", period.examName)
+      : q.gte("assessed_on", period.start).lte("assessed_on", period.end);
+    return f.order("student_id").order("assessed_on").order("mark_id").range(from, to) as unknown as Page<Mark>;
+  });
+  const attP = period.kind === "range"
+    ? sectionAttendance(supabase, sectionId, yearId, period.start, period.end)
+    : Promise.resolve(null);
+  const noticesP = period.kind === "range"
+    ? supabase.from("announcement").select("title, published_at")
+        .gte("published_at", period.start).lte("published_at", `${period.end}T23:59:59`)
+        .order("published_at", { ascending: false })
+    : Promise.resolve({ data: [] as Array<{ title: string; published_at: string }> });
+
+  const [marks, att, { data: notices }] = await Promise.all([marksP, attP, noticesP]);
+  const marksBy = new Map<number, ReportMark[]>();
+  for (const { student_id, ...m } of marks) marksBy.set(student_id, [...(marksBy.get(student_id) ?? []), m]);
+  const attBy = new Map((att ?? []).map((a) => [a.student_id, a]));
+
+  return pupils.map((p) => {
+    const a = attBy.get(p.id);
+    return {
+      roll: p.roll,
+      student: { full_name: p.full_name, admission_no: p.admission_no },
+      marks: period.kind === "exam" ? (marksBy.get(p.id) ?? []).sort((x, y) => x.subject_name.localeCompare(y.subject_name)) : marksBy.get(p.id) ?? [],
+      attendance: period.kind === "range"
+        ? { present: a?.present ?? 0, total: a?.total ?? 0, pct: a && a.total ? Math.round((a.present / a.total) * 1000) / 10 : null }
+        : null,
+      notices: (notices ?? []) as Array<{ title: string; published_at: string }>,
+    };
+  });
+}

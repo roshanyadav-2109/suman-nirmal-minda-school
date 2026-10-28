@@ -8,9 +8,10 @@ const TABS = [
   { href: "/dashboard/manage/teachers", label: "Assigned Teachers" },
   { href: "/dashboard/manage/classes", label: "Classes & Subjects" },
   { href: "/dashboard/manage/exams", label: "Exams" },
+  { href: "/dashboard/manage/access", label: "Give access" },
 ];
 
-// The four parts of Manage School, as tabs along the top.
+// The parts of Manage School, as tabs along the top.
 export function ManageTabs() {
   const pathname = usePathname();
   return (

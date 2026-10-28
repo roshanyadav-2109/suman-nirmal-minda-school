@@ -3,7 +3,7 @@ import { useSearchParams, usePathname } from "next/navigation";
 import { Input, Select } from "@/components/ui/field";
 import { useT } from "@/i18n/provider";
 import { cn } from "@/lib/utils";
-import { ReportDownloads, type XlsxExport } from "@/components/report/report-downloads";
+import { ReportDownloads, type XlsxExport, type ClassCardsExport } from "@/components/report/report-downloads";
 import type { PdfDoc } from "@/lib/pdf";
 import { useNavigate } from "@/components/nav-progress";
 
@@ -22,7 +22,7 @@ function Chip({ on, label, onClick }: { on: boolean; label: string; onClick: () 
 // (whole class or one student), the period/exam picker, and the downloads.
 // For the whole-school list there is no "one student" option (pick a section first).
 export function StaffReportBar({
-  type, view, month, examName, exams, students, studentId, sort, xlsx, pdf, wholeSchool = false,
+  type, view, month, examName, exams, students, studentId, sort, xlsx, pdf, cards, wholeSchool = false,
 }: {
   type: ReportType;
   view: View;
@@ -34,6 +34,7 @@ export function StaffReportBar({
   sort: "roll" | "marks";
   xlsx?: XlsxExport;
   pdf?: PdfDoc;
+  cards?: ClassCardsExport;
   wholeSchool?: boolean;
 }) {
   const t = useT();
@@ -105,7 +106,7 @@ export function StaffReportBar({
         </div>
       )}
 
-      <ReportDownloads className="ml-auto" xlsx={xlsx} pdf={pdf} />
+      <ReportDownloads className="ml-auto" xlsx={xlsx} pdf={pdf} cards={cards} />
     </div>
   );
 }

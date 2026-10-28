@@ -46,9 +46,35 @@ const cellText = (c: PdfCell): string =>
 
 const safeFile = (s: string) => clean(s).replace(/[\\/:*?"<>|]+/g, "-").replace(/\s+/g, " ").trim() || "report";
 
-export async function downloadPdf(spec: PdfDoc) {
+type Lib = { doc: import("jspdf").jsPDF; autoTable: typeof import("jspdf-autotable").default };
+
+async function openPdf(orientation: PdfDoc["orientation"]): Promise<Lib> {
   const [{ jsPDF }, { default: autoTable }] = await Promise.all([import("jspdf"), import("jspdf-autotable")]);
-  const doc = new jsPDF({ orientation: spec.orientation ?? "portrait", unit: "mm", format: "a4", compress: true });
+  return { doc: new jsPDF({ orientation: orientation ?? "portrait", unit: "mm", format: "a4", compress: true }), autoTable };
+}
+
+export async function downloadPdf(spec: PdfDoc) {
+  const lib = await openPdf(spec.orientation);
+  drawDoc(lib, spec, 1);
+  const name = safeFile(spec.filename);
+  lib.doc.save(name.toLowerCase().endsWith(".pdf") ? name : `${name}.pdf`);
+}
+
+// Several documents in one file — e.g. every pupil's report card for a class.
+// Each starts on a fresh page with its own letterhead and its own "Page x of y".
+export async function downloadPdfBook(specs: PdfDoc[], filename: string) {
+  if (!specs.length) return;
+  const lib = await openPdf(specs[0].orientation);
+  specs.forEach((spec, i) => {
+    if (i > 0) lib.doc.addPage();
+    drawDoc(lib, spec, lib.doc.getNumberOfPages());
+  });
+  const name = safeFile(filename);
+  lib.doc.save(name.toLowerCase().endsWith(".pdf") ? name : `${name}.pdf`);
+}
+
+// Draws one document starting on page `first` (already the current page).
+function drawDoc({ doc, autoTable }: Lib, spec: PdfDoc, first: number) {
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const M = 14;
@@ -140,21 +166,21 @@ export async function downloadPdf(spec: PdfDoc) {
     y = lastY() + 7;
   }
 
-  // ---- Running header (pages 2+) and footer with page numbers (all pages) ----
-  const pages = doc.getNumberOfPages();
+  // ---- Running header (its pages 2+) and footer with page numbers ----
+  const last = doc.getNumberOfPages();
+  const pages = last - first + 1;
   const printed = new Date().toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
-  for (let i = 1; i <= pages; i++) {
+  for (let n = 1; n <= pages; n++) {
+    const i = first + n - 1;
     doc.setPage(i);
     doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...MUTED);
-    if (i > 1) {
+    if (n > 1) {
       doc.text(clean(`${SCHOOL.fullName} - ${title}`), M, M);
       doc.setDrawColor(...LINE); doc.line(M, M + 2, pageW - M, M + 2);
     }
     doc.setDrawColor(...LINE); doc.line(M, pageH - M + 1, pageW - M, pageH - M + 1);
     doc.text(clean(`${SCHOOL.fullName} - printed ${printed}`), M, pageH - M + 5);
-    doc.text(`Page ${i} of ${pages}`, pageW - M, pageH - M + 5, { align: "right" });
+    doc.text(`Page ${n} of ${pages}`, pageW - M, pageH - M + 5, { align: "right" });
   }
-
-  const name = safeFile(spec.filename);
-  doc.save(name.toLowerCase().endsWith(".pdf") ? name : `${name}.pdf`);
+  doc.setPage(last);
 }
