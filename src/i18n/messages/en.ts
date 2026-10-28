@@ -52,6 +52,8 @@ const en = {
     schedule: "Schedule",
     manage: "Manage School",
     details: "Personal details",
+    fees: "Fees",
+    library: "Library",
   },
   auth: {
     signIn: "Sign in",

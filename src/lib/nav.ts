@@ -1,7 +1,7 @@
 import {
   DashboardIcon, ProgressIcon, AttendanceIcon, MarksIcon, StudentsIcon,
   AnnounceIcon, CalendarIcon, ReportIcon, LeaveIcon, AllotmentIcon,
-  PromotionIcon, RoleStudentIcon,
+  PromotionIcon, RoleStudentIcon, ExcelIcon, NotebookIcon,
   BusIcon, BusRidersIcon,
   type IconComponent,
 } from "@/components/icons";
@@ -31,6 +31,8 @@ export const NAV: NavItem[] = [
   { href: "/dashboard/announcements", icon: AnnounceIcon, labelKey: "nav.announcements", roles: ALL },
   { href: "/dashboard/calendar", icon: CalendarIcon, labelKey: "nav.calendar", roles: ALL },
   { href: "/dashboard/reports", icon: ReportIcon, labelKey: "nav.reports", roles: ["student", "guardian", "class_teacher", "principal", "office"] },
+  { href: "/dashboard/fees", icon: ExcelIcon, labelKey: "nav.fees", roles: ["student", "guardian", "principal", "office"] },
+  { href: "/dashboard/library", icon: NotebookIcon, labelKey: "nav.library", roles: ["student", "subject_teacher", "class_teacher", "principal", "office"] },
   { href: "/dashboard/leave", icon: LeaveIcon, labelKey: "nav.leave", roles: ["student", "guardian", "class_teacher"] },
   { href: "/dashboard/allotments", icon: AllotmentIcon, labelKey: "nav.allotments", roles: ["principal", "office"] },
   { href: "/dashboard/promotion", icon: PromotionIcon, labelKey: "nav.promotion", roles: ["office", "principal", "class_teacher"] },
