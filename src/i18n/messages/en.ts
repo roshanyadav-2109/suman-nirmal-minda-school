@@ -425,6 +425,7 @@ const en = {
     searchStudents: "Search student by name or admission no.",
     searchEverything: "Search students, teachers, classes, pages…",
     searchFamily: "Search pages and notices…",
+    searchShort: "Search…",
     searchPage: "Page",
     searchSection: "Class section",
     searchGroupPages: "Pages",

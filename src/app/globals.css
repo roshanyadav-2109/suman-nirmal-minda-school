@@ -156,3 +156,40 @@
   background: #0f6cbd;
   animation: loader-dot 1.2s ease-in-out infinite;
 }
+
+/* Phones: tables sit tighter so more columns fit before sideways scrolling.
+   Unlayered, so it wins over per-cell padding utilities. */
+@media (max-width: 639px) {
+  main table {
+    font-size: 13px;
+  }
+  main table th,
+  main table td {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+}
+
+/* A sideways-scrolling area keeps its own absolutely placed bits (e.g. the
+   screen-reader-only "Actions" header label) inside it, so they can't widen
+   the whole page on a phone. */
+main .overflow-x-auto {
+  position: relative;
+}
+
+/* Phones: a row of choice buttons (Monthly / Yearly / By exam, Day / Month…)
+   spreads across the full width in equal parts instead of bunching left. */
+@media (max-width: 639px) {
+  .seg {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    width: 100%;
+  }
+  .seg > * {
+    justify-content: center;
+    text-align: center;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+}

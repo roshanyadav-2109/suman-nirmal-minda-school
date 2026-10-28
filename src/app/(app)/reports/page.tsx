@@ -56,7 +56,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: SP }
       <div>
         <PageHeader title={t("report.title")} />
         {session.role === "guardian" && children.length > 1 && (
-          <div className="no-print mb-3 flex flex-wrap gap-2">
+          <div className="seg no-print mb-3 flex flex-wrap gap-2">
             {children.map((c) => (
               <Link prefetch={false} key={c.id} href={`/reports?child=${c.id}&month=${month}`} className={`rounded-sm border px-3 py-1.5 text-[13px] font-medium ${c.id === studentId ? "border-[#0F6CBD] bg-[#EBF3FC] text-[#0F6CBD] font-semibold" : "border-hair bg-surface text-ink-700 hover:border-[#B4D6FA] hover:bg-[#F5F9FE]"}`}>{c.full_name}</Link>
             ))}
@@ -172,7 +172,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: SP }
         <CardHeader eyebrow={`${sectionLabel} · ${periodLabel}`} title={yearName} />
         <CardBody className="pt-2">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[360px] text-[14px]">
+            <table className="w-full min-w-[300px] text-[14px]">
               <thead>
                 <tr className="text-left text-[12px] text-muted">
                   <th className="pb-2 font-semibold">#</th>

@@ -90,7 +90,7 @@ export function StudentAdmin({
             {sections.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
           </Select>
         </div>
-        <div className="flex gap-1.5" role="group" aria-label="Which students">
+        <div className="seg flex gap-1.5" role="group" aria-label="Which students">
           <button type="button" onClick={() => push({ show: "" })}
             className={cn("h-10 rounded-sm border px-3.5 text-[14px] transition-colors", !showLeft ? toggleOn : toggleOff)}>
             Current students

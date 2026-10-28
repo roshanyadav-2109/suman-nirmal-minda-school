@@ -30,20 +30,20 @@ export function AttendanceAdminControls({ period, date, month }: { period: "day"
 
   return (
     <div className="mb-5 flex flex-wrap items-end gap-3 rounded-md border border-hair bg-surface p-3">
-      <div>
+      <div className="w-full sm:w-auto">
         <label className="t-label mb-1 block">{t("common.filter")}</label>
-        <div className="flex gap-1.5">
+        <div className="seg flex gap-1.5">
           <Toggle p="day" label={t("x.periodDay")} />
           <Toggle p="month" label={t("x.periodMonth")} />
         </div>
       </div>
       {period === "day" ? (
-        <div className="min-w-[170px]">
+        <div className="w-full sm:w-auto sm:min-w-[170px]">
           <label className="t-label mb-1 block">{t("attendance.date")}</label>
           <Input type="date" value={date} onChange={(e) => push({ date: e.target.value }, ["section"])} />
         </div>
       ) : (
-        <div className="min-w-[170px]">
+        <div className="w-full sm:w-auto sm:min-w-[170px]">
           <label className="t-label mb-1 block">{t("report.month")}</label>
           <Input type="month" value={month} onChange={(e) => push({ month: e.target.value }, ["section"])} />
         </div>

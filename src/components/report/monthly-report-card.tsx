@@ -28,7 +28,7 @@ export async function ReportCard({ report, periodLabel }: { report: StudentRepor
           </div>
         </div>
 
-        <div className={att ? "grid gap-5 sm:grid-cols-[200px_1fr]" : ""}>
+        <div className={att ? "grid grid-cols-[minmax(0,1fr)] gap-5 sm:grid-cols-[200px_minmax(0,1fr)]" : ""}>
           {att && (
             <div className="rounded-md bg-panel/50 p-4">
               <div className="t-label">{t("report.attendance")}</div>

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { SearchIcon } from "@/components/icons";
 import { useT } from "@/i18n/provider";
@@ -10,8 +10,18 @@ import { cn } from "@/lib/utils";
 // The top-bar search. Results appear as you type (after a short pause), grouped
 // by kind; arrow keys move, Enter opens, Escape closes. Enter with nothing
 // highlighted opens the full results page.
+// Phones get a short placeholder so it isn't cut off mid-word.
+const PHONE = "(max-width: 639px)";
+function onPhoneChange(cb: () => void) {
+  const mq = window.matchMedia(PHONE);
+  mq.addEventListener("change", cb);
+  return () => mq.removeEventListener("change", cb);
+}
+
 export function SearchBox({ placeholder }: { placeholder: string }) {
   const t = useT();
+  const onPhone = useSyncExternalStore(onPhoneChange, () => window.matchMedia(PHONE).matches, () => false);
+  const hint = onPhone ? t("x.searchShort") : placeholder;
   const router = useRouter();
   const [q, setQ] = useState("");
   const [groups, setGroups] = useState<SearchGroup[]>([]);
@@ -75,7 +85,7 @@ export function SearchBox({ placeholder }: { placeholder: string }) {
           onChange={(e) => { setQ(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
           onKeyDown={onKey}
-          placeholder={placeholder}
+          placeholder={hint}
           aria-label={placeholder}
           role="combobox"
           aria-expanded={open && term.length >= 2}

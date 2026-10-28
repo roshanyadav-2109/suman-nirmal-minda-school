@@ -67,7 +67,7 @@ export function WeekGrid({ periods, cells, today, note }: {
 
       {/* Phones */}
       <div className="md:hidden">
-        <div className="mb-3 flex flex-wrap gap-1.5">
+        <div className="seg mb-3 flex flex-wrap gap-1.5">
           {DAYS.map((d) => (
             <button key={d.n} type="button" onClick={() => setDay(d.n)} aria-pressed={d.n === day}
               className={cn("h-8 rounded-sm border px-3 text-[13px] font-medium transition-colors", toggleCls(d.n === day))}>
@@ -84,12 +84,12 @@ export function WeekGrid({ periods, cells, today, note }: {
             return (
               <li key={p.period_no} className={cn("flex gap-3 px-3 py-2", p.is_break && "bg-[#fafafa]")}
                 style={c ? { background: tintFor(c.tint) } : undefined}>
-                <div className="w-[104px] shrink-0">
+                <div className="w-[128px] shrink-0">
                   <div className="text-[13px] font-medium text-ink-900">{p.label}</div>
-                  <div className="text-[12px] text-ink-500">{fmtRange(p.start_time, p.end_time)}</div>
+                  <div className="whitespace-nowrap text-[12px] text-ink-500">{fmtRange(p.start_time, p.end_time)}</div>
                 </div>
                 <div className="min-w-0 flex-1">
-                  {p.is_break ? <span className="text-[13px] text-ink-500">{p.label}</span> : <CellText cell={c} />}
+                  {p.is_break ? null : <CellText cell={c} />}
                 </div>
               </li>
             );

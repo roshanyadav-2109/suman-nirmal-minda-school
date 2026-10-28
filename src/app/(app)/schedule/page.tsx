@@ -59,7 +59,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: SP 
         <PageHeader title={TITLE}
           description="Your class's lessons for the week." />
         {children.length > 1 && (
-          <div className="mb-5 flex flex-wrap gap-2">
+          <div className="seg mb-5 flex flex-wrap gap-2">
             {children.map((c) => (
               <Link prefetch={false} key={c.id} href={`/schedule?child=${c.id}`} className={pill(c.id === studentId)}>{c.full_name}</Link>
             ))}

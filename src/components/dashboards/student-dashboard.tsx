@@ -151,20 +151,20 @@ async function MainContent({ name, standing, att }: { name: string; standing: St
         <Stat label={t("progress.classStanding")} value={standing?.classRank ? `${standing.classRank}/${standing.classSize}` : "—"} sub={standing ? `${t("progress.classAvg")} ${fmtPercent(locale, standing.classAvg, 1)}` : undefined} />
       </div>
 
-      {/* Quick links — one section, horizontal scroll, above My Progress */}
+      {/* Quick links — same wrapping grid as the other dashboards, above My Progress */}
       <div>
         <div className="mb-3 text-[16px] font-semibold text-ink-900">{t("dashboard.quickLinks")}</div>
-        <div className="flex gap-2.5 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {links.map((l) => {
             const Icon = l.icon;
             return (
               <Link prefetch={false}
                 key={l.href + l.labelKey}
                 href={l.href}
-                className="group flex shrink-0 items-center gap-2.5 rounded-md border border-hair bg-surface px-4 py-3 transition-colors hover:bg-panel"
+                className="group flex items-center gap-3 rounded-md border border-hair bg-surface p-3.5 transition-colors hover:border-[#0F6CBD]/40 hover:bg-[#0F6CBD]/[0.05]"
               >
-                <Icon size={22} className={linkColor[l.href] ?? "text-ink-900"} />
-                <span className="whitespace-nowrap text-[14px] font-normal text-ink-900">{t(l.labelKey)}</span>
+                <Icon size={32} className={linkColor[l.href] ?? "text-ink-900"} />
+                <span className="text-[15px] font-medium text-ink-900">{t(l.labelKey)}</span>
               </Link>
             );
           })}

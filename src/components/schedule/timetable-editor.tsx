@@ -193,7 +193,7 @@ export function TimetableEditor({ sectionId, sectionLabel, yearId, periods, slot
 
         {/* Smaller screens: one day at a time */}
         <div className="lg:hidden">
-          <div className="mb-3 flex flex-wrap gap-1.5">
+          <div className="seg mb-3 flex flex-wrap gap-1.5">
             {DAYS.map((d) => (
               <button key={d.n} type="button" onClick={() => setDay(d.n)} aria-pressed={d.n === day}
                 className={cn("h-8 rounded-sm border px-3 text-[13px] font-medium transition-colors", toggleCls(d.n === day))}>

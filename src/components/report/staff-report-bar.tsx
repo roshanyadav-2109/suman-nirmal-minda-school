@@ -49,9 +49,9 @@ export function StaffReportBar({
 
   return (
     <div className="no-print mb-5 flex flex-wrap items-end gap-3 rounded-md border border-hair bg-surface p-3">
-      <div>
+      <div className="w-full sm:w-auto">
         <label className="t-label mb-1 block">{t("report.type")}</label>
-        <div className="flex gap-1.5">
+        <div className="seg flex gap-1.5">
           <Chip on={type === "monthly"} label={t("report.monthly")} onClick={() => push({ type: "monthly" })} />
           <Chip on={type === "yearly"} label={t("report.yearly")} onClick={() => push({ type: "yearly" })} />
           <Chip on={type === "exam"} label={t("report.examwise")} onClick={() => push({ type: "exam" })} />
@@ -59,9 +59,9 @@ export function StaffReportBar({
       </div>
 
       {!wholeSchool && (
-        <div>
+        <div className="w-full sm:w-auto">
           <label className="t-label mb-1 block">{t("report.detail")}</label>
-          <div className="flex gap-1.5">
+          <div className="seg flex gap-1.5">
             <Chip on={view === "overview"} label={t("report.classDetail")} onClick={() => push({ view: "overview" }, ["student"])} />
             <Chip on={view === "student"} label={t("report.studentDetail")} onClick={() => push({ view: "student" })} />
           </div>
@@ -69,13 +69,13 @@ export function StaffReportBar({
       )}
 
       {type === "monthly" && (
-        <div className="min-w-[150px]">
+        <div className="w-full sm:w-auto sm:min-w-[150px]">
           <label className="t-label mb-1 block">{t("report.month")}</label>
           <Input type="month" value={month} onChange={(e) => push({ month: e.target.value })} />
         </div>
       )}
       {type === "exam" && (
-        <div className="min-w-[180px]">
+        <div className="w-full sm:w-auto sm:min-w-[180px]">
           <label className="t-label mb-1 block">{t("report.exam")}</label>
           <Select value={examName ?? ""} onChange={(e) => push({ exam: e.target.value })} disabled={!exams.length}>
             <option value="" disabled>{t("report.pickExam")}</option>
@@ -85,7 +85,7 @@ export function StaffReportBar({
       )}
 
       {view === "student" && !wholeSchool && (
-        <div className="min-w-[180px]">
+        <div className="w-full sm:w-auto sm:min-w-[180px]">
           <label className="t-label mb-1 block">{t("report.studentDetail")}</label>
           <Select value={studentId ?? ""} onChange={(e) => push({ student: e.target.value })}>
             <option value="" disabled>{t("x.reportPickStudent")}</option>
@@ -95,9 +95,9 @@ export function StaffReportBar({
       )}
 
       {(view === "overview" || wholeSchool) && (
-        <div>
+        <div className="w-full sm:w-auto">
           <label className="t-label mb-1 block">{t("report.order")}</label>
-          <div className="flex gap-1.5">
+          <div className="seg flex gap-1.5">
             <Chip on={sort === "roll"} label={t("report.byRoll")} onClick={() => push({ sort: "roll" })} />
             <Chip on={sort === "marks"} label={t("report.byMarks")} onClick={() => push({ sort: "marks" })} />
           </div>

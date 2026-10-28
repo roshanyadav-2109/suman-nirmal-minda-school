@@ -2,7 +2,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MenuIcon } from "@/components/icons";
 import { SearchBox } from "@/components/search-box";
 import { cn } from "@/lib/utils";
 import { navFor, type NavRole } from "@/lib/nav";
@@ -11,6 +10,15 @@ import { SchoolEmblem } from "@/components/brand";
 import { SCHOOL } from "@/lib/school";
 import { SignOutModal } from "@/components/dashboards/profile-menu";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+
+// The standard three-line menu button, drawn plainly rather than from the illustrated set.
+function HamburgerIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+      <path d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  );
+}
 
 export function AppShell({
   name,
@@ -154,11 +162,11 @@ export function AppShell({
         {/* Top bar: menu button, student search for staff, a parent's language picker. */}
         <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-hair bg-white px-3 sm:px-4">
           <button aria-label="Menu" onClick={() => setOpen(true)} className="rounded-sm p-1.5 text-ink-700 hover:bg-panel lg:hidden">
-            <MenuIcon size={22} />
+            <HamburgerIcon />
           </button>
           <button aria-label={collapsed ? "Show menu" : "Hide menu"} title={collapsed ? "Show menu" : "Hide menu"} onClick={toggleCollapsed}
             className="hidden rounded-sm p-1.5 text-ink-700 hover:bg-panel lg:block">
-            <MenuIcon size={22} />
+            <HamburgerIcon />
           </button>
           <div className={cn(!collapsed && "lg:hidden")}>
             <SchoolEmblem size={28} />

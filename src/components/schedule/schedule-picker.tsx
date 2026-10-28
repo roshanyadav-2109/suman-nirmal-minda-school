@@ -19,7 +19,7 @@ export function SchedulePicker({ mode, sections, teachers, sectionId, teacherId 
 
   return (
     <div className={cn("mb-5 flex flex-col gap-3 sm:flex-row sm:items-center", pending && "opacity-70")}>
-      <div className="flex gap-1.5">
+      <div className="seg flex gap-1.5">
         <button type="button" aria-pressed={mode === "section"} onClick={() => go(`/schedule?section=${sectionId ?? sections[0]?.id ?? ""}`)}
           className={cn("h-10 rounded-sm border px-3 text-[13px] font-medium transition-colors", toggleCls(mode === "section"))}>
           By class
