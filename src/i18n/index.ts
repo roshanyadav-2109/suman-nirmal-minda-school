@@ -1,8 +1,10 @@
 import en from "./messages/en";
 import hi from "./messages/hi";
 import bn from "./messages/bn";
+import gu from "./messages/gu";
+import pa from "./messages/pa";
 
-export const locales = ["en", "hi", "bn"] as const;
+export const locales = ["en", "hi", "bn", "gu", "pa"] as const;
 export type Locale = (typeof locales)[number];
 export const defaultLocale: Locale = "en";
 export const LOCALE_COOKIE = "kv_locale";
@@ -11,9 +13,11 @@ export const localeNames: Record<Locale, string> = {
   en: "English",
   hi: "हिन्दी",
   bn: "বাংলা",
+  gu: "ગુજરાતી",
+  pa: "ਪੰਜਾਬੀ",
 };
 
-const dictionaries: Record<Locale, PartialMessages> = { en, hi, bn };
+const dictionaries: Record<Locale, PartialMessages> = { en, hi, bn, gu, pa };
 
 // Deep-widen the English literal types to `string` so translations type-check
 // while preserving the exact key structure.
@@ -41,4 +45,6 @@ export const intlTag: Record<Locale, string> = {
   en: "en-IN",
   hi: "hi-IN",
   bn: "bn-IN",
+  gu: "gu-IN",
+  pa: "pa-IN",
 };

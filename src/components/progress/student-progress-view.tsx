@@ -1,4 +1,5 @@
 "use client";
+import type { Locale } from "@/i18n";
 import { ChartLineIcon, ViewsIcon, NotebookIcon } from "@/components/icons";
 import { useState } from "react";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
@@ -140,7 +141,7 @@ export function StudentProgressView({ data, standing }: { data: Progress; standi
 
 function StandingCard({ label, rank, size, groupAvg, groupLabel, locale, t }: {
   label: string; rank?: number; size?: number; groupAvg?: number | null; groupLabel: string;
-  locale: "en" | "hi" | "bn"; t: (k: string, v?: Record<string, string | number>) => string;
+  locale: Locale; t: (k: string, v?: Record<string, string | number>) => string;
 }) {
   return (
     <Card>
