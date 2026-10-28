@@ -1,5 +1,6 @@
 "use server";
 import { revalidatePath } from "next/cache";
+import { refreshReference } from "@/lib/data/reference";
 import { createClient } from "@/lib/supabase/server";
 
 export type PromotionDecision = {
@@ -20,6 +21,7 @@ export async function commitPromotion(input: { fromYear: number; toYear: number;
     p_rows: input.rows,
   });
   if (error) return { ok: false as const, error: error.message };
+  refreshReference(); // school years are in the shared reference copy
   revalidatePath("/dashboard/promotion");
   revalidatePath("/dashboard/students");
   return { ok: true as const, count: Number(data ?? 0) };
@@ -35,6 +37,7 @@ export async function createAcademicYear(input: { name: string; startDate: strin
     name, start_date: input.startDate, end_date: input.endDate, is_current: false,
   });
   if (error) return { ok: false as const, error: error.message };
+  refreshReference();
   revalidatePath("/dashboard/promotion");
   return { ok: true as const };
 }

@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getSession } from "@/lib/session";
+import { getReference } from "@/lib/data/reference";
 
 export type YearOpt = { id: number; name: string; is_current: boolean };
 export type SectionOpt = { id: number; name: string; class_id: number; class_name: string; class_level: number };
@@ -43,10 +44,10 @@ export const getStaffScope = cache(async (): Promise<StaffScope> => {
   // A teacher's allotments wait only for the session (to know they are not
   // admin), so they overlap with the rest instead of queueing behind them.
   const sessionP = getSession();
-  const [session, { data: years }, { data: allSubs }, allots, { data: allSecs }, { data: allClassSubs }] = await Promise.all([
+  const [session, ref, allots] = await Promise.all([
     sessionP,
-    supabase.from("academic_year").select("id, name, is_current").order("start_date", { ascending: false }),
-    supabase.from("subject").select("id, name, code").order("name"),
+    // Years, subjects, sections and class subjects: the shared reference copy.
+    getReference(),
     sessionP.then(async (sess) => {
       if (!sess || sess.isAdminScope) return [];
       const { data } = await supabase
@@ -57,11 +58,9 @@ export const getStaffScope = cache(async (): Promise<StaffScope> => {
         .eq("staff_id", sess.staffId ?? -1);
       return data ?? [];
     }),
-    // Both read-all tables; for a teacher RLS still applies and the rows are
-    // only used to resolve names, never to widen their scope.
-    supabase.from("section").select("id, name, class:class_id(id, name, level)").order("name"),
-    supabase.from("class_subject").select("class_id, subject_id"),
   ]);
+  // Names and order only; a teacher's scope still comes from their own allotments.
+  const years = ref.years, allSubs = ref.subjects, allSecs = ref.sections, allClassSubs = ref.classSubjects;
   const yearList = (years ?? []) as YearOpt[];
   const currentYearId = yearList.find((y) => y.is_current)?.id ?? yearList[0]?.id ?? null;
 

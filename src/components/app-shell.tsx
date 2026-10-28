@@ -3,7 +3,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SearchBox } from "@/components/search-box";
-import { CopyLink } from "@/components/copy-link";
 import { NavProgress } from "@/components/nav-progress";
 import { cn } from "@/lib/utils";
 import { navFor, type NavRole } from "@/lib/nav";
@@ -103,9 +102,13 @@ export function AppShell({
 
   // Everyone's name, role and sign-out sit at the foot of the side menu, on
   // every page — the same place in the desktop rail and the phone drawer —
-  // with the Neural AI credit beneath.
+  // with the Neural AI credit just above.
   const personCard = (
     <div className="border-t border-hair p-3">
+      <a href="https://neuralai.in" target="_blank" rel="noreferrer"
+        className="mb-2 block text-center text-[11px] text-ink-500 hover:text-[#0F6CBD]">
+        Powered by <span className="font-semibold text-ink-700">Neural AI</span>
+      </a>
       <button
         onClick={() => { setOpen(false); setMenuOpen(true); }}
         aria-haspopup="dialog"
@@ -120,10 +123,6 @@ export function AppShell({
           <span className="h-1 w-1 rounded-full bg-current" /><span className="h-1 w-1 rounded-full bg-current" /><span className="h-1 w-1 rounded-full bg-current" />
         </span>
       </button>
-      <a href="https://neuralai.in" target="_blank" rel="noreferrer"
-        className="mt-1 block text-center text-[11px] text-ink-500 hover:text-[#0F6CBD]">
-        Powered by <span className="font-semibold text-ink-700">Neural AI</span>
-      </a>
     </div>
   );
 
@@ -184,7 +183,6 @@ export function AppShell({
           )}
           <div className="ml-auto flex items-center gap-2">
             {role === "guardian" && isDashboard && <LocaleSwitcher />}
-            {role !== "transport" && <CopyLink />}
           </div>
         </header>
 

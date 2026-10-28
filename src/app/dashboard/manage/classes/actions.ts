@@ -1,5 +1,6 @@
 "use server";
 import { revalidatePath } from "next/cache";
+import { refreshReference } from "@/lib/data/reference";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentYear, getSession } from "@/lib/session";
 import type { Database } from "@/lib/database.types";
@@ -18,6 +19,8 @@ async function officeOnly(): Promise<string | null> {
 }
 
 function refresh() {
+  // Classes, sections and subjects are in the shared reference copy: drop it now.
+  refreshReference();
   revalidatePath("/dashboard/manage/classes");
   revalidatePath("/dashboard/manage/teachers");
   revalidatePath("/dashboard/manage/exams");

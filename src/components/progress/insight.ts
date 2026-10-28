@@ -10,5 +10,6 @@ export function supportReason(
   if (s.avg_percent < 40) parts.push(t("x.reasonOverall", { avg: Math.round(s.avg_percent) }));
   if (s.weak_subjects) parts.push(t("x.reasonWeak", { subjects: s.weak_subjects }));
   if (Number(s.recent_trend) < 0) parts.push(t("x.reasonTrend", { pts: Math.abs(Math.round(Number(s.recent_trend))) }));
-  return parts.join(" · ");
+  // Each reason is a short sentence of its own.
+  return parts.join(" ");
 }

@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/database.types";
+import { getReference } from "@/lib/data/reference";
 
 export type StaffRole = Database["public"]["Enums"]["staff_role"];
 export type ProfileRole = Database["public"]["Enums"]["profile_role"];
@@ -43,7 +44,7 @@ export const getSession = cache(async (): Promise<Session | null> => {
   const [{ data }, year] = await Promise.all([
     supabase
       .from("profile")
-      .select("id, role, full_name, locale, staff_id, guardian_id, student_id, staff:staff_id(role, email), guardian:guardian_id(email), student:student_id(email)")
+      .select("id, role, full_name, locale, staff_id, guardian_id, student_id, staff:staff_id(role, email, teacher_allotment(academic_year_id, is_class_teacher)), guardian:guardian_id(email), student:student_id(email)")
       .eq("id", user.id)
       .single(),
     getCurrentYear(),
@@ -67,16 +68,9 @@ export const getSession = cache(async (): Promise<Session | null> => {
     data.role === "staff" ? (staffRole ?? "office") : data.role;
 
   // Is this staff member a class teacher of any section in the current year?
-  let isClassTeacher = false;
-  if (data.staff_id && year) {
-    const { count } = await supabase
-      .from("teacher_allotment")
-      .select("id", { count: "exact", head: true })
-      .eq("staff_id", data.staff_id)
-      .eq("is_class_teacher", true)
-      .eq("academic_year_id", year.id);
-    isClassTeacher = (count ?? 0) > 0;
-  }
+  // Their allotments come with the profile, so this costs no extra trip.
+  const allots = (data.staff as { teacher_allotment?: { academic_year_id: number; is_class_teacher: boolean }[] } | null)?.teacher_allotment ?? [];
+  const isClassTeacher = !!year && allots.some((a) => a.is_class_teacher && a.academic_year_id === year.id);
 
   const navRole: NavRole = isClassTeacher ? "class_teacher" : (effectiveRole as NavRole);
 
@@ -102,7 +96,7 @@ export type Gender = Database["public"]["Enums"]["gender_type"];
 export type StudentCard = { gender: Gender | null; roll: number | null; classSection: string | null; classTeacher: string | null };
 export const getStudentCard = cache(async (studentId: number): Promise<StudentCard | null> => {
   const supabase = await createClient();
-  const { data: year } = await supabase.from("academic_year").select("id").eq("is_current", true).single();
+  const year = await getCurrentYear();
   if (!year) return null;
   const { data: enr } = await supabase
     .from("student_enrollment")
@@ -130,13 +124,5 @@ export const getStudentCard = cache(async (studentId: number): Promise<StudentCa
   return { gender, roll: enr.roll_no, classSection, classTeacher };
 });
 
-// Current academic year (readable by all authenticated users). Cached per request.
-export const getCurrentYear = cache(async () => {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("academic_year")
-    .select("id, name")
-    .eq("is_current", true)
-    .single();
-  return data;
-});
+// Current academic year — from the shared reference copy (no database trip).
+export const getCurrentYear = cache(async () => (await getReference()).currentYear);

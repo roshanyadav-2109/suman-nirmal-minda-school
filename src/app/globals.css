@@ -38,8 +38,10 @@
   --radius-md: 6px;
   --radius-lg: 8px;
 
-  /* Type — Source Sans 3 (Indic fallbacks so HI/BN don't render tofu) */
-  --font-sans: "Segoe UI Variable Text", "Segoe UI", var(--font-body), "Noto Sans Devanagari", "Noto Sans Bengali",
+  /* Type — Source Sans 3 (Indic fallbacks so HI/BN/GU/PA don't render tofu;
+     Nirmala UI is Windows' built-in Indic font) */
+  --font-sans: "Segoe UI Variable Text", "Segoe UI", var(--font-body), "Nirmala UI", "Noto Sans Devanagari", "Noto Sans Bengali",
+    "Noto Sans Gujarati", "Noto Sans Gurmukhi",
     ui-sans-serif, system-ui, sans-serif;
 
   /* Soft, low, warm-tinted shadows (no neumorphism/glassmorphism) */
