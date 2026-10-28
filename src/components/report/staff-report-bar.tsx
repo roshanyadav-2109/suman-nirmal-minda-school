@@ -1,21 +1,27 @@
 "use client";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Input, Select } from "@/components/ui/field";
-import { Button } from "@/components/ui/button";
-import { ExcelIcon, PrintIcon } from "@/components/icons";
 import { useT } from "@/i18n/provider";
 import { cn } from "@/lib/utils";
-import { downloadXlsx } from "@/lib/xlsx";
-import type { XlsxExport } from "@/components/report/report-controls";
+import { ReportDownloads, type XlsxExport } from "@/components/report/report-downloads";
+import type { PdfDoc } from "@/lib/pdf";
 
 type ReportType = "monthly" | "yearly" | "exam";
 type View = "overview" | "student";
 type Row = { id: number; name: string };
 
+const chipClass = (on: boolean) => cn("h-10 rounded-sm border px-3.5 text-[13px] font-medium transition-colors",
+  on ? "border-[#0F6CBD] bg-[#EBF3FC] text-[#0F6CBD] font-semibold" : "border-hair bg-surface text-ink-700 hover:border-[#B4D6FA] hover:bg-[#F5F9FE]");
+
+function Chip({ on, label, onClick }: { on: boolean; label: string; onClick: () => void }) {
+  return <button type="button" onClick={onClick} aria-pressed={on} className={chipClass(on)}>{label}</button>;
+}
+
 // Staff report controls: report type (monthly / yearly / exam), the detail level
-// (whole class or one student), the period/exam picker, and the download.
+// (whole class or one student), the period/exam picker, and the downloads.
+// For the whole-school list there is no "one student" option (pick a section first).
 export function StaffReportBar({
-  type, view, month, examName, exams, students, studentId, sort, xlsx,
+  type, view, month, examName, exams, students, studentId, sort, xlsx, pdf, wholeSchool = false,
 }: {
   type: ReportType;
   view: View;
@@ -26,6 +32,8 @@ export function StaffReportBar({
   studentId: number | null;
   sort: "roll" | "marks";
   xlsx?: XlsxExport;
+  pdf?: PdfDoc;
+  wholeSchool?: boolean;
 }) {
   const t = useT();
   const router = useRouter();
@@ -39,46 +47,26 @@ export function StaffReportBar({
     router.push(`${pathname}?${next.toString()}`);
   }
 
-  const TypeChip = ({ v, label }: { v: ReportType; label: string }) => (
-    <button onClick={() => push({ type: v })} aria-pressed={type === v}
-      className={cn("h-10 rounded-sm border px-3.5 text-[13px] font-medium transition-colors",
-        type === v ? "border-[#0F6CBD] bg-[#EBF3FC] text-[#0F6CBD] font-semibold" : "border-hair bg-surface text-ink-700 hover:border-[#B4D6FA] hover:bg-[#F5F9FE]")}>
-      {label}
-    </button>
-  );
-  const ViewChip = ({ v, label }: { v: View; label: string }) => (
-    <button onClick={() => push({ view: v }, v === "overview" ? ["student"] : [])} aria-pressed={view === v}
-      className={cn("h-10 rounded-sm border px-3.5 text-[13px] font-medium transition-colors",
-        view === v ? "border-[#0F6CBD] bg-[#EBF3FC] text-[#0F6CBD] font-semibold" : "border-hair bg-surface text-ink-700 hover:border-[#B4D6FA] hover:bg-[#F5F9FE]")}>
-      {label}
-    </button>
-  );
-  const SortChip = ({ v, label }: { v: "roll" | "marks"; label: string }) => (
-    <button onClick={() => push({ sort: v })} aria-pressed={sort === v}
-      className={cn("h-10 rounded-sm border px-3.5 text-[13px] font-medium transition-colors",
-        sort === v ? "border-[#0F6CBD] bg-[#EBF3FC] text-[#0F6CBD] font-semibold" : "border-hair bg-surface text-ink-700 hover:border-[#B4D6FA] hover:bg-[#F5F9FE]")}>
-      {label}
-    </button>
-  );
-
   return (
     <div className="no-print mb-5 flex flex-wrap items-end gap-3 rounded-md border border-hair bg-surface p-3">
       <div>
         <label className="t-label mb-1 block">{t("report.type")}</label>
         <div className="flex gap-1.5">
-          <TypeChip v="monthly" label={t("report.monthly")} />
-          <TypeChip v="yearly" label={t("report.yearly")} />
-          <TypeChip v="exam" label={t("report.examwise")} />
+          <Chip on={type === "monthly"} label={t("report.monthly")} onClick={() => push({ type: "monthly" })} />
+          <Chip on={type === "yearly"} label={t("report.yearly")} onClick={() => push({ type: "yearly" })} />
+          <Chip on={type === "exam"} label={t("report.examwise")} onClick={() => push({ type: "exam" })} />
         </div>
       </div>
 
-      <div>
-        <label className="t-label mb-1 block">{t("report.detail")}</label>
-        <div className="flex gap-1.5">
-          <ViewChip v="overview" label={t("report.classDetail")} />
-          <ViewChip v="student" label={t("report.studentDetail")} />
+      {!wholeSchool && (
+        <div>
+          <label className="t-label mb-1 block">{t("report.detail")}</label>
+          <div className="flex gap-1.5">
+            <Chip on={view === "overview"} label={t("report.classDetail")} onClick={() => push({ view: "overview" }, ["student"])} />
+            <Chip on={view === "student"} label={t("report.studentDetail")} onClick={() => push({ view: "student" })} />
+          </div>
         </div>
-      </div>
+      )}
 
       {type === "monthly" && (
         <div className="min-w-[150px]">
@@ -96,7 +84,7 @@ export function StaffReportBar({
         </div>
       )}
 
-      {view === "student" && (
+      {view === "student" && !wholeSchool && (
         <div className="min-w-[180px]">
           <label className="t-label mb-1 block">{t("report.studentDetail")}</label>
           <Select value={studentId ?? ""} onChange={(e) => push({ student: e.target.value })}>
@@ -106,20 +94,17 @@ export function StaffReportBar({
         </div>
       )}
 
-      {view === "overview" && (
+      {(view === "overview" || wholeSchool) && (
         <div>
           <label className="t-label mb-1 block">{t("report.order")}</label>
           <div className="flex gap-1.5">
-            <SortChip v="roll" label={t("report.byRoll")} />
-            <SortChip v="marks" label={t("report.byMarks")} />
+            <Chip on={sort === "roll"} label={t("report.byRoll")} onClick={() => push({ sort: "roll" })} />
+            <Chip on={sort === "marks"} label={t("report.byMarks")} onClick={() => push({ sort: "marks" })} />
           </div>
         </div>
       )}
 
-      <Button variant="subtle" className="ml-auto"
-        onClick={() => xlsx ? downloadXlsx(xlsx.filename, xlsx.headers, xlsx.rows, xlsx.sheetName) : window.print()}>
-        {xlsx ? <ExcelIcon size={18} /> : <PrintIcon size={18} />} {xlsx ? t("x.downloadExcel") : t("x.download")}
-      </Button>
+      <ReportDownloads className="ml-auto" xlsx={xlsx} pdf={pdf} />
     </div>
   );
 }

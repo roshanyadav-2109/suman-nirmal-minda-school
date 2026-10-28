@@ -1,5 +1,7 @@
-import { ArrowRightIcon } from "@/components/icons";
 import Link from "next/link";
+import { RosterGrid } from "@/components/students/roster-grid";
+import { getSession } from "@/lib/session";
+import { getStudentRecords } from "@/app/(app)/manage/students/data";
 import { getT } from "@/i18n/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty";
@@ -68,7 +70,20 @@ export default async function StudentsPage({ searchParams }: { searchParams: SP 
   }
 
   const section = scope.sections.find((s) => s.id === num(sp.section)) ?? scope.sections[0];
+
+  // Who may edit details here: the office for everyone, a class teacher for
+  // their own class — and only this year's roster (that is what an edit changes).
+  const session = await getSession();
+  const isOffice = session?.staffRole === "office";
+  const ownClass = scope.sectionMeta.some((m) => m.id === section.id && m.isClassTeacher);
+  const mode: "none" | "teacher" | "office" =
+    yearId !== scope.currentYearId ? "none" : isOffice ? "office" : ownClass ? "teacher" : "none";
+
   const roster = await getSectionStudents(section.id, yearId);
+  const records = mode === "none" ? [] : [...(await getStudentRecords(roster.map((s) => s.id), yearId)).values()];
+  const sectionRefs = scope.sections.map((s) => ({
+    id: s.id, label: `${s.class_name}-${s.name}`, className: s.class_name, sectionName: s.name, classLevel: s.class_level,
+  }));
 
   return (
     <div>
@@ -76,19 +91,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: SP 
       <ScopeBar years={scope.years} sections={scope.sections} yearId={yearId} sectionId={section.id} />
       <Card>
         <CardBody>
-          <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
-            {roster.map((s) => (
-              <Link prefetch={false} key={s.id} href={`/progress?studentId=${s.id}&section=${section.id}&year=${yearId}`}
-                className="group flex items-center gap-2.5 rounded-sm border border-hair bg-surface px-3 py-2 transition-colors hover:border-[#0F6CBD]">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-panel text-[11px] font-semibold text-ink-700 tabular">{s.roll ?? "–"}</span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[13px] font-medium text-ink-900">{s.name}</span>
-                  <span className="block truncate text-[11px] text-muted tabular">{s.admissionNo}</span>
-                </span>
-                <ArrowRightIcon size={15} className="text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-ink-900" />
-              </Link>
-            ))}
-          </div>
+          <RosterGrid roster={roster} records={records} sectionId={section.id} yearId={yearId} mode={mode} sections={sectionRefs} />
         </CardBody>
       </Card>
     </div>

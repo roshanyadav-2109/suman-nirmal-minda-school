@@ -15,11 +15,11 @@ export type AllotRow = {
   isCt: boolean;
 };
 
-export function AllotmentsTable({ rows }: { rows: AllotRow[] }) {
+export function AllotmentsTable({ rows, initialTeacher = "" }: { rows: AllotRow[]; initialTeacher?: string }) {
   const t = useT();
   const [cls, setCls] = useState("");
   const [section, setSection] = useState("");
-  const [teacher, setTeacher] = useState("");
+  const [teacher, setTeacher] = useState(initialTeacher);
 
   const classes = useMemo(() => {
     const m = new Map<string, number>();

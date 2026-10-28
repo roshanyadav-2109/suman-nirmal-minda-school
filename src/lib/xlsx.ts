@@ -1,5 +1,6 @@
 // Minimal, dependency-free XLSX writer. Builds a real .xlsx (zip of Open XML
 // parts) in the browser so class reports download as Excel — no external lib.
+// Supports several sheets per workbook (whole-school report: one per class).
 
 type Cell = string | number | null | undefined;
 
@@ -82,6 +83,18 @@ function colName(n: number): string {
   return s;
 }
 
+
+// Column widths sized to the longest value (Excel units ≈ characters).
+function colsXml(rows: Cell[][]): string {
+  const widths: number[] = [];
+  for (const row of rows) row.forEach((cell, ci) => {
+    const len = cell == null ? 0 : String(cell).length;
+    widths[ci] = Math.max(widths[ci] ?? 6, Math.min(len + 2, 60));
+  });
+  if (!widths.length) return "";
+  return `<cols>${widths.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join("")}</cols>`;
+}
+
 function sheetXml(rows: Cell[][]): string {
   const body = rows.map((row, ri) => {
     const cells = row.map((cell, ci) => {
@@ -93,25 +106,45 @@ function sheetXml(rows: Cell[][]): string {
     }).join("");
     return `<row r="${ri + 1}">${cells}</row>`;
   }).join("");
-  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>${body}</sheetData></worksheet>`;
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">${colsXml(rows)}<sheetData>${body}</sheetData></worksheet>`;
 }
 
-// Build an .xlsx Blob from a header row + data rows.
-export function buildXlsxBlob(headers: string[], rows: Cell[][], sheetName = "Report"): Blob {
-  const name = esc(sheetName.slice(0, 31));
+export type XlsxSheet = { name: string; headers: string[]; rows: Cell[][] };
+
+// Excel sheet names: max 31 chars, none of : \ / ? * [ ], and unique.
+function sheetNames(sheets: XlsxSheet[]): string[] {
+  const used = new Set<string>();
+  return sheets.map((s, i) => {
+    const base = (s.name.replace(/[:\\/?*[\]]/g, "-").trim() || `Sheet${i + 1}`).slice(0, 31);
+    let name = base;
+    for (let n = 2; used.has(name.toLowerCase()); n++) name = `${base.slice(0, 31 - String(n).length - 1)} ${n}`;
+    used.add(name.toLowerCase());
+    return name;
+  });
+}
+
+// Build an .xlsx Blob with one or more sheets.
+export function buildWorkbookBlob(sheets: XlsxSheet[]): Blob {
+  const names = sheetNames(sheets);
+  const overrides = sheets.map((_, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join("");
+  const sheetEls = names.map((n, i) => `<sheet name="${esc(n)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join("");
+  const rels = sheets.map((_, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join("");
   const files = [
-    { name: "[Content_Types].xml", data: enc(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>`) },
+    { name: "[Content_Types].xml", data: enc(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>${overrides}</Types>`) },
     { name: "_rels/.rels", data: enc(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`) },
-    { name: "xl/workbook.xml", data: enc(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="${name}" sheetId="1" r:id="rId1"/></sheets></workbook>`) },
-    { name: "xl/_rels/workbook.xml.rels", data: enc(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>`) },
-    { name: "xl/worksheets/sheet1.xml", data: enc(sheetXml([headers, ...rows])) },
+    { name: "xl/workbook.xml", data: enc(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${sheetEls}</sheets></workbook>`) },
+    { name: "xl/_rels/workbook.xml.rels", data: enc(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${rels}</Relationships>`) },
+    ...sheets.map((s, i) => ({ name: `xl/worksheets/sheet${i + 1}.xml`, data: enc(sheetXml([s.headers, ...s.rows])) })),
   ];
   return new Blob([zip(files) as unknown as BlobPart], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
 }
 
-// Build the file and trigger a browser download.
-export function downloadXlsx(filename: string, headers: string[], rows: Cell[][], sheetName = "Report") {
-  const blob = buildXlsxBlob(headers, rows, sheetName);
+// Build an .xlsx Blob from a header row + data rows (single sheet).
+export function buildXlsxBlob(headers: string[], rows: Cell[][], sheetName = "Report"): Blob {
+  return buildWorkbookBlob([{ name: sheetName, headers, rows }]);
+}
+
+function saveBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -119,5 +152,15 @@ export function downloadXlsx(filename: string, headers: string[], rows: Cell[][]
   document.body.appendChild(a);
   a.click();
   a.remove();
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// Build the file and trigger a browser download.
+export function downloadXlsx(filename: string, headers: string[], rows: Cell[][], sheetName = "Report") {
+  saveBlob(buildXlsxBlob(headers, rows, sheetName), filename);
+}
+
+// Several sheets in one workbook (e.g. whole school + one sheet per class).
+export function downloadWorkbook(filename: string, sheets: XlsxSheet[]) {
+  saveBlob(buildWorkbookBlob(sheets), filename);
 }

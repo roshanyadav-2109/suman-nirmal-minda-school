@@ -1,14 +1,10 @@
-import { Illustration } from "@/components/ui/empty";
-
-// Shown the moment someone opens a page, while it loads: the school's "books"
-// illustration floating gently, with three dots pulsing in turn. Motion stops
-// for anyone who has asked their device for reduced motion (globals.css).
+// Shown the moment someone opens a page, while it loads: a small spinner with
+// three dots pulsing in turn. Motion stops for anyone who has asked their
+// device for reduced motion (globals.css).
 export default function Loading() {
   return (
     <div role="status" aria-live="polite" className="flex min-h-[60vh] flex-col items-center justify-center text-center">
-      <div className="loader-float">
-        <Illustration name="loading" size={130} />
-      </div>
+      <span className="h-9 w-9 animate-spin rounded-full border-[3px] border-hair border-t-[#0F6CBD]" aria-hidden />
       <div className="mt-4 flex items-center gap-2 text-[15px] font-medium text-ink-700">
         Loading
         <span className="flex gap-1" aria-hidden>

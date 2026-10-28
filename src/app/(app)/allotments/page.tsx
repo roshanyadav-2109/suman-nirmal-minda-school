@@ -4,7 +4,11 @@ import { getT } from "@/i18n/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { AllotmentsTable, type AllotRow } from "@/components/allotments/allotments-table";
 
-export default async function AllotmentsPage() {
+type SP = Promise<Record<string, string | string[] | undefined>>;
+
+export default async function AllotmentsPage({ searchParams }: { searchParams: SP }) {
+  const sp = await searchParams;
+  const initialTeacher = typeof sp.teacher === "string" ? sp.teacher : "";
   const supabase = await createClient();
   const { t } = await getT();
   const year = await getCurrentYear();
@@ -30,7 +34,7 @@ export default async function AllotmentsPage() {
   return (
     <div>
       <PageHeader title={t("nav.allotments")} />
-      <AllotmentsTable rows={rows} />
+      <AllotmentsTable rows={rows} initialTeacher={initialTeacher} />
     </div>
   );
 }

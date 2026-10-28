@@ -83,15 +83,45 @@ export async function getStudentExamReport(studentId: number, yearId: number, ex
   };
 }
 
+
+// PostgREST returns at most 1,000 rows per request, so a year of marks for one
+// section (~1,200) or a month for the whole school (~4,000) is read in pages:
+// the first page also returns the total count, then every other page is sent
+// at once. `make(from, to, withCount)` must build a fresh, stably ordered query.
+type Page<T> = PromiseLike<{ data: T[] | null; count?: number | null; error: unknown }>;
+const PAGE = 1000;
+async function fetchAll<T>(make: (from: number, to: number, withCount: boolean) => Page<T>): Promise<T[]> {
+  const first = await make(0, PAGE - 1, true);
+  const rows = [...(first.data ?? [])];
+  const total = first.count ?? rows.length;
+  if (total <= PAGE) return rows;
+  const pages = await Promise.all(
+    Array.from({ length: Math.ceil(total / PAGE) - 1 }, (_, i) => make((i + 1) * PAGE, (i + 2) * PAGE - 1, false)),
+  );
+  for (const p of pages) rows.push(...(p.data ?? []));
+  return rows;
+}
+
+type AttRow = { student_id: number; present: number; total: number };
+type Db = Awaited<ReturnType<typeof createClient>>;
+
+// Per-pupil present/total for one section over a date range, counted in the
+// database (one small row per pupil instead of thousands of daily records).
+async function sectionAttendance(supabase: Db, sectionId: number, yearId: number, start: string, end: string): Promise<AttRow[]> {
+  const { data } = await supabase.rpc("section_attendance_range", { p_section: sectionId, p_start: start, p_end: end, p_year: yearId });
+  return (data ?? []).map((r) => ({ student_id: r.student_id, present: Number(r.present), total: Number(r.total) }));
+}
+
 // Whole-class report over a date range: per-student average marks + attendance %.
 export async function getClassReport(sectionId: number, yearId: number, start: string, end: string): Promise<ClassReportRow[]> {
   const supabase = await createClient();
-  const [{ data: marks }, { data: att }, { data: roster }] = await Promise.all([
-    supabase.from("v_mark_detail").select("student_id, percent")
-      .eq("section_id", sectionId).eq("academic_year_id", yearId)
-      .gte("assessed_on", start).lte("assessed_on", end),
-    supabase.from("attendance_record").select("student_id, status")
-      .eq("section_id", sectionId).is("period", null).gte("on_date", start).lte("on_date", end),
+  const [marks, att, { data: roster }] = await Promise.all([
+    fetchAll<{ student_id: number | null; percent: number | null }>((from, to, withCount) =>
+      supabase.from("v_mark_detail").select("student_id, percent", withCount ? { count: "exact" } : undefined)
+        .eq("section_id", sectionId).eq("academic_year_id", yearId)
+        .gte("assessed_on", start).lte("assessed_on", end)
+        .order("mark_id").range(from, to)),
+    sectionAttendance(supabase, sectionId, yearId, start, end),
     supabase.from("student_enrollment").select("roll_no, student:student_id(id, full_name)")
       .eq("section_id", sectionId).eq("academic_year_id", yearId).order("roll_no"),
   ]);
@@ -101,9 +131,11 @@ export async function getClassReport(sectionId: number, yearId: number, start: s
 // Whole-class report for a single exam: per-student average % in that exam (no attendance).
 export async function getClassExamReport(sectionId: number, yearId: number, examName: string): Promise<ClassReportRow[]> {
   const supabase = await createClient();
-  const [{ data: marks }, { data: roster }] = await Promise.all([
-    supabase.from("v_mark_detail").select("student_id, percent")
-      .eq("section_id", sectionId).eq("academic_year_id", yearId).eq("assessment_name", examName),
+  const [marks, { data: roster }] = await Promise.all([
+    fetchAll<{ student_id: number | null; percent: number | null }>((from, to, withCount) =>
+      supabase.from("v_mark_detail").select("student_id, percent", withCount ? { count: "exact" } : undefined)
+        .eq("section_id", sectionId).eq("academic_year_id", yearId).eq("assessment_name", examName)
+        .order("mark_id").range(from, to)),
     supabase.from("student_enrollment").select("roll_no, student:student_id(id, full_name)")
       .eq("section_id", sectionId).eq("academic_year_id", yearId).order("roll_no"),
   ]);
@@ -114,7 +146,7 @@ type RosterRow = { roll_no: number | null; student: unknown } | null;
 function rollUp(
   roster: RosterRow[] | null,
   marks: { student_id: number | null; percent: number | null }[] | null,
-  att: { student_id: number | null; status: string }[] | null,
+  att: AttRow[] | null,
 ): ClassReportRow[] {
   const markAgg = new Map<number, { sum: number; n: number }>();
   for (const m of marks ?? []) {
@@ -122,12 +154,7 @@ function rollUp(
     const a = markAgg.get(m.student_id) ?? { sum: 0, n: 0 };
     a.sum += Number(m.percent); a.n += 1; markAgg.set(m.student_id, a);
   }
-  const attAgg = new Map<number, { p: number; t: number }>();
-  for (const a of att ?? []) {
-    if (a.student_id == null || a.status === "holiday") continue;
-    const x = attAgg.get(a.student_id) ?? { p: 0, t: 0 };
-    x.t += 1; if (a.status === "present" || a.status === "late") x.p += 1; attAgg.set(a.student_id, x);
-  }
+  const attAgg = new Map<number, AttRow>((att ?? []).map((a) => [a.student_id, a]));
   return (roster ?? []).map((e) => {
     const s = e!.student as unknown as { id: number; full_name: string };
     const mk = markAgg.get(s.id);
@@ -135,7 +162,131 @@ function rollUp(
     return {
       id: s.id, roll: e!.roll_no, name: s.full_name,
       avg: mk ? Math.round((mk.sum / mk.n) * 10) / 10 : null,
-      attPct: att && at && at.t ? Math.round((at.p / at.t) * 1000) / 10 : null,
+      attPct: att && at && at.total ? Math.round((at.present / at.total) * 1000) / 10 : null,
     };
   });
+}
+
+// ---------------------------------------------------------------------------
+// Whole school (principal / office): every pupil, grouped by class then section.
+// ---------------------------------------------------------------------------
+export type SchoolSectionRef = { id: number; name: string; class_name: string; class_level: number };
+export type SchoolReportSection = {
+  sectionId: number; className: string; classLevel: number; sectionName: string;
+  rows: ClassReportRow[];
+  avg: number | null;      // mean of the pupils' averages
+  attPct: number | null;   // all days present / all school days in the section
+};
+export type SchoolReportPeriod =
+  | { kind: "range"; start: string; end: string; yearly: boolean }
+  | { kind: "exam"; examName: string };
+
+// Distinct exam names across the whole school this year (for the exam picker).
+export async function getSchoolExamNames(yearId: number) {
+  const supabase = await createClient();
+  const rows = await fetchAll<{ name: string }>((from, to, withCount) =>
+    supabase.from("assessment").select("name", withCount ? { count: "exact" } : undefined)
+      .eq("academic_year_id", yearId).order("assessed_on").order("id").range(from, to));
+  return [...new Set(rows.map((r) => r.name).filter(Boolean))];
+}
+
+// Set-based: the roster (2 pages), the marks (paged for a month / one exam, or
+// averaged in the database per section for a full year) and attendance counted
+// in the database per section. Every request is sent at the same time.
+export async function getSchoolReport(yearId: number, sections: SchoolSectionRef[], period: SchoolReportPeriod): Promise<SchoolReportSection[]> {
+  const supabase = await createClient();
+
+  const rosterP = fetchAll<{ section_id: number; roll_no: number | null; student: unknown }>((from, to, withCount) =>
+    supabase.from("student_enrollment").select("section_id, roll_no, student:student_id(id, full_name)", withCount ? { count: "exact" } : undefined)
+      .eq("academic_year_id", yearId).order("id").range(from, to));
+
+  // student_id -> average %
+  const marksF = async (): Promise<Map<number, number>> => {
+    const avg = new Map<number, number>();
+    if (period.kind === "range" && period.yearly) {
+      // A full year is ~55k marks: let the database average them, one call per section.
+      const res = await Promise.all(sections.map((s) =>
+        supabase.rpc("top_performers", { p_section: s.id, p_year: yearId, p_limit: 5000 })));
+      for (const r of res) for (const x of r.data ?? []) {
+        if (x.avg_percent != null) avg.set(x.student_id, Math.round(Number(x.avg_percent) * 10) / 10);
+      }
+      return avg;
+    }
+    const rows = await fetchAll<{ id: number; student_id: number; marks_obtained: number | null; assessment: unknown }>((from, to, withCount) => {
+      const q = supabase.from("mark")
+        .select("id, student_id, marks_obtained, assessment!inner(max_marks)", withCount ? { count: "exact" } : undefined)
+        .eq("assessment.academic_year_id", yearId).not("marks_obtained", "is", null);
+      const f = period.kind === "exam"
+        ? q.eq("assessment.name", period.examName)
+        : q.gte("assessment.assessed_on", period.start).lte("assessment.assessed_on", period.end);
+      return f.order("id").range(from, to);
+    });
+    const agg = new Map<number, { sum: number; n: number }>();
+    for (const m of rows) {
+      const max = Number((m.assessment as { max_marks: number } | null)?.max_marks ?? 0);
+      if (m.marks_obtained == null || !(max > 0)) continue;
+      const a = agg.get(m.student_id) ?? { sum: 0, n: 0 };
+      a.sum += (Number(m.marks_obtained) / max) * 100; a.n += 1; agg.set(m.student_id, a);
+    }
+    for (const [id, a] of agg) avg.set(id, Math.round((a.sum / a.n) * 10) / 10);
+    return avg;
+  };
+
+  const attF = (): Promise<Map<number, AttRow> | null> => period.kind === "range"
+    ? Promise.all(sections.map((s) => sectionAttendance(supabase, s.id, yearId, period.start, period.end)))
+        .then((all) => new Map(all.flat().map((a) => [a.student_id, a])))
+    : Promise.resolve(null);
+
+  // Fast path: one database call for every pupil's figures (migration 0035).
+  // Until that is applied the call fails and the per-section requests above run instead.
+  type Summary = { student_id: number; avg_percent: number | string | null; present: number | string; total: number | string };
+  const summaryP = supabase.rpc("school_report_summary" as never, (period.kind === "exam"
+    ? { p_year: yearId, p_exam: period.examName }
+    : { p_year: yearId, p_start: period.start, p_end: period.end }) as never) as unknown as PromiseLike<{ data: Summary[] | null; error: unknown }>;
+
+  const [roster, summary] = await Promise.all([rosterP, summaryP]);
+  let avg: Map<number, number>;
+  let att: Map<number, AttRow> | null;
+  if (!summary.error && summary.data) {
+    avg = new Map();
+    for (const r of summary.data) if (r.avg_percent != null) avg.set(r.student_id, Number(r.avg_percent));
+    att = period.kind === "range"
+      ? new Map(summary.data.map((r) => [r.student_id, { student_id: r.student_id, present: Number(r.present), total: Number(r.total) }]))
+      : null;
+  } else {
+    [avg, att] = await Promise.all([marksF(), attF()]);
+  }
+
+  const bySection = new Map<number, ClassReportRow[]>();
+  const attTotals = new Map<number, { p: number; t: number }>();
+  for (const e of roster) {
+    const s = e.student as { id: number; full_name: string } | null;
+    if (!s) continue;
+    const a = att?.get(s.id);
+    const row: ClassReportRow = {
+      id: s.id, roll: e.roll_no, name: s.full_name,
+      avg: avg.get(s.id) ?? null,
+      attPct: a && a.total ? Math.round((a.present / a.total) * 1000) / 10 : null,
+    };
+    const list = bySection.get(e.section_id);
+    if (list) list.push(row); else bySection.set(e.section_id, [row]);
+    if (a) {
+      const t = attTotals.get(e.section_id) ?? { p: 0, t: 0 };
+      t.p += a.present; t.t += a.total; attTotals.set(e.section_id, t);
+    }
+  }
+
+  return [...sections]
+    .sort((a, b) => a.class_level - b.class_level || a.name.localeCompare(b.name))
+    .map((s) => {
+      const rows = (bySection.get(s.id) ?? []).sort((a, b) => (a.roll ?? Number.MAX_SAFE_INTEGER) - (b.roll ?? Number.MAX_SAFE_INTEGER));
+      const avgs = rows.map((r) => r.avg).filter((v): v is number => v != null);
+      const t = attTotals.get(s.id);
+      return {
+        sectionId: s.id, className: s.class_name, classLevel: s.class_level, sectionName: s.name, rows,
+        avg: avgs.length ? Math.round((avgs.reduce((x, y) => x + y, 0) / avgs.length) * 10) / 10 : null,
+        attPct: t && t.t ? Math.round((t.p / t.t) * 1000) / 10 : null,
+      };
+    })
+    .filter((s) => s.rows.length > 0);
 }

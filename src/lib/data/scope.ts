@@ -175,6 +175,7 @@ export async function getSectionStudents(sectionId: number, yearId: number) {
     .select("roll_no, student:student_id(id, full_name, admission_no)")
     .eq("section_id", sectionId)
     .eq("academic_year_id", yearId)
+    .neq("status", "transferred") // students who left the school drop off the roster
     .order("roll_no");
   return (data ?? []).map((e) => {
     const s = e.student as unknown as { id: number; full_name: string; admission_no: string };

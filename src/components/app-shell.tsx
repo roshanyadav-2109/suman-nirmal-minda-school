@@ -1,8 +1,9 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { MenuIcon, CloseIcon, SearchIcon } from "@/components/icons";
+import { usePathname } from "next/navigation";
+import { MenuIcon } from "@/components/icons";
+import { SearchBox } from "@/components/search-box";
 import { cn } from "@/lib/utils";
 import { navFor, type NavRole } from "@/lib/nav";
 import { useT } from "@/i18n/provider";
@@ -26,21 +27,15 @@ export function AppShell({
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const router = useRouter();
   const items = navFor(role);
 
   // Desktop side menu can be hidden from the top bar for more room.
   const [collapsed, setCollapsed] = useState(false);
   const toggleCollapsed = () => setCollapsed((c) => !c);
 
-  // Student search is for the staff who have the Students page.
-  const canSearch = role === "principal" || role === "office" || role === "class_teacher";
-  const [query, setQuery] = useState("");
-  const search = (e: React.FormEvent) => {
-    e.preventDefault();
-    const q = query.trim();
-    if (q) router.push(`/students?q=${encodeURIComponent(q)}`);
-  };
+  // Everyone gets search; staff search people and classes, families search
+  // pages and notices (and their own children).
+  const isStaffRole = role === "principal" || role === "office" || role === "class_teacher" || role === "subject_teacher";
 
   const isDashboard = pathname === "/";
 
@@ -138,13 +133,6 @@ export function AppShell({
                 <SchoolEmblem size={32} />
                 <span className="text-[13px] font-bold text-ink-900">{SCHOOL.name}</span>
               </div>
-              <button
-                aria-label={t("common.close")}
-                onClick={() => setOpen(false)}
-                className="rounded-sm p-1.5 text-ink-500 hover:bg-panel"
-              >
-                <CloseIcon size={20} />
-              </button>
             </div>
             <div className="flex-1 overflow-y-auto">
               {navList}
@@ -175,17 +163,8 @@ export function AppShell({
           <div className={cn(!collapsed && "lg:hidden")}>
             <SchoolEmblem size={28} />
           </div>
-          {canSearch && (
-            <form onSubmit={search} role="search" className="flex w-full max-w-[460px] items-center gap-2 rounded-md border border-hair bg-surface px-3 focus-within:border-[#0F6CBD]">
-              <SearchIcon size={18} />
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder={t("x.searchStudents")}
-                aria-label={t("x.searchStudents")}
-                className="h-9 w-full bg-transparent text-[14px] text-ink-900 outline-none placeholder:text-ink-500"
-              />
-            </form>
+          {role !== "transport" && (
+            <SearchBox placeholder={t(isStaffRole ? "x.searchEverything" : "x.searchFamily")} />
           )}
           {role === "guardian" && isDashboard && (
             <div className="ml-auto flex items-center gap-2">

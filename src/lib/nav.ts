@@ -25,6 +25,7 @@ export const NAV: NavItem[] = [
   { href: "/progress", icon: ProgressIcon, labelKey: "nav.childProgress", roles: ["guardian"] },
   { href: "/progress", icon: ProgressIcon, labelKey: "nav.progress", roles: ["subject_teacher", "class_teacher", "principal"] },
   { href: "/attendance", icon: AttendanceIcon, labelKey: "nav.attendance", roles: ALL },
+  { href: "/schedule", icon: CalendarIcon, labelKey: "nav.schedule", roles: ALL },
   { href: "/marks", icon: MarksIcon, labelKey: "nav.marks", roles: ["subject_teacher", "class_teacher", "office"] },
   { href: "/students", icon: StudentsIcon, labelKey: "nav.students", roles: ["class_teacher", "principal", "office"] },
   { href: "/announcements", icon: AnnounceIcon, labelKey: "nav.announcements", roles: ALL },
@@ -33,6 +34,7 @@ export const NAV: NavItem[] = [
   { href: "/leave", icon: LeaveIcon, labelKey: "nav.leave", roles: ["student", "guardian", "class_teacher"] },
   { href: "/allotments", icon: AllotmentIcon, labelKey: "nav.allotments", roles: ["principal", "office"] },
   { href: "/promotion", icon: PromotionIcon, labelKey: "nav.promotion", roles: ["office", "principal", "class_teacher"] },
+  { href: "/manage", icon: AllotmentIcon, labelKey: "nav.manage", roles: ["office"] },
 ];
 
 export function navFor(role: NavRole): NavItem[] {

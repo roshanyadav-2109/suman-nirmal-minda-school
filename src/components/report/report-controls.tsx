@@ -1,16 +1,16 @@
 "use client";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Input } from "@/components/ui/field";
-import { Button } from "@/components/ui/button";
-import { ExcelIcon, PrintIcon } from "@/components/icons";
 import { useT } from "@/i18n/provider";
-import { downloadXlsx } from "@/lib/xlsx";
+import { ReportDownloads, type XlsxExport } from "@/components/report/report-downloads";
+import type { PdfDoc } from "@/lib/pdf";
 
-// When `xlsx` is supplied (multi-student class report) the download button
-// exports an Excel workbook; otherwise it prints the single report to PDF.
-export type XlsxExport = { filename: string; sheetName?: string; headers: string[]; rows: (string | number | null)[][] };
+export type { XlsxExport };
 
-export function ReportControls({ month, extra, xlsx }: { month: string; extra?: React.ReactNode; xlsx?: XlsxExport }) {
+// Month picker for the parent / student report card, with the downloads:
+// "Download PDF" saves the report card as a file, "Print" opens the print dialog
+// (and Excel appears only when a multi-student `xlsx` list is supplied).
+export function ReportControls({ month, extra, xlsx, pdf }: { month: string; extra?: React.ReactNode; xlsx?: XlsxExport; pdf?: PdfDoc }) {
   const t = useT();
   const router = useRouter();
   const pathname = usePathname();
@@ -29,10 +29,7 @@ export function ReportControls({ month, extra, xlsx }: { month: string; extra?: 
         <Input type="month" value={month} onChange={(e) => setMonth(e.target.value)} />
       </div>
       {extra}
-      <Button variant="subtle" className="ml-auto"
-        onClick={() => xlsx ? downloadXlsx(xlsx.filename, xlsx.headers, xlsx.rows, xlsx.sheetName) : window.print()}>
-        {xlsx ? <ExcelIcon size={18} /> : <PrintIcon size={18} />} {xlsx ? t("x.downloadExcel") : t("x.download")}
-      </Button>
+      <ReportDownloads className="ml-auto" xlsx={xlsx} pdf={pdf} />
     </div>
   );
 }
