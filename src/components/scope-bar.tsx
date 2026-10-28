@@ -1,8 +1,9 @@
 "use client";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import { Select, Input } from "@/components/ui/field";
 import { useT } from "@/i18n/provider";
 import type { YearOpt, SectionOpt } from "@/lib/data/scope";
+import { useNavigate } from "@/components/nav-progress";
 
 // Compact filter bar for attendance/marks: year + section (+ optional date/extra).
 export function ScopeBar({
@@ -16,7 +17,7 @@ export function ScopeBar({
   extra?: React.ReactNode;
 }) {
   const t = useT();
-  const router = useRouter();
+  const navigate = useNavigate();
   const pathname = usePathname();
   const params = useSearchParams();
 
@@ -28,7 +29,7 @@ export function ScopeBar({
     }
     // A new section has its own roster/history — drop section-specific params.
     if ("section" in patch) { next.delete("date"); next.delete("student"); }
-    router.push(`${pathname}?${next.toString()}`);
+    navigate(`${pathname}?${next.toString()}`);
   }
 
   return (

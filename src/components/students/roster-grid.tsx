@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRightIcon } from "@/components/icons";
 import { Dialog, StudentForm, type FormStudent } from "@/components/students/student-form";
-import { saveStudent, updateStudentDetails } from "@/app/(app)/manage/students/actions";
-import type { SectionRef } from "@/app/(app)/manage/students/rules";
+import { saveStudent, updateStudentDetails } from "@/app/dashboard/manage/students/actions";
+import type { SectionRef } from "@/app/dashboard/manage/students/rules";
 
 type RosterItem = { id: number; name: string; admissionNo: string; roll: number | null };
 
@@ -34,7 +34,7 @@ export function RosterGrid({
           const rec = byId.get(s.id);
           return (
             <div key={s.id} className="flex items-center gap-1 rounded-sm border border-hair bg-surface pr-1.5 transition-colors hover:border-[#0F6CBD]">
-              <Link prefetch={false} href={`/progress?studentId=${s.id}&section=${sectionId}&year=${yearId}`}
+              <Link prefetch={false} href={`/dashboard/progress?studentId=${s.id}&section=${sectionId}&year=${yearId}`}
                 className="group flex min-w-0 flex-1 items-center gap-2.5 px-3 py-2">
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-panel text-[11px] font-semibold text-ink-700 tabular">{s.roll ?? "–"}</span>
                 <span className="min-w-0 flex-1">

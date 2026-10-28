@@ -4,10 +4,10 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const TABS = [
-  { href: "/manage/students", label: "Students" },
-  { href: "/manage/teachers", label: "Assigned Teachers" },
-  { href: "/manage/classes", label: "Classes & Subjects" },
-  { href: "/manage/exams", label: "Exams" },
+  { href: "/dashboard/manage/students", label: "Students" },
+  { href: "/dashboard/manage/teachers", label: "Assigned Teachers" },
+  { href: "/dashboard/manage/classes", label: "Classes & Subjects" },
+  { href: "/dashboard/manage/exams", label: "Exams" },
 ];
 
 // The four parts of Manage School, as tabs along the top.
@@ -18,7 +18,7 @@ export function ManageTabs() {
       {TABS.map((tab) => {
         const on = pathname === tab.href || pathname.startsWith(`${tab.href}/`);
         return (
-          <Link prefetch={false} key={tab.href} href={tab.href} aria-current={on ? "page" : undefined}
+          <Link key={tab.href} href={tab.href} aria-current={on ? "page" : undefined}
             className={cn("rounded-sm border px-3.5 py-2 text-[14px] font-medium transition-colors",
               on ? "border-[#0F6CBD] bg-[#EBF3FC] font-semibold text-[#0F6CBD]" : "border-hair bg-surface text-ink-700 hover:border-[#B4D6FA] hover:bg-[#F5F9FE]")}>
             {tab.label}

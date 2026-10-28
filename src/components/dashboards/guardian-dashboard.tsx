@@ -36,9 +36,9 @@ export async function GuardianDashboard({ session }: { session: Session }) {
     <div>
       <DashHeader name={session.fullName} emoji="🙏" />
       <ActionButtons actions={[
-        { href: "/progress", label: t("dashboard.ctaChildProgress"), icon: ProgressIcon },
-        { href: "/leave", label: t("dashboard.ctaApplyLeave"), icon: LeaveIcon },
-        { href: "/reports", label: t("dashboard.ctaReportCard"), icon: ReportIcon },
+        { href: "/dashboard/progress", label: t("dashboard.ctaChildProgress"), icon: ProgressIcon },
+        { href: "/dashboard/leave", label: t("dashboard.ctaApplyLeave"), icon: LeaveIcon },
+        { href: "/dashboard/reports", label: t("dashboard.ctaReportCard"), icon: ReportIcon },
       ]} />
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2">
@@ -56,7 +56,7 @@ export async function GuardianDashboard({ session }: { session: Session }) {
                       <div className="text-[12px] tabular text-ink-900">{child.admission_no}</div>
                     </div>
                   </div>
-                  <Link prefetch={false} href={`/progress?child=${child.id}`} aria-label={t("nav.childProgress")}
+                  <Link href={`/dashboard/progress?child=${child.id}`} aria-label={t("nav.childProgress")}
                     className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-hair bg-surface transition-colors hover:border-[#B4D6FA] hover:bg-[#F5F9FE]">
                     <ArrowRightIcon size={16} />
                   </Link>

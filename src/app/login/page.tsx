@@ -1,22 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowRightIcon, RolePrincipalIcon, RoleTeacherIcon, RoleParentIcon, RoleStudentIcon, RoleOfficeIcon, RoleConductorIcon, CloseIcon, type IconComponent } from "@/components/icons";
+import { ArrowRightIcon } from "@/components/icons";
 import { createClient } from "@/lib/supabase/client";
 import { useT } from "@/i18n/provider";
 import { SchoolEmblem } from "@/components/brand";
 import { SCHOOL } from "@/lib/school";
 import { DEMO_ACCOUNTS, DEMO_PASSWORD } from "@/lib/demo";
-
-// A suitable icon per demo role.
-const ROLE_ICON: Record<string, IconComponent> = {
-  principal: RolePrincipalIcon,
-  teacher: RoleTeacherIcon,
-  guardian: RoleParentIcon,
-  student: RoleStudentIcon,
-  office: RoleOfficeIcon,
-  transport: RoleConductorIcon,
-};
+import { safeNext } from "@/lib/safe-next";
 
 // ── Provider brand marks (inline so they need no external assets) ──────────────
 function GoogleMark({ size = 20 }: { size?: number }) {
@@ -29,31 +20,18 @@ function GoogleMark({ size = 20 }: { size?: number }) {
     </svg>
   );
 }
-function MicrosoftMark({ size = 20 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden>
-      <rect x="1" y="1" width="10" height="10" fill="#F25022" />
-      <rect x="13" y="1" width="10" height="10" fill="#7FBA00" />
-      <rect x="1" y="13" width="10" height="10" fill="#00A4EF" />
-      <rect x="13" y="13" width="10" height="10" fill="#FFB900" />
-    </svg>
-  );
-}
-// Zoho's brandmark is its four-colour wordmark.
-function ZohoMark() {
-  const letters: [string, string][] = [["Z", "#E42527"], ["o", "#F9B21D"], ["h", "#089949"], ["o", "#226DB4"]];
-  return (
-    <span className="text-[13px] font-bold leading-none tracking-tight" aria-hidden>
-      {letters.map(([ch, c], i) => (<span key={i} style={{ color: c }}>{ch}</span>))}
-    </span>
-  );
-}
-
 const PROVIDERS: { key: string; label: string; Mark: (p: { size?: number }) => React.ReactElement }[] = [
   { key: "google", label: "Continue with Google", Mark: GoogleMark },
-  { key: "microsoft", label: "Continue with Microsoft", Mark: MicrosoftMark },
-  { key: "zoho", label: "Continue with Zoho", Mark: ZohoMark },
 ];
+
+// What to tell someone whose Google sign-in didn't go through.
+const GOOGLE_ERRORS: Record<string, string> = {
+  google_not_registered: "This Google account isn't registered with the school. Please ask the school office to add your email.",
+  google_other_login: "Your school record is already linked to a different login. Please ask the school office.",
+  google_ambiguous: "This email is on more than one school record. Please ask the school office.",
+  google_failed: "Google sign-in didn't go through. Please try again.",
+  google_off: "Google sign-in isn't set up yet.",
+};
 
 export default function LoginPage() {
   const t = useT();
@@ -62,7 +40,6 @@ export default function LoginPage() {
   const supabase = createClient();
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState(false);
-  const [showDemo, setShowDemo] = useState(false);
   // The film is a large-screen affair: phones and tablets get the plain page and
   // never fetch it. And because the player shows its title strip and a control
   // cluster for the first moment of playback, it is held hidden until that has
@@ -80,9 +57,17 @@ export default function LoginPage() {
     setBusy(key); setError(false);
     const { error } = await supabase.auth.signInWithPassword({ email: em, password: pw });
     if (error) { setError(true); setBusy(null); return; }
-    router.push(params.get("next") || "/");
+    router.push(safeNext(params.get("next")));
     router.refresh();
   }
+
+  // Google signs in directly with the school's own site (see /auth/google).
+  function providerSignIn(key: string) {
+    setBusy(key);
+    const next = params.get("next");
+    window.location.assign(`/auth/google/start${next ? `?next=${encodeURIComponent(next)}` : ""}`);
+  }
+  const googleError = GOOGLE_ERRORS[params.get("error") ?? ""];
 
   const rowBase = "flex w-full items-center gap-3 rounded-sm border border-hair bg-surface px-4 py-2.5 text-[14px] font-normal text-ink-900 transition-colors hover:bg-panel disabled:opacity-50";
 
@@ -145,11 +130,14 @@ export default function LoginPage() {
           {error && (
             <p className="mb-3 rounded-sm border border-down/30 bg-down-soft px-3 py-2 text-[13px] text-down">{t("auth.invalid")}</p>
           )}
+          {googleError && (
+            <p className="mb-3 rounded-sm border border-down/30 bg-down-soft px-3 py-2 text-[13px] text-down">{googleError}</p>
+          )}
 
           {/* Provider sign-in */}
           <div className="space-y-2">
             {PROVIDERS.map(({ key, label, Mark }) => (
-              <button key={key} onClick={() => setShowDemo(true)} disabled={busy !== null} className={rowBase}>
+              <button key={key} onClick={() => providerSignIn(key)} disabled={busy !== null} className={rowBase}>
                 <span className="flex w-7 shrink-0 justify-center"><Mark size={20} /></span>
                 <span className="flex-1 text-left font-semibold">{label}</span>
                 {busy === key && <span className="h-3.5 w-3.5 shrink-0 animate-spin rounded-full border-2 border-hair border-t-ink-900" />}
@@ -183,40 +171,13 @@ export default function LoginPage() {
             ))}
           </div>
 
+          <a href="https://neuralai.in" target="_blank" rel="noreferrer"
+            className="mt-6 block text-center text-[12px] text-ink-500 hover:text-[#0F6CBD]">
+            Powered by <span className="font-semibold text-ink-700">Neural AI</span>
+          </a>
         </div>
       </main>
 
-      {/* Not-public-yet notice for provider sign-in → offer the demo logins */}
-      {showDemo && (
-        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-ink-900/40 backdrop-blur-md" onClick={() => setShowDemo(false)} />
-          <div className="relative z-10 flex max-h-[88vh] w-[92vw] flex-col items-center justify-center overflow-y-auto rounded-md bg-surface p-5 text-center shadow-[var(--shadow-pop)] sm:h-[70vh] sm:w-[70vw] sm:p-8">
-            <button onClick={() => setShowDemo(false)} aria-label="Close" className="absolute right-3 top-3 rounded-sm p-1.5 text-ink-500 hover:bg-panel">
-              <CloseIcon size={20} />
-            </button>
-            <div className="text-[36px] leading-none">🙈</div>
-            <h2 className="font-display mt-3 text-[22px] font-medium leading-tight text-ink-900 sm:text-[28px]">Uh oh — we&apos;re not public yet!</h2>
-            <p className="mt-2 text-[13px] text-ink-500 sm:text-[14px]">Try one of the demo logins instead.</p>
-
-            <div className="mt-6 grid w-full max-w-md grid-cols-2 gap-2.5 sm:mt-8 sm:flex sm:flex-wrap sm:justify-center">
-              {DEMO_ACCOUNTS.map((a) => {
-                const Icon = ROLE_ICON[a.role] ?? RoleStudentIcon;
-                return (
-                  <button key={a.email} onClick={() => signIn(a.email, DEMO_PASSWORD, a.email)} disabled={busy !== null}
-                    className="flex w-full flex-col items-center gap-2 rounded-sm border border-hair bg-surface px-3 py-3.5 transition-colors hover:border-[#0F6CBD] hover:bg-panel disabled:opacity-50 sm:w-[128px]">
-                    <span className="flex h-11 w-11 items-center justify-center rounded-full bg-panel text-ink-900">
-                      {busy === a.email
-                        ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-hair border-t-ink-900" />
-                        : <Icon size={32} />}
-                    </span>
-                    <span className="text-[13px] font-semibold text-ink-900">{t(`roles.${a.role}`)}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

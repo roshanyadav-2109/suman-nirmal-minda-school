@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/field";
 import { CheckIcon, PlusIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import type { Period } from "@/components/schedule/shared";
-import { saveBellSchedule, type PeriodInput } from "@/app/(app)/schedule/actions";
+import { saveBellSchedule, type PeriodInput } from "@/app/dashboard/schedule/actions";
 
 // Office: the school's bell times (names and start/end of each period).
 export function BellScheduleForm({ periods }: { periods: Period[] }) {

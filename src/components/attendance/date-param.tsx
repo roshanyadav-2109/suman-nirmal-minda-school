@@ -1,9 +1,10 @@
 "use client";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import { Input } from "@/components/ui/field";
+import { useNavigate } from "@/components/nav-progress";
 
 export function DateParam({ date }: { date: string }) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const pathname = usePathname();
   const params = useSearchParams();
   return (
@@ -13,7 +14,7 @@ export function DateParam({ date }: { date: string }) {
       onChange={(e) => {
         const next = new URLSearchParams(params.toString());
         next.set("date", e.target.value);
-        router.push(`${pathname}?${next.toString()}`);
+        navigate(`${pathname}?${next.toString()}`);
       }}
     />
   );

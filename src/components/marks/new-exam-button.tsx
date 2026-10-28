@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Select, Field } from "@/components/ui/field";
 import { PlusIcon } from "@/components/icons";
 import { useT } from "@/i18n/provider";
-import { createClassExam } from "@/app/(app)/marks/actions";
+import { createClassExam } from "@/app/dashboard/marks/actions";
 
 // Teacher/office creates a new exam column for the class+subject. It fans out to
 // every section of the class (create_class_exam), so it appears in all sections.

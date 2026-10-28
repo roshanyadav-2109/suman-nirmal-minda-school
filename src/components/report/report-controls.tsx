@@ -1,9 +1,10 @@
 "use client";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import { Input } from "@/components/ui/field";
 import { useT } from "@/i18n/provider";
 import { ReportDownloads, type XlsxExport } from "@/components/report/report-downloads";
 import type { PdfDoc } from "@/lib/pdf";
+import { useNavigate } from "@/components/nav-progress";
 
 export type { XlsxExport };
 
@@ -12,14 +13,14 @@ export type { XlsxExport };
 // (and Excel appears only when a multi-student `xlsx` list is supplied).
 export function ReportControls({ month, extra, xlsx, pdf }: { month: string; extra?: React.ReactNode; xlsx?: XlsxExport; pdf?: PdfDoc }) {
   const t = useT();
-  const router = useRouter();
+  const navigate = useNavigate();
   const pathname = usePathname();
   const params = useSearchParams();
 
   function setMonth(v: string) {
     const next = new URLSearchParams(params.toString());
     if (v) next.set("month", v);
-    router.push(`${pathname}?${next.toString()}`);
+    navigate(`${pathname}?${next.toString()}`);
   }
 
   return (

@@ -1,10 +1,11 @@
 "use client";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import { Select } from "@/components/ui/field";
 import { useI18n } from "@/i18n/provider";
 import { fmtDate } from "@/i18n/format";
 import type { YearOpt, SectionMeta } from "@/lib/data/scope";
 import type { AssessmentOpt } from "@/lib/data/marks";
+import { useNavigate } from "@/components/nav-progress";
 
 export function MarksScopeBar({
   years, sectionMeta, assessments, yearId, sectionId, subjectId, assessmentId,
@@ -18,7 +19,7 @@ export function MarksScopeBar({
   assessmentId: number | null;
 }) {
   const { t, locale } = useI18n();
-  const router = useRouter();
+  const navigate = useNavigate();
   const pathname = usePathname();
   const params = useSearchParams();
 
@@ -30,7 +31,7 @@ export function MarksScopeBar({
     for (const [k, v] of Object.entries(patch)) { if (v) next.set(k, v); else next.delete(k); }
     if (resetSubject) next.delete("subject");
     if (resetAssessment) next.delete("assessment");
-    router.push(`${pathname}?${next.toString()}`);
+    navigate(`${pathname}?${next.toString()}`);
   }
 
   return (

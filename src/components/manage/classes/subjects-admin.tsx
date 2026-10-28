@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
 import { EmptyState } from "@/components/ui/empty";
 import { PlusIcon } from "@/components/icons";
-import { addSubject, updateSubject, type ActionResult } from "@/app/(app)/manage/classes/actions";
+import { addSubject, updateSubject, type ActionResult } from "@/app/dashboard/manage/classes/actions";
 
 export type SubjectRow = { id: number; name: string; code: string };
 type Note = { ok: boolean; text: string } | null;

@@ -32,7 +32,8 @@ export type Session = {
 export const getSession = cache(async (): Promise<Session | null> => {
   const supabase = await createClient();
   const { data: claimsData } = await supabase.auth.getClaims();
-  const userId = claimsData?.claims?.sub;
+  const claims = claimsData?.claims;
+  const userId = claims?.sub;
   if (!userId) return null;
   const user = { id: userId };
 
@@ -42,12 +43,24 @@ export const getSession = cache(async (): Promise<Session | null> => {
   const [{ data }, year] = await Promise.all([
     supabase
       .from("profile")
-      .select("id, role, full_name, locale, staff_id, guardian_id, student_id, staff:staff_id(role)")
+      .select("id, role, full_name, locale, staff_id, guardian_id, student_id, staff:staff_id(role, email), guardian:guardian_id(email), student:student_id(email)")
       .eq("id", user.id)
       .single(),
     getCurrentYear(),
   ]);
   if (!data) return null;
+
+  // Google sign-in follows the email on the school record: once the office
+  // changes or removes it, a Google login stops working straight away.
+  const providers = (claims?.app_metadata as { providers?: string[] } | undefined)?.providers ?? [];
+  if (providers.includes("google")) {
+    const recordEmail =
+      (data.staff as { email: string | null } | null)?.email ??
+      (data.guardian as { email: string | null } | null)?.email ??
+      (data.student as { email: string | null } | null)?.email ?? null;
+    const signedInAs = typeof claims?.email === "string" ? claims.email : "";
+    if (!recordEmail || recordEmail.trim().toLowerCase() !== signedInAs.trim().toLowerCase()) return null;
+  }
 
   const staffRole = (data.staff as { role: StaffRole } | null)?.role ?? null;
   const effectiveRole: Session["effectiveRole"] =

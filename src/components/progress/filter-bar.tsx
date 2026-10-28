@@ -1,8 +1,9 @@
 "use client";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import { Select } from "@/components/ui/field";
 import { useT } from "@/i18n/provider";
 import type { YearOpt, SectionMeta, ClassOpt, SubjectOpt } from "@/lib/data/scope";
+import { useNavigate } from "@/components/nav-progress";
 
 export function FilterBar({
   years, classes, sectionMeta, subjects, subjectsByClass, exams, examName, students, studentId, yearId, level, scopeId, subjectId,
@@ -22,7 +23,7 @@ export function FilterBar({
   subjectId: number | null;
 }) {
   const t = useT();
-  const router = useRouter();
+  const navigate = useNavigate();
   const pathname = usePathname();
   const params = useSearchParams();
 
@@ -40,7 +41,7 @@ export function FilterBar({
 
   function push(next: URLSearchParams) {
     next.delete("studentId");
-    router.push(`${pathname}?${next.toString()}`);
+    navigate(`${pathname}?${next.toString()}`);
   }
   function setYear(v: string) {
     const next = new URLSearchParams(params.toString());
@@ -77,7 +78,7 @@ export function FilterBar({
   function setStudent(v: string) {
     const next = new URLSearchParams(params.toString());
     if (v) next.set("studentId", v); else next.delete("studentId");
-    router.push(`${pathname}?${next.toString()}`);
+    navigate(`${pathname}?${next.toString()}`);
   }
 
   return (

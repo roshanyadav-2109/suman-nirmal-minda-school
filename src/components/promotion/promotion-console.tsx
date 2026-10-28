@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/field";
 import { useT } from "@/i18n/provider";
 import { cn } from "@/lib/utils";
-import { commitPromotion, type PromotionDecision } from "@/app/(app)/promotion/actions";
+import { commitPromotion, type PromotionDecision } from "@/app/dashboard/promotion/actions";
 import type { PromRow, SectionOpt } from "@/lib/data/promotion";
 
 type Outcome = "promoted" | "retained" | "transferred" | "graduated";

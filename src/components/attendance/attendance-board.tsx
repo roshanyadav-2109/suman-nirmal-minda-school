@@ -8,7 +8,7 @@ import { CheckIcon } from "@/components/icons";
 import { useI18n } from "@/i18n/provider";
 import { fmtDate } from "@/i18n/format";
 import { cn } from "@/lib/utils";
-import { saveDailyAttendance, type AttStatus } from "@/app/(app)/attendance/actions";
+import { saveDailyAttendance, type AttStatus } from "@/app/dashboard/attendance/actions";
 
 type Row = { id: number; name: string; roll: number | null };
 const STATUSES: { key: AttStatus; short: string; cls: string }[] = [

@@ -7,7 +7,7 @@ import { Field, Input, Select } from "@/components/ui/field";
 import { EmptyState } from "@/components/ui/empty";
 import { PlusIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
-import { createExam, updateExam, deleteExam } from "@/app/(app)/manage/exams/actions";
+import { createExam, updateExam, deleteExam } from "@/app/dashboard/manage/exams/actions";
 
 export type ExamGroup = {
   key: string;

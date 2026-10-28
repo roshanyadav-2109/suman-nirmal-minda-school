@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase/config";
 import { NextResponse, type NextRequest } from "next/server";
+import { safeNext } from "@/lib/safe-next";
 
 // Next 16 renamed `middleware` -> `proxy`. Runs before render: refreshes the
 // Supabase session cookie and gates unauthenticated users to /login.
@@ -41,16 +42,19 @@ export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const isPublic = PUBLIC_PATHS.some((p) => path === p || path.startsWith(p + "/"));
 
+  // Signed out: go to login, remembering the whole link (filters included) so a
+  // shared link opens exactly that page once they have signed in.
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    url.searchParams.set("next", path);
+    url.search = "";
+    url.searchParams.set("next", path + request.nextUrl.search);
     return NextResponse.redirect(url);
   }
+  // Already signed in but on the login page: straight on to where they were going.
   if (user && path === "/login") {
-    const url = request.nextUrl.clone();
-    url.pathname = "/";
-    return NextResponse.redirect(url);
+    const target = safeNext(request.nextUrl.searchParams.get("next"));
+    return NextResponse.redirect(new URL(target, request.url));
   }
 
   return response;

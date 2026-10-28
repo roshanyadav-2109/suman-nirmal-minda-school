@@ -9,8 +9,9 @@ import { PlusIcon, SearchIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { Dialog, StudentForm, type FormStudent } from "@/components/students/student-form";
 import { BulkUpload } from "@/components/manage/students/bulk-upload";
-import { saveStudent, setStudentLeft } from "@/app/(app)/manage/students/actions";
-import type { SectionRef } from "@/app/(app)/manage/students/rules";
+import { saveStudent, setStudentLeft } from "@/app/dashboard/manage/students/actions";
+import type { SectionRef } from "@/app/dashboard/manage/students/rules";
+import { useNavigate } from "@/components/nav-progress";
 
 export type AdminRow = FormStudent & { left: boolean };
 
@@ -31,6 +32,7 @@ export function StudentAdmin({
   yearName: string;
 }) {
   const router = useRouter();
+  const navigate = useNavigate();
   const pathname = usePathname();
   const params = useSearchParams();
   const [q, setQ] = useState(params.get("q") ?? "");
@@ -48,7 +50,7 @@ export function StudentAdmin({
     const next = new URLSearchParams(params.toString());
     for (const [k, val] of Object.entries(patch)) { if (val) next.set(k, val); else next.delete(k); }
     if (!("page" in patch)) next.delete("page");
-    router.push(`${pathname}?${next.toString()}`);
+    navigate(`${pathname}?${next.toString()}`);
   }
 
   function done(text: string) {

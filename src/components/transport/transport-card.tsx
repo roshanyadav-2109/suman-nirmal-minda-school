@@ -188,7 +188,7 @@ export function TransportCard({
           </div>
         </div>
         <Link prefetch={false}
-          href="/transport"
+          href="/dashboard/transport"
           className="mt-3 inline-flex items-center gap-1.5 text-[12px] font-normal text-[#0F6CBD] hover:text-ink-900"
         >
           {labels.trackBus}

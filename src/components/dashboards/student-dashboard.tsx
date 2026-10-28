@@ -122,15 +122,15 @@ async function BusCard({ studentId }: { studentId: number }) {
 async function MainContent({ name, standing, att }: { name: string; standing: Standing | null; att: Att | null }) {
   const { t, locale } = await getT();
   const firstName = name.split(" ").slice(-1)[0];
-  const links = navFor("student").filter((l) => l.href !== "/");
+  const links = navFor("student").filter((l) => l.href !== "/dashboard");
   // A distinct, lively colour per quick link.
   const linkColor: Record<string, string> = {
-    "/progress": "text-[rgb(79,70,229)]",
-    "/attendance": "text-[rgb(22,163,74)]",
-    "/announcements": "text-[rgb(217,119,6)]",
-    "/calendar": "text-[rgb(219,39,119)]",
-    "/reports": "text-[rgb(124,58,237)]",
-    "/leave": "text-[rgb(13,148,136)]",
+    "/dashboard/progress": "text-[rgb(79,70,229)]",
+    "/dashboard/attendance": "text-[rgb(22,163,74)]",
+    "/dashboard/announcements": "text-[rgb(217,119,6)]",
+    "/dashboard/calendar": "text-[rgb(219,39,119)]",
+    "/dashboard/reports": "text-[rgb(124,58,237)]",
+    "/dashboard/leave": "text-[rgb(13,148,136)]",
   };
   return (
     <section className="flex flex-col gap-3">
@@ -140,8 +140,8 @@ async function MainContent({ name, standing, att }: { name: string; standing: St
       </div>
 
       <ActionButtons actions={[
-        { href: "/progress", label: t("dashboard.ctaMyProgress"), icon: ProgressIcon },
-        { href: "/reports", label: t("dashboard.ctaReportCard"), icon: ReportIcon },
+        { href: "/dashboard/progress", label: t("dashboard.ctaMyProgress"), icon: ProgressIcon },
+        { href: "/dashboard/reports", label: t("dashboard.ctaReportCard"), icon: ReportIcon },
       ]} />
 
       <div className="grid grid-cols-2 gap-3">
@@ -158,7 +158,7 @@ async function MainContent({ name, standing, att }: { name: string; standing: St
           {links.map((l) => {
             const Icon = l.icon;
             return (
-              <Link prefetch={false}
+              <Link
                 key={l.href + l.labelKey}
                 href={l.href}
                 className="group flex items-center gap-3 rounded-md border border-hair bg-surface p-3.5 transition-colors hover:border-[#0F6CBD]/40 hover:bg-[#0F6CBD]/[0.05]"
@@ -175,7 +175,7 @@ async function MainContent({ name, standing, att }: { name: string; standing: St
       <div className="rounded-sm border border-hair bg-surface p-5">
         <h3 className="t-h3 text-ink-900">{t("progress.title")}</h3>
         <p className="mt-1.5 text-[14px] leading-relaxed text-ink-900">{t("dashboard.progressCta")}</p>
-        <Link prefetch={false} href="/progress" className="mt-3 inline-flex items-center gap-1.5 rounded-sm bg-[#0F6CBD] px-3.5 py-2 text-[13px] font-normal text-white transition-colors hover:bg-[#115EA3]">
+        <Link href="/dashboard/progress" className="mt-3 inline-flex items-center gap-1.5 rounded-sm bg-[#0F6CBD] px-3.5 py-2 text-[13px] font-normal text-white transition-colors hover:bg-[#115EA3]">
           {t("nav.myProgress")}
           <ArrowRightIcon size={14} />
         </Link>
@@ -199,7 +199,7 @@ async function AnnouncementsCard() {
       <CardHeader
         title={t("announce.title")}
         action={
-          <Link prefetch={false} href="/announcements" className="inline-flex items-center gap-1 text-[12px] font-normal text-[#0F6CBD] hover:text-ink-900">
+          <Link href="/dashboard/announcements" className="inline-flex items-center gap-1 text-[12px] font-normal text-[#0F6CBD] hover:text-ink-900">
             {t("dashboard.viewAll")}
             <ArrowRightIcon size={13} />
           </Link>
@@ -230,7 +230,7 @@ async function EventCalendarCard() {
       <CardHeader
         title={t("announce.events")}
         action={
-          <Link prefetch={false} href="/calendar" className="inline-flex items-center gap-1 text-[12px] font-normal text-[#0F6CBD] hover:text-ink-900">
+          <Link href="/dashboard/calendar" className="inline-flex items-center gap-1 text-[12px] font-normal text-[#0F6CBD] hover:text-ink-900">
             {t("dashboard.viewAll")}
             <ArrowRightIcon size={13} />
           </Link>
@@ -243,7 +243,7 @@ async function EventCalendarCard() {
               const d = new Date(e.start_date);
               return (
                 <li key={e.id}>
-                  <Link prefetch={false} href="/calendar" className="group flex items-center gap-2.5 rounded-sm p-1 transition-colors hover:bg-panel">
+                  <Link href="/dashboard/calendar" className="group flex items-center gap-2.5 rounded-sm p-1 transition-colors hover:bg-panel">
                     <span className="flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-sm bg-ink-900 leading-none text-gold-100">
                       <span className="text-[15px] font-bold tabular">{fmtDate(locale, d, { day: "2-digit" })}</span>
                       <span className="text-[9px] font-semibold uppercase tracking-wide text-gold-300">{fmtDate(locale, d, { month: "short" })}</span>

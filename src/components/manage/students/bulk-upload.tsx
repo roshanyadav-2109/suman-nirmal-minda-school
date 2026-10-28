@@ -4,8 +4,8 @@ import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExcelIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
-import { findExistingAdmissionNos, importStudents } from "@/app/(app)/manage/students/actions";
-import { parseCsv, readImport, templateCsv, type ImportRow, type SectionRef } from "@/app/(app)/manage/students/rules";
+import { findExistingAdmissionNos, importStudents } from "@/app/dashboard/manage/students/actions";
+import { parseCsv, readImport, templateCsv, type ImportRow, type SectionRef } from "@/app/dashboard/manage/students/rules";
 
 const SHOW_MAX = 500;
 const GENDER: Record<string, string> = { male: "Male", female: "Female", other: "Other" };

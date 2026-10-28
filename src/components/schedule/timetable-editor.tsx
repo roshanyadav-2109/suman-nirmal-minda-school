@@ -7,7 +7,7 @@ import { Input, Select } from "@/components/ui/field";
 import { CheckIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { DAYS, cellKey, fmtRange, tintFor, toggleCls, type Named, type Period, type SlotRow } from "@/components/schedule/shared";
-import { saveTimetable, loadSectionForCopy, type CellInput } from "@/app/(app)/schedule/actions";
+import { saveTimetable, loadSectionForCopy, type CellInput } from "@/app/dashboard/schedule/actions";
 
 type Cell = { subjectId: number | null; staffId: number | null; room: string };
 type Cells = Record<string, Cell>;

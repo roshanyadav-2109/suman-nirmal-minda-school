@@ -193,3 +193,27 @@ main .overflow-x-auto {
     padding-right: 0.5rem;
   }
 }
+
+/* Top-of-screen bar shown while a click is waiting for the next page. */
+@keyframes nav-progress {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(250%); }
+}
+.nav-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  height: 3px;
+  overflow: hidden;
+  background: #dbeafb;
+}
+.nav-progress::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: #0f6cbd;
+  animation: nav-progress 1s ease-in-out infinite;
+}

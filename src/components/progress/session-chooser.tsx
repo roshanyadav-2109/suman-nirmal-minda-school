@@ -22,7 +22,7 @@ export function SessionChooser({
     const p = new URLSearchParams();
     p.set("session", session);
     if (childId) p.set("child", String(childId));
-    return `/progress?${p.toString()}`;
+    return `/dashboard/progress?${p.toString()}`;
   };
   const opts = [{ key: "lifetime", label: lifetimeLabel }, ...years.map((y) => ({ key: String(y.yearId), label: y.yearName }))];
   return (

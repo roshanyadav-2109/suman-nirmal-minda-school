@@ -3,8 +3,8 @@ import { useEffect, useId, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/field";
 import { CloseIcon } from "@/components/icons";
-import { checkStudentInput, type Gender, type SectionRef, type StudentInput } from "@/app/(app)/manage/students/rules";
-import type { Result } from "@/app/(app)/manage/students/actions";
+import { checkStudentInput, type Gender, type SectionRef, type StudentInput } from "@/app/dashboard/manage/students/rules";
+import type { Result } from "@/app/dashboard/manage/students/actions";
 
 // The student's details as the form needs them (from StudentRecord).
 export type FormStudent = {
@@ -13,6 +13,7 @@ export type FormStudent = {
   admissionNo: string;
   dob: string | null;
   gender: Gender | null;
+  email: string | null;
   sectionId: number | null;
   classSection: string | null;
   rollNo: number | null;
@@ -23,7 +24,7 @@ const RELATIONS = ["Father", "Mother", "Guardian", "Grandparent", "Uncle", "Aunt
 
 function blank(sectionId: number | null): StudentInput {
   return {
-    id: null, fullName: "", admissionNo: "", dob: "", gender: "", sectionId, rollNo: "",
+    id: null, fullName: "", admissionNo: "", dob: "", gender: "", sectionId, rollNo: "", studentEmail: "",
     guardian: { id: null, fullName: "", relation: "", phone: "", email: "" },
   };
 }
@@ -37,6 +38,7 @@ function fromStudent(s: FormStudent): StudentInput {
     gender: s.gender ?? "",
     sectionId: s.sectionId,
     rollNo: s.rollNo == null ? "" : String(s.rollNo),
+    studentEmail: s.email ?? "",
     guardian: {
       id: s.guardian?.id ?? null,
       fullName: s.guardian?.fullName ?? "",
@@ -123,6 +125,10 @@ export function StudentForm({
           <Input id={`${id}-roll`} inputMode="numeric" value={v.rollNo} maxLength={4}
             onChange={(e) => set("rollNo", e.target.value.replace(/\D/g, ""))} />
         </Field>
+        <Field label="Student's email" htmlFor={`${id}-semail`} hint="The student signs in with Google using this email.">
+          <Input id={`${id}-semail`} type="email" value={v.studentEmail} maxLength={120}
+            onChange={(e) => set("studentEmail", e.target.value)} />
+        </Field>
       </div>
 
       <h3 className="t-h3 mt-6 text-ink-900">Parent or guardian</h3>
@@ -145,7 +151,7 @@ export function StudentForm({
           <Input id={`${id}-phone`} type="tel" inputMode="tel" value={v.guardian.phone} disabled={parentLocked} maxLength={20}
             onChange={(e) => setG("phone", e.target.value)} />
         </Field>
-        <Field label="Email" htmlFor={`${id}-email`}>
+        <Field label="Email" htmlFor={`${id}-email`} hint="The parent signs in with Google using this email.">
           <Input id={`${id}-email`} type="email" value={v.guardian.email} disabled={parentLocked} maxLength={120}
             onChange={(e) => setG("email", e.target.value)} />
         </Field>

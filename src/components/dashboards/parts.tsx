@@ -17,17 +17,17 @@ import { TRANSPORT_ENABLED } from "@/lib/features";
 
 // A distinct, premium colour per destination — icons only, no block behind.
 export const NAV_COLOR: Record<string, string> = {
-  "/progress": "text-[rgb(79,70,229)]",
-  "/attendance": "text-[rgb(22,163,74)]",
-  "/marks": "text-[rgb(219,39,119)]",
-  "/students": "text-[#0F6CBD]",
-  "/announcements": "text-[rgb(234,88,12)]",
-  "/calendar": "text-[rgb(219,39,119)]",
-  "/reports": "text-[rgb(124,58,237)]",
-  "/leave": "text-[rgb(13,148,136)]",
-  "/allotments": "text-[rgb(2,132,199)]",
-  "/feedback": "text-[rgb(217,70,239)]",
-  "/promotion": "text-[rgb(5,150,105)]",
+  "/dashboard/progress": "text-[rgb(79,70,229)]",
+  "/dashboard/attendance": "text-[rgb(22,163,74)]",
+  "/dashboard/marks": "text-[rgb(219,39,119)]",
+  "/dashboard/students": "text-[#0F6CBD]",
+  "/dashboard/announcements": "text-[rgb(234,88,12)]",
+  "/dashboard/calendar": "text-[rgb(219,39,119)]",
+  "/dashboard/reports": "text-[rgb(124,58,237)]",
+  "/dashboard/leave": "text-[rgb(13,148,136)]",
+  "/dashboard/allotments": "text-[rgb(2,132,199)]",
+  "/dashboard/feedback": "text-[rgb(217,70,239)]",
+  "/dashboard/promotion": "text-[rgb(5,150,105)]",
 };
 
 export async function DashHeader({ name, subtitleKey = "dashboard.overview", emoji }: { name: string; subtitleKey?: string; emoji?: string }) {
@@ -55,7 +55,7 @@ export function StatCard({ label, value, sub, tone = "ink", href }: { label: str
     </>
   );
   const base = "block rounded-md border border-hair bg-surface p-4";
-  if (href) return <Link prefetch={false} href={href} className={cn(base, "transition-colors hover:border-[#0F6CBD]")}>{inner}</Link>;
+  if (href) return <Link href={href} className={cn(base, "transition-colors hover:border-[#0F6CBD]")}>{inner}</Link>;
   return <div className={base}>{inner}</div>;
 }
 
@@ -69,7 +69,7 @@ export function ActionButtons({ actions }: { actions: DashAction[] }) {
       {actions.map((a, i) => {
         const Icon = a.icon;
         return (
-          <Link prefetch={false} key={a.href + a.label} href={a.href}
+          <Link key={a.href + a.label} href={a.href}
             className={cn(
               "inline-flex h-12 items-center gap-2.5 rounded-md px-5 text-[15px] font-semibold transition-colors",
               // Main action: soft school-blue tint with a blue edge; the others
@@ -139,7 +139,7 @@ export async function EventsPanel() {
 
 export async function QuickLinks({ role }: { role: NavRole }) {
   const { t } = await getT();
-  const links = navFor(role).filter((l) => l.href !== "/");
+  const links = navFor(role).filter((l) => l.href !== "/dashboard");
   return (
     <div>
       <div className="mb-3 text-[16px] font-semibold text-ink-900">{t("dashboard.quickLinks")}</div>
@@ -147,7 +147,7 @@ export async function QuickLinks({ role }: { role: NavRole }) {
         {links.map((l) => {
           const Icon = l.icon;
           return (
-            <Link prefetch={false}
+            <Link
               key={l.href + l.labelKey}
               href={l.href}
               className="group flex items-center gap-3 rounded-md border border-hair bg-surface p-3.5 transition-colors hover:border-[#0F6CBD]/40 hover:bg-[#0F6CBD]/[0.05]"
@@ -173,9 +173,9 @@ export async function FleetStrip() {
     <div className="mb-6">
       <div className="mb-2.5 text-[13px] font-semibold text-ink-900">{t("transport.title")}</div>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
-        <StatCard label={t("transport.busesRunning")} value={fleet.running} sub={`${t("transport.of")} ${fleet.buses}`} tone={fleet.running ? "up" : "ink"} href="/transport" />
-        <StatCard label={t("transport.totalRiders")} value={fleet.riders} href="/transport" />
-        <StatCard label={t("transport.staleBuses")} value={fleet.stale} sub={t("transport.staleBusesHint")} tone={fleet.stale ? "watch" : "ink"} href="/transport" />
+        <StatCard label={t("transport.busesRunning")} value={fleet.running} sub={`${t("transport.of")} ${fleet.buses}`} tone={fleet.running ? "up" : "ink"} href="/dashboard/transport" />
+        <StatCard label={t("transport.totalRiders")} value={fleet.riders} href="/dashboard/transport" />
+        <StatCard label={t("transport.staleBuses")} value={fleet.stale} sub={t("transport.staleBusesHint")} tone={fleet.stale ? "watch" : "ink"} href="/dashboard/transport" />
       </div>
     </div>
   );

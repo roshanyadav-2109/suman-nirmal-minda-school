@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import type { Database } from "@/lib/database.types";
 import {
   addClass, updateClass, addSection, renameSection, deleteSection, type ActionResult,
-} from "@/app/(app)/manage/classes/actions";
+} from "@/app/dashboard/manage/classes/actions";
 
 type Stage = Database["public"]["Enums"]["nep_stage"];
 export type ClassRow = {

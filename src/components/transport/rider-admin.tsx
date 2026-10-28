@@ -10,8 +10,9 @@ import { useT } from "@/i18n/provider";
 import {
   assignTransport, updateTransport, removeTransport,
   type TransportResult,
-} from "@/app/(app)/transport/actions";
+} from "@/app/dashboard/transport/actions";
 import type { RiderAdmin as RiderAdminData, RouteWithStops } from "@/lib/data/transport";
+import { useNavigate } from "@/components/nav-progress";
 
 // The office's allotment desk: who rides a bus, and where they board. Nothing
 // here decides authorisation — every mutation goes through the server actions
@@ -24,6 +25,7 @@ type Focus = { kind: "edit" | "allot"; id: number } | null;
 export function RiderAdmin({ data }: { data: RiderAdminData }) {
   const t = useT();
   const router = useRouter();
+  const navigate = useNavigate();
   const pathname = usePathname();
   const params = useSearchParams();
 
@@ -45,7 +47,7 @@ export function RiderAdmin({ data }: { data: RiderAdminData }) {
     // Changing a filter invalidates whichever page each panel was standing on;
     // paging one panel must leave the other where it was.
     if (!("page" in patch) && !("upage" in patch)) { next.delete("page"); next.delete("upage"); }
-    router.push(`${pathname}?${next.toString()}`);
+    navigate(`${pathname}?${next.toString()}`);
   }
 
   function run(on: string, action: () => Promise<TransportResult>, okKey: string) {

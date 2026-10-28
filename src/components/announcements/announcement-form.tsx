@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Field, Input, Textarea } from "@/components/ui/field";
 import { useT } from "@/i18n/provider";
 import type { SectionOpt } from "@/lib/data/scope";
-import { createAnnouncement, signAnnouncementUpload } from "@/app/(app)/announcements/actions";
+import { createAnnouncement, signAnnouncementUpload } from "@/app/dashboard/announcements/actions";
 import { cn } from "@/lib/utils";
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;

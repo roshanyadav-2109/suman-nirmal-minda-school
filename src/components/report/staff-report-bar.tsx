@@ -1,10 +1,11 @@
 "use client";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import { Input, Select } from "@/components/ui/field";
 import { useT } from "@/i18n/provider";
 import { cn } from "@/lib/utils";
 import { ReportDownloads, type XlsxExport } from "@/components/report/report-downloads";
 import type { PdfDoc } from "@/lib/pdf";
+import { useNavigate } from "@/components/nav-progress";
 
 type ReportType = "monthly" | "yearly" | "exam";
 type View = "overview" | "student";
@@ -36,7 +37,7 @@ export function StaffReportBar({
   wholeSchool?: boolean;
 }) {
   const t = useT();
-  const router = useRouter();
+  const navigate = useNavigate();
   const pathname = usePathname();
   const params = useSearchParams();
 
@@ -44,7 +45,7 @@ export function StaffReportBar({
     const next = new URLSearchParams(params.toString());
     for (const [k, v] of Object.entries(patch)) { if (v) next.set(k, v); else next.delete(k); }
     for (const k of clear) next.delete(k);
-    router.push(`${pathname}?${next.toString()}`);
+    navigate(`${pathname}?${next.toString()}`);
   }
 
   return (

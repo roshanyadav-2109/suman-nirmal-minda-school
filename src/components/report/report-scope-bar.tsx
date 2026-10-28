@@ -1,8 +1,9 @@
 "use client";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import { Select } from "@/components/ui/field";
 import { useT } from "@/i18n/provider";
 import type { YearOpt, SectionOpt } from "@/lib/data/scope";
+import { useNavigate } from "@/components/nav-progress";
 
 // Year + section picker for the office and principal on the Reports page. Same
 // as the shared ScopeBar, plus a "Whole school" choice (section=all) that lists
@@ -16,7 +17,7 @@ export function ReportScopeBar({
   sectionId: number | "all";
 }) {
   const t = useT();
-  const router = useRouter();
+  const navigate = useNavigate();
   const pathname = usePathname();
   const params = useSearchParams();
 
@@ -28,7 +29,7 @@ export function ReportScopeBar({
       // The whole-school list has no single-student view.
       if (patch.section === "all") next.delete("view");
     }
-    router.push(`${pathname}?${next.toString()}`);
+    navigate(`${pathname}?${next.toString()}`);
   }
 
   return (

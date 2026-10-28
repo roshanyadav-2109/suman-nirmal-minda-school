@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty";
-import { saveClassSubjects } from "@/app/(app)/manage/classes/actions";
+import { saveClassSubjects } from "@/app/dashboard/manage/classes/actions";
 
 type Note = { ok: boolean; text: string } | null;
 const keyOf = (classId: number, subjectId: number) => `${classId}:${subjectId}`;

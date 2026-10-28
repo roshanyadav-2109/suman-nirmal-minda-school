@@ -6,7 +6,7 @@ import { BandChip } from "@/components/ui/status";
 import { CheckIcon } from "@/components/icons";
 import { useT } from "@/i18n/provider";
 import { cn } from "@/lib/utils";
-import { saveMarks, releaseAssessment } from "@/app/(app)/marks/actions";
+import { saveMarks, releaseAssessment } from "@/app/dashboard/marks/actions";
 
 type Row = { id: number; name: string; roll: number | null };
 type Entry = { marks: number | null; absent: boolean };

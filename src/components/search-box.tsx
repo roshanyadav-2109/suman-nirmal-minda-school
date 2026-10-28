@@ -1,11 +1,11 @@
 "use client";
 import { useEffect, useRef, useState, useSyncExternalStore, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { SearchIcon } from "@/components/icons";
 import { useT } from "@/i18n/provider";
-import { quickSearch } from "@/app/(app)/search/actions";
+import { quickSearch } from "@/app/dashboard/search/actions";
 import type { SearchGroup } from "@/lib/data/search";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "@/components/nav-progress";
 
 // The top-bar search. Results appear as you type (after a short pause), grouped
 // by kind; arrow keys move, Enter opens, Escape closes. Enter with nothing
@@ -22,7 +22,7 @@ export function SearchBox({ placeholder }: { placeholder: string }) {
   const t = useT();
   const onPhone = useSyncExternalStore(onPhoneChange, () => window.matchMedia(PHONE).matches, () => false);
   const hint = onPhone ? t("x.searchShort") : placeholder;
-  const router = useRouter();
+  const navigate = useNavigate();
   const [q, setQ] = useState("");
   const [groups, setGroups] = useState<SearchGroup[]>([]);
   const [open, setOpen] = useState(false);
@@ -61,7 +61,7 @@ export function SearchBox({ placeholder }: { placeholder: string }) {
     return () => document.removeEventListener("mousedown", close);
   }, []);
 
-  function go(href: string) { setOpen(false); setQ(""); setGroups([]); router.push(href); }
+  function go(href: string) { setOpen(false); setQ(""); setGroups([]); navigate(href); }
 
   function onKey(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Escape") { setOpen(false); return; }
@@ -70,7 +70,7 @@ export function SearchBox({ placeholder }: { placeholder: string }) {
     if (e.key === "Enter") {
       e.preventDefault();
       if (active >= 0 && flat[active]) go(flat[active]);
-      else if (q.trim().length >= 2) go(`/search?q=${encodeURIComponent(q.trim())}`);
+      else if (q.trim().length >= 2) go(`/dashboard/search?q=${encodeURIComponent(q.trim())}`);
     }
   }
 
@@ -127,7 +127,7 @@ export function SearchBox({ placeholder }: { placeholder: string }) {
               </ul>
             </div>
           ))}
-          <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => go(`/search?q=${encodeURIComponent(term)}`)}
+          <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => go(`/dashboard/search?q=${encodeURIComponent(term)}`)}
             className="block w-full border-t border-hair px-3 py-2 text-left text-[13px] font-medium text-[#0F6CBD] hover:bg-[#F5F9FE]">
             {t("x.searchSeeAll", { q: term })}
           </button>

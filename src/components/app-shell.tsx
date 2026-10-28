@@ -3,6 +3,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SearchBox } from "@/components/search-box";
+import { CopyLink } from "@/components/copy-link";
+import { NavProgress } from "@/components/nav-progress";
 import { cn } from "@/lib/utils";
 import { navFor, type NavRole } from "@/lib/nav";
 import { useT } from "@/i18n/provider";
@@ -45,13 +47,13 @@ export function AppShell({
   // pages and notices (and their own children).
   const isStaffRole = role === "principal" || role === "office" || role === "class_teacher" || role === "subject_teacher";
 
-  const isDashboard = pathname === "/";
+  const isDashboard = pathname === "/dashboard";
 
   // Longest matching prefix wins, so /transport/riders lights up its own entry
   // and not the /transport one above it. The "/" boundary keeps a href from
   // matching a sibling that merely starts with the same letters.
   const matches = (href: string) =>
-    href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
+    href === "/dashboard" ? pathname === "/dashboard" : pathname === href || pathname.startsWith(`${href}/`);
   const activeHref = items
     .map((i) => i.href)
     .filter(matches)
@@ -64,7 +66,7 @@ export function AppShell({
         const active = isActive(item.href);
         const Icon = item.icon;
         return (
-          <Link prefetch={false}
+          <Link
             key={item.href + item.labelKey}
             href={item.href}
             onClick={() => setOpen(false)}
@@ -100,7 +102,8 @@ export function AppShell({
   const initials = name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
 
   // Everyone's name, role and sign-out sit at the foot of the side menu, on
-  // every page — the same place in the desktop rail and the phone drawer.
+  // every page — the same place in the desktop rail and the phone drawer —
+  // with the Neural AI credit beneath.
   const personCard = (
     <div className="border-t border-hair p-3">
       <button
@@ -117,10 +120,15 @@ export function AppShell({
           <span className="h-1 w-1 rounded-full bg-current" /><span className="h-1 w-1 rounded-full bg-current" /><span className="h-1 w-1 rounded-full bg-current" />
         </span>
       </button>
+      <a href="https://neuralai.in" target="_blank" rel="noreferrer"
+        className="mt-1 block text-center text-[11px] text-ink-500 hover:text-[#0F6CBD]">
+        Powered by <span className="font-semibold text-ink-700">Neural AI</span>
+      </a>
     </div>
   );
 
   return (
+    <NavProgress>
     <div className={cn("min-h-dvh bg-white lg:grid", collapsed ? "lg:grid-cols-[1fr]" : "lg:grid-cols-[264px_1fr]")}>
       {/* Desktop side menu — attached to the left edge, full height */}
       <aside className={cn("sticky top-0 hidden h-dvh flex-col overflow-hidden border-r border-hair bg-surface", !collapsed && "lg:flex")}>
@@ -174,11 +182,10 @@ export function AppShell({
           {role !== "transport" && (
             <SearchBox placeholder={t(isStaffRole ? "x.searchEverything" : "x.searchFamily")} />
           )}
-          {role === "guardian" && isDashboard && (
-            <div className="ml-auto flex items-center gap-2">
-              <LocaleSwitcher />
-            </div>
-          )}
+          <div className="ml-auto flex items-center gap-2">
+            {role === "guardian" && isDashboard && <LocaleSwitcher />}
+            {role !== "transport" && <CopyLink />}
+          </div>
         </header>
 
         {/* Each section is its own block on the page — no shared wrapper. */}
@@ -187,5 +194,6 @@ export function AppShell({
         </main>
       </div>
     </div>
+    </NavProgress>
   );
 }

@@ -5,7 +5,7 @@ import { Card, CardBody } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
 import { useT } from "@/i18n/provider";
-import { createAcademicYear } from "@/app/(app)/promotion/actions";
+import { createAcademicYear } from "@/app/dashboard/promotion/actions";
 
 // Office: create the next academic session, then promote pupils into it.
 export function NewSessionForm({ name, start, end }: { name: string; start: string; end: string }) {

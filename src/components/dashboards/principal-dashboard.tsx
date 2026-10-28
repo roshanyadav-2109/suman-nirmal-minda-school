@@ -18,15 +18,15 @@ export async function PrincipalDashboard({ session }: { session: Session }) {
     <div>
       <DashHeader name={session.fullName} />
       <ActionButtons actions={[
-        { href: "/progress", label: t("dashboard.ctaNeedHelp"), icon: StudentsIcon },
-        { href: "/attendance", label: t("dashboard.ctaAttendanceToday"), icon: AttendanceIcon },
-        { href: "/announcements", label: t("dashboard.ctaPostNotice"), icon: AnnounceIcon },
+        { href: "/dashboard/progress", label: t("dashboard.ctaNeedHelp"), icon: StudentsIcon },
+        { href: "/dashboard/attendance", label: t("dashboard.ctaAttendanceToday"), icon: AttendanceIcon },
+        { href: "/dashboard/announcements", label: t("dashboard.ctaPostNotice"), icon: AnnounceIcon },
       ]} />
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatCard label={t("common.students")} value={ov?.students ?? "—"} tone="gold" href="/students" />
-        <StatCard label={`${t("progress.overall")} ${t("progress.average")}`} value={fmtPercent(locale, ov?.avg ?? null, 1)} href="/progress" />
-        <StatCard label={t("attendance.percent")} value={ov?.attendancePct != null ? `${ov.attendancePct}%` : "—"} tone={ov && ov.attendancePct != null && ov.attendancePct < 75 ? "down" : "up"} href="/attendance" />
-        <StatCard label={t("progress.slippage")} value={ov?.slippage ?? 0} tone={ov && ov.slippage > 0 ? "watch" : "up"} sub={t("progress.needsSupport")} href="/progress" />
+        <StatCard label={t("common.students")} value={ov?.students ?? "—"} tone="gold" href="/dashboard/students" />
+        <StatCard label={`${t("progress.overall")} ${t("progress.average")}`} value={fmtPercent(locale, ov?.avg ?? null, 1)} href="/dashboard/progress" />
+        <StatCard label={t("attendance.percent")} value={ov?.attendancePct != null ? `${ov.attendancePct}%` : "—"} tone={ov && ov.attendancePct != null && ov.attendancePct < 75 ? "down" : "up"} href="/dashboard/attendance" />
+        <StatCard label={t("progress.slippage")} value={ov?.slippage ?? 0} tone={ov && ov.slippage > 0 ? "watch" : "up"} sub={t("progress.needsSupport")} href="/dashboard/progress" />
       </div>
 
       {classBars.length > 0 && (

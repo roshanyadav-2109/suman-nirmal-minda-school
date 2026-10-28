@@ -1,12 +1,13 @@
 "use client";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import { Input } from "@/components/ui/field";
 import { useT } from "@/i18n/provider";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "@/components/nav-progress";
 
 export function AttendanceAdminControls({ period, date, month }: { period: "day" | "month"; date: string; month: string }) {
   const t = useT();
-  const router = useRouter();
+  const navigate = useNavigate();
   const pathname = usePathname();
   const params = useSearchParams();
 
@@ -14,7 +15,7 @@ export function AttendanceAdminControls({ period, date, month }: { period: "day"
     const next = new URLSearchParams(params.toString());
     for (const [k, v] of Object.entries(patch)) { if (v) next.set(k, v); else next.delete(k); }
     for (const k of clear) next.delete(k);
-    router.push(`${pathname}?${next.toString()}`);
+    navigate(`${pathname}?${next.toString()}`);
   }
 
   const Toggle = ({ p, label }: { p: "day" | "month"; label: string }) => (

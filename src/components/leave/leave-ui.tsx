@@ -4,7 +4,7 @@ import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Textarea, Select } from "@/components/ui/field";
 import { useT } from "@/i18n/provider";
-import { applyLeave, decideLeave } from "@/app/(app)/leave/actions";
+import { applyLeave, decideLeave } from "@/app/dashboard/leave/actions";
 
 export function LeaveForm({ students }: { students: { id: number; full_name: string }[] }) {
   const t = useT();

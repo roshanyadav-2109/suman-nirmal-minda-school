@@ -63,8 +63,8 @@ export async function searchEverything(rawQuery: string, perGroup = 6): Promise<
     const e = enrolment.get(s.id);
     const bits = [s.admission_no, e?.label, e?.roll_no != null ? `${t("dashboard.rollNo")} ${e.roll_no}` : null].filter(Boolean);
     const href = isStaff
-      ? (e && year ? `/progress?studentId=${s.id}&section=${e.section_id}&year=${year.id}` : `/progress?studentId=${s.id}`)
-      : `/progress?child=${s.id}`;
+      ? (e && year ? `/dashboard/progress?studentId=${s.id}&section=${e.section_id}&year=${year.id}` : `/dashboard/progress?studentId=${s.id}`)
+      : `/dashboard/progress?child=${s.id}`;
     return { href, title: s.full_name, detail: bits.join(" · ") };
   });
 
@@ -90,7 +90,7 @@ export async function searchEverything(rawQuery: string, perGroup = 6): Promise<
     const list = teaches.get(s.id) ?? [];
     const role = t(`roles.${s.role}`);
     const detail = list.length ? `${role} · ${list.slice(0, 3).join(", ")}${list.length > 3 ? ` +${list.length - 3}` : ""}` : role;
-    return { href: session.isAdminScope ? `/allotments?teacher=${encodeURIComponent(s.full_name)}` : null, title: s.full_name, detail };
+    return { href: session.isAdminScope ? `/dashboard/allotments?teacher=${encodeURIComponent(s.full_name)}` : null, title: s.full_name, detail };
   });
 
   // Classes and sections: "VIII", "viii-b", "XI-Sci".
@@ -100,9 +100,9 @@ export async function searchEverything(rawQuery: string, perGroup = 6): Promise<
     .filter((s) => norm(s.label).startsWith(norm(q)))
     .sort((a, b) => a.level - b.level || a.label.localeCompare(b.label))
     .slice(0, perGroup)
-    .map((s) => ({ href: `/students?section=${s.id}`, title: s.label, detail: t("x.searchSection") }));
+    .map((s) => ({ href: `/dashboard/students?section=${s.id}`, title: s.label, detail: t("x.searchSection") }));
 
-  const notices: SearchHit[] = (noticesRes.data ?? []).map((a) => ({ href: "/announcements", title: a.title, detail: t("announce.title") }));
+  const notices: SearchHit[] = (noticesRes.data ?? []).map((a) => ({ href: "/dashboard/announcements", title: a.title, detail: t("announce.title") }));
 
   const groups: SearchGroup[] = [
     { key: "pages", label: t("x.searchGroupPages"), hits: pages },

@@ -12,7 +12,7 @@ export default function NotFound() {
       </p>
       <Link
         prefetch={false}
-        href="/"
+        href="/dashboard"
         className="mt-5 inline-flex h-10 items-center rounded-sm bg-[#0F6CBD] px-5 text-[14px] font-medium text-white hover:bg-[#115EA3]"
       >
         Go to the Dashboard

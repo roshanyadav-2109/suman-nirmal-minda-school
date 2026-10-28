@@ -9,7 +9,7 @@ import { PlusIcon } from "@/components/icons";
 import type { StaffRole } from "@/lib/session";
 import {
   addAssignment, removeAssignment, setClassTeacher, removeClassTeacher, type ActionResult,
-} from "@/app/(app)/manage/teachers/actions";
+} from "@/app/dashboard/manage/teachers/actions";
 
 export type AssignRow = { id: number; staffId: number; sectionId: number; subjectId: number | null; isClassTeacher: boolean };
 export type SectionOpt = { id: number; name: string; classId: number; className: string; classLevel: number };

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n/provider";
 import { fmtDate } from "@/i18n/format";
 import { cn } from "@/lib/utils";
-import { explainAbsences } from "@/app/(app)/leave/actions";
+import { explainAbsences } from "@/app/dashboard/leave/actions";
 import type { AbsenceNotice } from "@/lib/data/absence";
 
 export function AbsenceList({ notices, canExplain }: { notices: AbsenceNotice[]; canExplain: boolean }) {
