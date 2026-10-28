@@ -166,7 +166,7 @@ export default async function AttendancePage({ searchParams }: { searchParams: S
 
   return (
     <div>
-      <PageHeader eyebrow={`${section.class_name}-${section.name}`} title={t("attendance.title")}
+      <PageHeader title={t("attendance.title")}
         description={canMark ? undefined : t("x.attViewOnly")} />
       <ScopeBar years={scope.years} sections={sections} yearId={yearId} sectionId={section.id} date={date} />
       <AttendanceBoard key={`${section.id}-${date}`} sectionId={section.id} yearId={yearId} date={date} roster={roster} initial={initial} summary={summary} readOnly={!canMark} />

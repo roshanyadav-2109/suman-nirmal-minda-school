@@ -87,7 +87,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: SP 
 
   return (
     <div>
-      <PageHeader eyebrow={`${section.class_name}-${section.name}`} title={t("nav.students")} />
+      <PageHeader title={t("nav.students")} />
       <ScopeBar years={scope.years} sections={scope.sections} yearId={yearId} sectionId={section.id} />
       <Card>
         <CardBody>

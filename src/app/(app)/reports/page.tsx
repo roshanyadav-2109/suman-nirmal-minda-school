@@ -132,7 +132,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: SP }
     const pdf = report ? studentCardPdf(report, { kind: type, period: periodEn, yearName, section: sectionLabel }) : undefined;
     return (
       <div>
-        <PageHeader eyebrow={sectionLabel} title={t("report.title")} />
+        <PageHeader title={t("report.title")} />
         {scopeBar}
         <StaffReportBar type={type} view={view} month={month} examName={examName} exams={exams}
           students={roster.map((s) => ({ id: s.id, name: s.name }))} studentId={studentId} sort="roll" pdf={pdf} />
@@ -164,7 +164,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: SP }
 
   return (
     <div>
-      <PageHeader eyebrow={sectionLabel} title={t("report.title")} />
+      <PageHeader title={t("report.title")} />
       {scopeBar}
       <StaffReportBar type={type} view={view} month={month} examName={examName} exams={exams}
         students={roster.map((s) => ({ id: s.id, name: s.name }))} studentId={studentId} sort={sort} xlsx={xlsx} pdf={pdf} />
@@ -263,7 +263,7 @@ function SchoolView({
 
   return (
     <div>
-      <PageHeader eyebrow="Whole school" title={t("report.title")} />
+      <PageHeader title={t("report.title")} />
       {scopeBar}
       {bar(xlsx, pdf)}
       {!sections.length ? (

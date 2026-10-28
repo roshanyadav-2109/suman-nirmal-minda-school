@@ -56,7 +56,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: SP 
     const cells = section ? await sectionCells(await getSectionSlots(section.id, year.id)) : {};
     return (
       <div>
-        <PageHeader eyebrow={section ? (child ? `${child.full_name} · ${section.label}` : section.label) : undefined} title={TITLE}
+        <PageHeader title={TITLE}
           description="Your class's lessons for the week." />
         {children.length > 1 && (
           <div className="mb-5 flex flex-wrap gap-2">
@@ -169,7 +169,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: SP 
 
   return (
     <div>
-      <PageHeader eyebrow={view === "class" && myClass ? myClass.label : undefined} title={TITLE}
+      <PageHeader title={TITLE}
         description={view === "class" ? "Every lesson of your class this week, with the teacher who takes it." : "Every period you teach this week."} />
       {myClass && (
         <div className="mb-5 flex flex-wrap gap-2">

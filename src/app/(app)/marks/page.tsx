@@ -53,7 +53,7 @@ export default async function MarksPage({ searchParams }: { searchParams: SP }) 
 
   return (
     <div>
-      <PageHeader eyebrow={`${section.class_name}-${section.name}`} title={t("marks.title")} />
+      <PageHeader title={t("marks.title")} />
       <MarksScopeBar years={scope.years} sectionMeta={scope.sectionMeta} assessments={assessments}
         yearId={yearId} sectionId={section.id} subjectId={subjectId} assessmentId={assessmentId} />
       {subjectId ? <NewExamButton classId={section.class_id} subjectId={subjectId} yearId={yearId} className={section.class_name} /> : null}
