@@ -25,9 +25,12 @@ function refresh() {
   revalidatePath("/students");
 }
 
-async function officeContext() {
+// `withPrincipal`: the principal may also edit a student's details (from the
+// Students page); adding, removing and bulk upload stay with the office.
+async function officeContext(withPrincipal = false) {
   const [session, year] = await Promise.all([getSession(), getCurrentYear()]);
-  if (session?.staffRole !== "office") return { error: NOT_ALLOWED } as const;
+  const allowed = session?.staffRole === "office" || (withPrincipal && session?.staffRole === "principal");
+  if (!allowed) return { error: NOT_ALLOWED } as const;
   if (!year) return { error: "There is no current school year set up yet." } as const;
   return { yearId: year.id } as const;
 }
@@ -64,7 +67,8 @@ async function saveGuardian(supabase: Supa, studentId: number, g: StudentInput["
 // --- Office: add / edit ------------------------------------------------------
 
 export async function saveStudent(input: StudentInput): Promise<Result> {
-  const ctx = await officeContext();
+  // Editing an existing student is open to the principal too; adding one is not.
+  const ctx = await officeContext(!!input.id);
   if ("error" in ctx) return { ok: false, error: ctx.error! };
   const problem = checkStudentInput(input);
   if (problem) return { ok: false, error: problem };
@@ -299,7 +303,7 @@ export async function updateStudentDetails(input: StudentInput): Promise<Result>
     .eq("student_id", input.id)
     .eq("academic_year_id", year.id)
     .maybeSingle();
-  const isOffice = session.staffRole === "office";
+  const isOffice = session.staffRole === "office" || session.staffRole === "principal";
   const ownClass = !!enr && scope.sectionMeta.some((m) => m.id === enr.section_id && m.isClassTeacher);
   if (!enr || (!isOffice && !ownClass)) {
     return { ok: false, error: "You can only change details of students in your own class." };

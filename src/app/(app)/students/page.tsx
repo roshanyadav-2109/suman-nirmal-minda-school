@@ -71,10 +71,10 @@ export default async function StudentsPage({ searchParams }: { searchParams: SP 
 
   const section = scope.sections.find((s) => s.id === num(sp.section)) ?? scope.sections[0];
 
-  // Who may edit details here: the office for everyone, a class teacher for
-  // their own class — and only this year's roster (that is what an edit changes).
+  // Who may edit details here: the office and principal for everyone, a class
+  // teacher for their own class — and only this year's roster (that is what an edit changes).
   const session = await getSession();
-  const isOffice = session?.staffRole === "office";
+  const isOffice = session?.staffRole === "office" || session?.staffRole === "principal";
   const ownClass = scope.sectionMeta.some((m) => m.id === section.id && m.isClassTeacher);
   const mode: "none" | "teacher" | "office" =
     yearId !== scope.currentYearId ? "none" : isOffice ? "office" : ownClass ? "teacher" : "none";
