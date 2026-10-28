@@ -11,7 +11,7 @@ import {
   type Dashboard, type StudentHit, type ParentOption,
 } from "@/app/dashboard/manage/access/actions";
 
-export type AccessRow = { kind: "staff" | "guardian" | "student"; id: number; name: string; email: string; dashboard: string; signedIn: boolean };
+export type AccessRow = { kind: "staff" | "guardian" | "student"; id: number; name: string; email: string; phone: string | null; dashboard: string; signedIn: boolean };
 export type StaffOption = { id: number; name: string; role: string };
 export type SectionOption = { id: number; label: string };
 
@@ -37,6 +37,7 @@ export function AccessAdmin({ rows, staff, sections }: { rows: AccessRow[]; staf
   const [who, setWho] = useState<"new" | "existing">("new");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [staffId, setStaffId] = useState<number | null>(null);
   const [sectionId, setSectionId] = useState<number | null>(null);
   const [students, setStudents] = useState<StudentHit[]>([]);
@@ -58,7 +59,7 @@ export function AccessAdmin({ rows, staff, sections }: { rows: AccessRow[]; staf
     setNote(null);
     start(async () => {
       const res = await giveAccess({
-        dashboard, email, fullName,
+        dashboard, email, phone, fullName,
         staffId: isStaff && who === "existing" ? staffId : null,
         sectionId: dashboard === "class_teacher" ? sectionId : null,
         studentIds: students.map((s) => s.id),
@@ -67,7 +68,7 @@ export function AccessAdmin({ rows, staff, sections }: { rows: AccessRow[]; staf
       });
       if (res.ok) {
         setNote({ ok: true, text: `Done. ${email.trim()} can now sign in with Google and will see the ${DASHBOARDS.find((d) => d.value === dashboard)?.label} dashboard.` });
-        setFullName(""); setEmail(""); setStaffId(null); setSectionId(null); setStudents([]); setGuardianId(null); setRelation(""); setWho("new");
+        setFullName(""); setEmail(""); setPhone(""); setStaffId(null); setSectionId(null); setStudents([]); setGuardianId(null); setRelation(""); setWho("new");
       } else setNote({ ok: false, text: res.error });
     });
   }
@@ -82,7 +83,7 @@ export function AccessAdmin({ rows, staff, sections }: { rows: AccessRow[]; staf
 
   const shown = rows.filter((r) => {
     const f = filter.trim().toLowerCase();
-    return !f || r.name.toLowerCase().includes(f) || r.email.toLowerCase().includes(f) || r.dashboard.toLowerCase().includes(f);
+    return !f || r.name.toLowerCase().includes(f) || r.email.toLowerCase().includes(f) || (r.phone ?? "").includes(f) || r.dashboard.toLowerCase().includes(f);
   });
 
   return (
@@ -146,6 +147,10 @@ export function AccessAdmin({ rows, staff, sections }: { rows: AccessRow[]; staf
                 <Input id="acc-email" type="email" value={email} maxLength={120} placeholder="name@gmail.com" onChange={(e) => setEmail(e.target.value)} />
               </Field>
 
+              <Field label="Phone number (optional)" htmlFor="acc-phone">
+                <Input id="acc-phone" type="tel" inputMode="tel" value={phone} maxLength={20} placeholder="98765 43210" onChange={(e) => setPhone(e.target.value)} />
+              </Field>
+
               {dashboard === "class_teacher" && (
                 <Field label="Class teacher of" htmlFor="acc-sec">
                   <Select id="acc-sec" value={sectionId ?? ""} onChange={(e) => setSectionId(Number(e.target.value) || null)}>
@@ -176,17 +181,18 @@ export function AccessAdmin({ rows, staff, sections }: { rows: AccessRow[]; staf
         <CardHeader title={`People with access (${rows.length})`} />
         <CardBody>
           <div className="mb-3 max-w-sm">
-            <Input aria-label="Find a person" placeholder="Find by name, email or dashboard" value={filter} onChange={(e) => setFilter(e.target.value)} />
+            <Input aria-label="Find a person" placeholder="Find by name, email, phone or dashboard" value={filter} onChange={(e) => setFilter(e.target.value)} />
           </div>
           {shown.length === 0 ? (
             <EmptyState art="nothing-yet" title={rows.length ? "Nobody matches" : "Nobody has been given access yet"} hint={rows.length ? undefined : "Use the form above to give someone a dashboard."} />
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[640px] text-[14px]">
+              <table className="w-full min-w-[760px] text-[14px]">
                 <thead>
                   <tr className="text-left text-[12px] text-ink-700">
                     <th className="py-2 font-semibold">Name</th>
                     <th className="py-2 font-semibold">Email</th>
+                    <th className="py-2 font-semibold">Phone</th>
                     <th className="py-2 font-semibold">Dashboard</th>
                     <th className="py-2 font-semibold">Signed in yet</th>
                     <th className="py-2"><span className="sr-only">Actions</span></th>
@@ -199,6 +205,7 @@ export function AccessAdmin({ rows, staff, sections }: { rows: AccessRow[]; staf
                       <tr key={key}>
                         <td className="py-2 font-medium text-ink-900">{r.name}</td>
                         <td className="py-2 text-ink-900">{r.email}</td>
+                        <td className="py-2 tabular text-ink-900">{r.phone || "—"}</td>
                         <td className="py-2 text-ink-900">{r.dashboard}</td>
                         <td className="py-2 text-ink-900">{r.signedIn ? "Yes" : "Not yet"}</td>
                         <td className="py-2 text-right">

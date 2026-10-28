@@ -16,9 +16,9 @@ const STAFF_LABEL: Record<string, string> = {
 export default async function ManageAccessPage() {
   const supabase = await createClient();
   const [staffRes, guardianRes, studentRes, loginRes, scope] = await Promise.all([
-    supabase.from("staff").select("id, full_name, role, email").order("full_name"),
-    supabase.from("guardian").select("id, full_name, relation, email, guardian_student(student:student_id(full_name))").not("email", "is", null).order("full_name"),
-    supabase.from("student").select("id, full_name, admission_no, email").not("email", "is", null).order("full_name"),
+    supabase.from("staff").select("id, full_name, role, email, phone").order("full_name"),
+    supabase.from("guardian").select("id, full_name, relation, email, phone, guardian_student(student:student_id(full_name))").not("email", "is", null).order("full_name"),
+    supabase.from("student").select("id, full_name, admission_no, email, phone").not("email", "is", null).order("full_name"),
     supabase.from("profile").select("staff_id, guardian_id, student_id"),
     getStaffScope(),
   ]);
@@ -28,16 +28,16 @@ export default async function ManageAccessPage() {
 
   const rows: AccessRow[] = [
     ...(staffRes.data ?? []).filter((s) => s.email).map((s) => ({
-      kind: "staff" as const, id: s.id, name: s.full_name, email: s.email!,
+      kind: "staff" as const, id: s.id, name: s.full_name, email: s.email!, phone: s.phone,
       dashboard: STAFF_LABEL[s.role] ?? s.role, signedIn: has("staff_id", s.id),
     })),
-    ...((guardianRes.data ?? []) as unknown as { id: number; full_name: string; relation: string | null; email: string; guardian_student: { student: { full_name: string } | null }[] }[]).map((g) => ({
-      kind: "guardian" as const, id: g.id, name: g.full_name, email: g.email,
+    ...((guardianRes.data ?? []) as unknown as { id: number; full_name: string; relation: string | null; email: string; phone: string | null; guardian_student: { student: { full_name: string } | null }[] }[]).map((g) => ({
+      kind: "guardian" as const, id: g.id, name: g.full_name, email: g.email, phone: g.phone,
       dashboard: `Parent${g.guardian_student.length ? ` of ${g.guardian_student.map((l) => l.student?.full_name).filter(Boolean).join(", ")}` : ""}`,
       signedIn: has("guardian_id", g.id),
     })),
     ...(studentRes.data ?? []).map((s) => ({
-      kind: "student" as const, id: s.id, name: s.full_name, email: s.email!,
+      kind: "student" as const, id: s.id, name: s.full_name, email: s.email!, phone: s.phone,
       dashboard: `Student · ${s.admission_no}`, signedIn: has("student_id", s.id),
     })),
   ].sort((a, b) => a.name.localeCompare(b.name));

@@ -17,6 +17,7 @@ export type ParentOption = { id: number; name: string; relation: string | null; 
 export type GiveAccessInput = {
   dashboard: Dashboard;
   email: string;
+  phone: string;              // optional
   fullName: string;           // new staff member / new parent
   staffId: number | null;     // an existing staff member instead of a new one
   sectionId: number | null;   // class teacher of
@@ -26,6 +27,7 @@ export type GiveAccessInput = {
 };
 
 const EMAIL_OK = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_OK = /^[+\d][\d\s-]{6,19}$/;
 const STAFF_DASHBOARDS: Dashboard[] = ["principal", "office", "subject_teacher", "class_teacher", "transport"];
 
 async function officeOnly() {
@@ -56,6 +58,10 @@ export async function giveAccess(input: GiveAccessInput): Promise<Result> {
   if (!(await officeOnly())) return { ok: false, error: "Only the school office can give access." };
   const email = input.email.trim().toLowerCase();
   if (!EMAIL_OK.test(email)) return { ok: false, error: "Please type a proper email address, like name@gmail.com." };
+  const phone = input.phone.replace(/\s+/g, " ").trim();
+  if (phone && !PHONE_OK.test(phone)) return { ok: false, error: "The phone number does not look right." };
+  // A blank phone never wipes one already on the record.
+  const withPhone = phone ? { phone } : {};
   const supabase = await createClient();
 
   const taken = await emailTakenBy(supabase, email);
@@ -69,11 +75,11 @@ export async function giveAccess(input: GiveAccessInput): Promise<Result> {
     const role = input.dashboard === "class_teacher" ? "class_teacher" : input.dashboard;
     let staffId = input.staffId;
     if (staffId) {
-      const { error } = await supabase.from("staff").update({ email, role: role as never }).eq("id", staffId);
+      const { error } = await supabase.from("staff").update({ email, role: role as never, ...withPhone }).eq("id", staffId);
       if (error) return { ok: false, error: "Could not save. Please try again." };
     } else {
       if (!name) return { ok: false, error: "Please type the person's full name." };
-      const { data, error } = await supabase.from("staff").insert({ full_name: name, email, role: role as never }).select("id").single();
+      const { data, error } = await supabase.from("staff").insert({ full_name: name, email, role: role as never, ...withPhone }).select("id").single();
       if (error || !data) return { ok: false, error: "Could not save. Please try again." };
       staffId = data.id;
     }
@@ -90,12 +96,12 @@ export async function giveAccess(input: GiveAccessInput): Promise<Result> {
     if (!input.studentIds.length) return { ok: false, error: "Please choose their child (or children)." };
     let guardianId = input.guardianId;
     if (guardianId) {
-      const { error } = await supabase.from("guardian").update({ email }).eq("id", guardianId);
+      const { error } = await supabase.from("guardian").update({ email, ...withPhone }).eq("id", guardianId);
       if (error) return { ok: false, error: "Could not save. Please try again." };
     } else {
       if (!name) return { ok: false, error: "Please type the parent's full name." };
       const { data, error } = await supabase.from("guardian")
-        .insert({ full_name: name, email, relation: input.relation.trim() || null }).select("id").single();
+        .insert({ full_name: name, email, relation: input.relation.trim() || null, ...withPhone }).select("id").single();
       if (error || !data) return { ok: false, error: "Could not save. Please try again." };
       guardianId = data.id;
     }
@@ -116,7 +122,7 @@ export async function giveAccess(input: GiveAccessInput): Promise<Result> {
   if (input.dashboard === "student") {
     const id = input.studentIds[0];
     if (!id) return { ok: false, error: "Please choose the student." };
-    const { data, error } = await supabase.from("student").update({ email }).eq("id", id).select("id");
+    const { data, error } = await supabase.from("student").update({ email, ...withPhone }).eq("id", id).select("id");
     if (error || !data?.length) return { ok: false, error: "Could not save. Please try again." };
     refresh();
     return { ok: true };

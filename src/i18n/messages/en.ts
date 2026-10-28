@@ -51,6 +51,7 @@ const en = {
     transportRiders: "Bus Riders",
     schedule: "Schedule",
     manage: "Manage School",
+    details: "Personal details",
   },
   auth: {
     signIn: "Sign in",

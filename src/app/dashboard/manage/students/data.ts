@@ -11,6 +11,7 @@ export type StudentRecord = {
   dob: string | null;
   gender: Gender | null;
   email: string | null;
+  phone: string | null;
   sectionId: number | null;
   classSection: string | null;
   rollNo: number | null;
@@ -24,14 +25,14 @@ export const PAGE_SIZE = 50;
 
 type GuardianRow = { id: number; full_name: string; relation: string | null; phone: string | null; email: string | null };
 type Raw = {
-  id: number; full_name: string; admission_no: string; dob: string | null; gender: Gender | null; email: string | null;
+  id: number; full_name: string; admission_no: string; dob: string | null; gender: Gender | null; email: string | null; phone: string | null;
   student_enrollment: { section_id: number; roll_no: number | null; status: string; academic_year_id: number;
     section: { name: string; class: { name: string } | null } | null }[];
   guardian_student: { is_primary: boolean; guardian: GuardianRow | null }[];
 };
 
 const SELECT =
-  "id, full_name, admission_no, dob, gender, email, " +
+  "id, full_name, admission_no, dob, gender, email, phone, " +
   "student_enrollment!inner(section_id, roll_no, status, academic_year_id, section:section_id(name, class:class_id(name))), " +
   "guardian_student(is_primary, guardian:guardian_id(id, full_name, relation, phone, email))";
 
@@ -47,6 +48,7 @@ function toRecord(r: Raw): StudentRecord {
     dob: r.dob,
     gender: r.gender,
     email: r.email,
+    phone: r.phone,
     sectionId: e?.section_id ?? null,
     classSection: sec ? (sec.class ? `${sec.class.name}-${sec.name}` : sec.name) : null,
     rollNo: e?.roll_no ?? null,

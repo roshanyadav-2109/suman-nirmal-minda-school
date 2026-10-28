@@ -82,6 +82,7 @@ export async function saveStudent(input: StudentInput): Promise<Result> {
     dob,
     gender: input.gender || null,
     email: nullIfBlank(input.studentEmail)?.toLowerCase() ?? null,
+    phone: nullIfBlank(input.studentPhone),
   };
 
   // Admission numbers are unique across the whole school, every year.
@@ -207,6 +208,7 @@ export async function importStudents(rows: ImportRow[]): Promise<ImportResult> {
     if (r.dob) rec.dob = r.dob;
     if (r.gender) rec.gender = r.gender;
     if (tidy(r.studentEmail)) rec.email = tidy(r.studentEmail).toLowerCase();
+    if (tidy(r.studentPhone)) rec.phone = tidy(r.studentPhone);
     const key = Object.keys(rec).join(",");
     groups.set(key, [...(groups.get(key) ?? []), rec]);
   }
@@ -320,6 +322,7 @@ export async function updateStudentDetails(input: StudentInput): Promise<Result>
       dob: input.dob ? (parseDate(input.dob) as string) : null,
       gender: input.gender || null,
       email: nullIfBlank(input.studentEmail)?.toLowerCase() ?? null,
+      phone: nullIfBlank(input.studentPhone),
     })
     .eq("id", input.id)
     .select("id");

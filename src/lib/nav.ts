@@ -1,7 +1,7 @@
 import {
   DashboardIcon, ProgressIcon, AttendanceIcon, MarksIcon, StudentsIcon,
   AnnounceIcon, CalendarIcon, ReportIcon, LeaveIcon, AllotmentIcon,
-  PromotionIcon,
+  PromotionIcon, RoleStudentIcon,
   BusIcon, BusRidersIcon,
   type IconComponent,
 } from "@/components/icons";
@@ -35,6 +35,7 @@ export const NAV: NavItem[] = [
   { href: "/dashboard/allotments", icon: AllotmentIcon, labelKey: "nav.allotments", roles: ["principal", "office"] },
   { href: "/dashboard/promotion", icon: PromotionIcon, labelKey: "nav.promotion", roles: ["office", "principal", "class_teacher"] },
   { href: "/dashboard/manage", icon: AllotmentIcon, labelKey: "nav.manage", roles: ["office"] },
+  { href: "/dashboard/details", icon: RoleStudentIcon, labelKey: "nav.details", roles: ["student"] },
 ];
 
 export function navFor(role: NavRole): NavItem[] {

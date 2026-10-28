@@ -14,6 +14,7 @@ export type FormStudent = {
   dob: string | null;
   gender: Gender | null;
   email: string | null;
+  phone: string | null;
   sectionId: number | null;
   classSection: string | null;
   rollNo: number | null;
@@ -24,7 +25,7 @@ const RELATIONS = ["Father", "Mother", "Guardian", "Grandparent", "Uncle", "Aunt
 
 function blank(sectionId: number | null): StudentInput {
   return {
-    id: null, fullName: "", admissionNo: "", dob: "", gender: "", sectionId, rollNo: "", studentEmail: "",
+    id: null, fullName: "", admissionNo: "", dob: "", gender: "", sectionId, rollNo: "", studentEmail: "", studentPhone: "",
     guardian: { id: null, fullName: "", relation: "", phone: "", email: "" },
   };
 }
@@ -39,6 +40,7 @@ function fromStudent(s: FormStudent): StudentInput {
     sectionId: s.sectionId,
     rollNo: s.rollNo == null ? "" : String(s.rollNo),
     studentEmail: s.email ?? "",
+    studentPhone: s.phone ?? "",
     guardian: {
       id: s.guardian?.id ?? null,
       fullName: s.guardian?.fullName ?? "",
@@ -128,6 +130,10 @@ export function StudentForm({
         <Field label="Student's email" htmlFor={`${id}-semail`} hint="The student signs in with Google using this email.">
           <Input id={`${id}-semail`} type="email" value={v.studentEmail} maxLength={120}
             onChange={(e) => set("studentEmail", e.target.value)} />
+        </Field>
+        <Field label="Student's phone" htmlFor={`${id}-sphone`}>
+          <Input id={`${id}-sphone`} type="tel" inputMode="tel" value={v.studentPhone} maxLength={20}
+            onChange={(e) => set("studentPhone", e.target.value)} />
         </Field>
       </div>
 

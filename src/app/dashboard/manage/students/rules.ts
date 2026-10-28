@@ -23,6 +23,7 @@ export type StudentInput = {
   sectionId: number | null;
   rollNo: string;       // "" or a whole number
   studentEmail: string; // "" or the student's own email (for Google sign-in)
+  studentPhone: string; // "" or the student's own phone
   guardian: GuardianInput;
 };
 
@@ -41,6 +42,7 @@ export type ImportRow = {
   phone: string;
   email: string;
   studentEmail: string;
+  studentPhone: string;
   errors: string[];
 };
 
@@ -57,9 +59,10 @@ export const TEMPLATE_HEADERS = [
   "Parent phone",
   "Parent email",
   "Student email",
+  "Student phone",
 ] as const;
 
-type Col = "fullName" | "admissionNo" | "dob" | "gender" | "section" | "rollNo" | "parentName" | "relation" | "phone" | "email" | "studentEmail";
+type Col = "fullName" | "admissionNo" | "dob" | "gender" | "section" | "rollNo" | "parentName" | "relation" | "phone" | "email" | "studentEmail" | "studentPhone";
 
 // Header spellings people actually use, squashed to letters and digits.
 const HEADER_ALIASES: Record<Col, string[]> = {
@@ -74,6 +77,7 @@ const HEADER_ALIASES: Record<Col, string[]> = {
   phone: ["parentphone", "phone", "mobile", "phoneno", "mobileno", "contact", "contactno", "parentmobile", "guardianphone"],
   email: ["parentemail", "email", "emailid", "guardianemail", "mail"],
   studentEmail: ["studentemail", "studentemailid", "studentmail", "childemail", "pupilemail"],
+  studentPhone: ["studentphone", "studentmobile", "studentphoneno", "studentmobileno", "childphone"],
 };
 
 const squash = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -148,6 +152,7 @@ export function checkStudentInput(v: StudentInput, limited = false): string | nu
   if (v.gender && !["male", "female", "other"].includes(v.gender)) return "Please choose a gender from the list.";
   if (v.rollNo && parseRoll(v.rollNo) === "bad") return "Roll no should be a whole number, like 12.";
   if (tidy(v.studentEmail) && !EMAIL_OK.test(tidy(v.studentEmail))) return "The student's email does not look right.";
+  if (tidy(v.studentPhone) && !PHONE_OK.test(tidy(v.studentPhone))) return "The student's phone number does not look right.";
   const g = v.guardian;
   const anyParent = tidy(g.fullName) || tidy(g.relation) || tidy(g.phone) || tidy(g.email);
   if (anyParent && !tidy(g.fullName)) return "Please enter the parent's name.";
@@ -251,13 +256,15 @@ export function readImport(cells: string[][], sections: SectionRef[]): ReadResul
     if (email && !EMAIL_OK.test(email)) errors.push(`Email "${email}" does not look right`);
     const studentEmail = get("studentEmail");
     if (studentEmail && !EMAIL_OK.test(studentEmail)) errors.push(`Student email "${studentEmail}" does not look right`);
+    const studentPhone = get("studentPhone");
+    if (studentPhone && !PHONE_OK.test(studentPhone)) errors.push(`Student phone "${studentPhone}" does not look right`);
     rows.push({
       line, fullName, admissionNo,
       dob: dob === "bad" ? null : dob,
       gender: gender === "bad" ? null : gender,
       sectionId, sectionLabel,
       rollNo: rollNo === "bad" ? null : rollNo,
-      parentName, relation: get("relation"), phone, email, studentEmail,
+      parentName, relation: get("relation"), phone, email, studentEmail, studentPhone,
       errors,
     });
   }

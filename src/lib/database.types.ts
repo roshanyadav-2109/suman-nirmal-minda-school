@@ -1560,6 +1560,7 @@ export type Database = {
         Row: {
           admission_no: string
           email: string | null
+          phone: string | null
           created_at: string
           dob: string | null
           exit_remark: string | null
@@ -1574,6 +1575,7 @@ export type Database = {
         Insert: {
           admission_no: string
           email?: string | null
+          phone?: string | null
           created_at?: string
           dob?: string | null
           exit_remark?: string | null
@@ -1588,6 +1590,7 @@ export type Database = {
         Update: {
           admission_no?: string
           email?: string | null
+          phone?: string | null
           created_at?: string
           dob?: string | null
           exit_remark?: string | null
